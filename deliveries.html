@@ -298,7 +298,7 @@ Settings
 </div>
 <input type="text" class="bg-darklight border border-gray-700 text-white text-sm rounded-md block w-full pl-10 p-2.5 !rounded-button" placeholder="Search deliveries...">
 </div>
-<button class="bg-primary hover:bg-primary/90 text-white px-4 py-2.5 rounded-md text-sm font-medium !rounded-button whitespace-nowrap">
+<button id="add-delivery-button" class="bg-primary hover:bg-primary/90 text-white px-4 py-2.5 rounded-md text-sm font-medium !rounded-button whitespace-nowrap">
 <i class="ri-add-line mr-1"></i> Add New Delivery
 </button>
 </div>
@@ -312,18 +312,18 @@ Settings
 </div>
 <div class="flex items-center space-x-3">
 <div class="relative">
-<select class="bg-dark border border-gray-700 text-white text-sm rounded-md block w-full p-2 pr-8 appearance-none !rounded-button">
-<option selected>Bulk Actions</option>
-<option>Mark as Completed</option>
-<option>Mark as Delayed</option>
-<option>Cancel Selected</option>
-<option>Delete Selected</option>
+<select id="bulk-actions-select" class="bg-dark border border-gray-700 text-white text-sm rounded-md block w-full p-2 pr-8 appearance-none !rounded-button">
+<option selected value="">Bulk Actions</option>
+<option value="completed">Mark as Completed</option>
+<option value="delayed">Mark as Delayed</option>
+<option value="cancelled">Cancel Selected</option>
+<option value="delete">Delete Selected</option>
 </select>
 <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
 <i class="ri-arrow-down-s-line"></i>
 </div>
 </div>
-<button class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded-md text-sm !rounded-button whitespace-nowrap">
+<button id="apply-bulk-action-button" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded-md text-sm !rounded-button whitespace-nowrap">
 Apply
 </button>
 </div>
@@ -380,26 +380,26 @@ Showing <span class="font-medium text-white" id="showing-deliveries">...</span>
 </div>
 <div class="flex items-center">
 <div class="mr-4">
-<select class="bg-dark border border-gray-700 text-white text-sm rounded-md p-2 pr-8 appearance-none !rounded-button">
-<option selected>10 per page</option>
-<option>20 per page</option>
-<option>50 per page</option>
+<select id="per-page-select" class="bg-dark border border-gray-700 text-white text-sm rounded-md p-2 pr-8 appearance-none !rounded-button">
+<option selected value="10">10 per page</option>
+<option value="20">20 per page</option>
+<option value="50">50 per page</option>
 </select>
 <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
 <i class="ri-arrow-down-s-line"></i>
 </div>
 </div>
 <div class="flex items-center space-x-1">
-<button class="p-2 text-gray-400 hover:text-white rounded-md hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+<button id="prev-page-button" class="p-2 text-gray-400 hover:text-white rounded-md hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
 <i class="ri-arrow-left-s-line"></i>
 </button>
-<button class="p-2 bg-primary text-white rounded-md">
+<button class="p-2 bg-primary text-white rounded-md page-button" data-page="1">
 1
 </button>
-<button class="p-2 text-gray-400 hover:text-white rounded-md hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
+<button class="p-2 text-gray-400 hover:text-white rounded-md hover:bg-gray-700 page-button" data-page="2">
 2
 </button>
-<button class="p-2 text-gray-400 hover:text-white rounded-md hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
+<button class="p-2 text-gray-400 hover:text-white rounded-md hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed" id="next-page-button">
 <i class="ri-arrow-right-s-line"></i>
 </button>
 </div>
@@ -452,10 +452,10 @@ Showing <span class="font-medium text-white" id="showing-deliveries">...</span>
 </div>
 </div>
 <div class="p-4 border-t border-gray-700 flex justify-end space-x-3">
-<button class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-md text-sm !rounded-button whitespace-nowrap">
+<button id="modal-close-button" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-md text-sm !rounded-button whitespace-nowrap">
 Close
 </button>
-<button class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-md text-sm !rounded-button whitespace-nowrap">
+<button id="modal-edit-button" class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-md text-sm !rounded-button whitespace-nowrap">
 Edit Delivery
 </button>
 </div>
@@ -477,19 +477,48 @@ console.log('Mobile menu button clicked');
 });
 }
 
-// Select all deliveries checkboxes
-const selectAllDeliveries = document.getElementById('selectAllDeliveries');
+// Get references to key elements
+const selectAllDeliveriesCheckbox = document.getElementById('selectAllDeliveries');
 const deliveriesTableBody = document.getElementById('deliveries-table-body');
-// We will select checkboxes after data is loaded
+const totalDeliveriesCountSpan = document.getElementById('total-deliveries-count');
+const showingDeliveriesSpan = document.getElementById('showing-deliveries');
+const addDeliveryButton = document.getElementById('add-delivery-button');
+const bulkActionsSelect = document.getElementById('bulk-actions-select');
+const applyBulkActionButton = document.getElementById('apply-bulk-action-button');
+const perPageSelect = document.getElementById('per-page-select');
+const prevPageButton = document.getElementById('prev-page-button');
+const nextPageButton = document.getElementById('next-page-button');
+const paginationButtonsContainer = document.querySelector('.flex.items-center.space-x-1'); // Container for page number buttons
+
 
 // Delivery Details Modal functionality
 const deliveryDetailsModal = document.getElementById('deliveryDetailsModal');
-const closeDeliveryDetailsModal = document.getElementById('closeDeliveryDetailsModal');
+const closeDeliveryDetailsModalButton = document.getElementById('closeDeliveryDetailsModal');
+const modalCloseButton = document.getElementById('modal-close-button');
+const modalEditButton = document.getElementById('modal-edit-button');
 
-if (deliveryDetailsModal && closeDeliveryDetailsModal) {
-closeDeliveryDetailsModal.addEventListener('click', function() {
+
+// Add event listeners for modal buttons
+if (deliveryDetailsModal) {
+if (closeDeliveryDetailsModalButton) {
+closeDeliveryDetailsModalButton.addEventListener('click', function() {
 deliveryDetailsModal.classList.add('hidden');
 });
+}
+if (modalCloseButton) {
+modalCloseButton.addEventListener('click', function() {
+deliveryDetailsModal.classList.add('hidden');
+});
+}
+if (modalEditButton) {
+modalEditButton.addEventListener('click', function() {
+// Placeholder for Edit Delivery action
+console.log('Edit Delivery button clicked in modal');
+// You would typically get the delivery ID from the modal content
+// and navigate to an edit page or open an edit modal
+alert('Edit Delivery functionality not yet implemented.'); // Using alert for placeholder
+});
+}
 
 // Close modal when clicking outside
 window.addEventListener('click', function(event) {
@@ -568,10 +597,10 @@ row.innerHTML = `
                             <button class="text-gray-400 hover:text-white p-1 rounded-md hover:bg-gray-700 view-details-button" title="View Details" data-delivery-id="${delivery.id}">
                                 <i class="ri-eye-line"></i>
                             </button>
-                            <button class="text-gray-400 hover:text-white p-1 rounded-md hover:bg-gray-700" title="Edit">
+                            <button class="text-gray-400 hover:text-white p-1 rounded-md hover:bg-gray-700 edit-delivery-button" title="Edit" data-delivery-id="${delivery.id}">
                                 <i class="ri-pencil-line"></i>
                             </button>
-                            <button class="text-gray-400 hover:text-danger p-1 rounded-md hover:bg-gray-700" title="Delete">
+                            <button class="text-gray-400 hover:text-danger p-1 rounded-md hover:bg-gray-700 delete-delivery-button" title="Delete" data-delivery-id="${delivery.id}">
                                 <i class="ri-delete-bin-line"></i>
                             </button>
                         </div>
@@ -581,11 +610,11 @@ deliveriesTableBody.appendChild(row);
 });
 
 // Update total count and showing info
-document.getElementById('total-deliveries-count').textContent = `${deliveries.length} total`;
-document.getElementById('showing-deliveries').textContent = `1-${deliveries.length} of ${deliveries.length} deliveries`; // Simple for now, need pagination logic for real data
+totalDeliveriesCountSpan.textContent = `${deliveries.length} total`;
+showingDeliveriesSpan.textContent = `1-${deliveries.length} of ${deliveries.length} deliveries`; // Simple for now, need pagination logic for real data
 
-// Add event listeners for "View Details" buttons
-addDetailsButtonListeners(deliveries);
+// Add event listeners for action buttons in rows
+addActionButtonListeners(deliveries);
 
 } else {
 deliveriesTableBody.innerHTML = `
@@ -593,19 +622,16 @@ deliveriesTableBody.innerHTML = `
                     <td colspan="9" class="text-center py-4 text-gray-400">No deliveries found.</td>
                 </tr>
             `;
-document.getElementById('total-deliveries-count').textContent = '0 total';
-document.getElementById('showing-deliveries').textContent = '0-0 of 0 deliveries';
+totalDeliveriesCountSpan.textContent = '0 total';
+showingDeliveriesSpan.textContent = '0-0 of 0 deliveries';
 }
 
 // Re-attach select all listener after populating rows
-const selectAllDeliveries = document.getElementById('selectAllDeliveries');
+if (selectAllDeliveriesCheckbox) {
+selectAllDeliveriesCheckbox.checked = false; // Reset select all
 const deliveryCheckboxes = document.querySelectorAll('#deliveries-table-body .custom-checkbox input');
-if (selectAllDeliveries) {
-selectAllDeliveries.addEventListener('change', function() {
-deliveryCheckboxes.forEach(checkbox => {
-checkbox.checked = selectAllDeliveries.checked;
-});
-});
+selectAllDeliveriesCheckbox.removeEventListener('change', handleSelectAllChange); // Remove previous listener
+selectAllDeliveriesCheckbox.addEventListener('change', handleSelectAllChange); // Add new listener
 }
 
 
@@ -616,27 +642,68 @@ deliveriesTableBody.innerHTML = `
                 <td colspan="9" class="text-center py-4 text-danger">Failed to load deliveries. ${error.message}</td>
             </tr>
         `;
-document.getElementById('total-deliveries-count').textContent = 'Error';
-document.getElementById('showing-deliveries').textContent = 'Error loading deliveries';
+totalDeliveriesCountSpan.textContent = 'Error';
+showingDeliveriesSpan.textContent = 'Error loading deliveries';
 }
 }
 
-// Function to add event listeners to "View Details" buttons
-function addDetailsButtonListeners(deliveriesData) {
+// Function to add event listeners to action buttons in dynamically created rows
+function addActionButtonListeners(deliveriesData) {
+// Add listeners for View Details buttons
 const viewDetailsButtons = document.querySelectorAll('.view-details-button');
 viewDetailsButtons.forEach(button => {
 button.addEventListener('click', function() {
 const deliveryId = this.getAttribute('data-delivery-id');
 const delivery = deliveriesData.find(d => d.id === deliveryId);
-
 if (delivery) {
-// Populate modal with delivery details
+populateDeliveryDetailsModal(delivery);
+deliveryDetailsModal.classList.remove('hidden');
+} else {
+console.error('Delivery details not found for ID:', deliveryId);
+alert('Error: Could not find delivery details.'); // Placeholder alert
+}
+});
+});
+
+// Add listeners for Edit buttons
+const editButtons = document.querySelectorAll('.edit-delivery-button');
+editButtons.forEach(button => {
+button.addEventListener('click', function() {
+const deliveryId = this.getAttribute('data-delivery-id');
+console.log('Edit button clicked for delivery ID:', deliveryId);
+// Placeholder for edit functionality
+alert(`Edit functionality for Delivery ID ${deliveryId} not yet implemented.`); // Placeholder alert
+// In a real app, you would navigate to an edit page or open an edit modal
+});
+});
+
+// Add listeners for Delete buttons
+const deleteButtons = document.querySelectorAll('.delete-delivery-button');
+deleteButtons.forEach(button => {
+button.addEventListener('click', function() {
+const deliveryId = this.getAttribute('data-delivery-id');
+console.log('Delete button clicked for delivery ID:', deliveryId);
+// Placeholder for delete functionality
+if (confirm(`Are you sure you want to delete Delivery ID ${deliveryId}?`)) { // Using confirm for placeholder
+// In a real app, you would make an API call to delete the delivery
+console.log(`Deleting Delivery ID ${deliveryId}...`);
+alert(`Delete functionality for Delivery ID ${deliveryId} not yet implemented.`); // Placeholder alert
+// After successful deletion, you would refresh the table
+// fetchDeliveries();
+}
+});
+});
+}
+
+// Function to populate the delivery details modal
+function populateDeliveryDetailsModal(delivery) {
 document.getElementById('modal-delivery-id').textContent = delivery.id || 'N/A';
 document.getElementById('modal-delivery-origin').textContent = delivery.origin || 'N/A';
 document.getElementById('modal-delivery-destination').textContent = delivery.destination || 'N/A';
 document.getElementById('modal-delivery-driver').textContent = delivery.driver || 'N/A';
 document.getElementById('modal-delivery-scheduled').textContent = delivery.scheduled || 'N/A';
 document.getElementById('modal-delivery-eta').textContent = delivery.eta || 'N/A';
+
 // Format status with span and class
 let statusClass = 'bg-gray-700 text-gray-300';
 if (delivery.status === 'Completed') {
@@ -647,16 +714,104 @@ statusClass = 'bg-warning/10 text-warning';
 statusClass = 'bg-danger/10 text-danger';
 }
 document.getElementById('modal-delivery-status').innerHTML = `<span class="${statusClass} text-xs px-2.5 py-1 rounded-full">${delivery.status || 'N/A'}</span>`;
-document.getElementById('modal-delivery-additional').textContent = delivery.additionalDetails || 'No additional details available.'; // Assuming an additionalDetails field
+document.getElementById('modal-delivery-additional').textContent = delivery.additionalDetails || 'No additional details available.';
+}
 
-deliveryDetailsModal.classList.remove('hidden');
-} else {
-console.error('Delivery details not found for ID:', deliveryId);
-// Optionally show an error message to the user
+
+// Event listener for "Add New Delivery" button
+if (addDeliveryButton) {
+addDeliveryButton.addEventListener('click', function() {
+console.log('Add New Delivery button clicked');
+// Placeholder for adding a new delivery
+alert('Add New Delivery functionality not yet implemented.'); // Using alert for placeholder
+// In a real app, you would navigate to a new page or open a modal for adding a delivery
+});
 }
+
+// Event listener for "Apply" button for bulk actions
+if (applyBulkActionButton && bulkActionsSelect) {
+applyBulkActionButton.addEventListener('click', function() {
+const selectedAction = bulkActionsSelect.value;
+const selectedDeliveries = Array.from(document.querySelectorAll('#deliveries-table-body .custom-checkbox input:checked'))
+.map(checkbox => checkbox.getAttribute('data-delivery-id'));
+
+if (selectedDeliveries.length === 0) {
+alert('Please select at least one delivery for the bulk action.');
+return;
+}
+
+if (selectedAction === '') {
+alert('Please select a bulk action.');
+return;
+}
+
+console.log('Applying bulk action:', selectedAction, 'to deliveries:', selectedDeliveries);
+// Placeholder for bulk actions
+alert(`Bulk action "${selectedAction}" on ${selectedDeliveries.length} deliveries not yet implemented.`); // Placeholder alert
+// In a real app, you would make an API call to perform the bulk action
+// After successful action, you would refresh the table: fetchDeliveries();
+});
+}
+
+// Event listener for "Select All" checkbox
+function handleSelectAllChange() {
+const deliveryCheckboxes = document.querySelectorAll('#deliveries-table-body .custom-checkbox input');
+deliveryCheckboxes.forEach(checkbox => {
+checkbox.checked = selectAllDeliveriesCheckbox.checked;
+});
+}
+if (selectAllDeliveriesCheckbox) {
+// Initial listener added after data fetch
+}
+
+
+// Event listener for "Per page" select
+if (perPageSelect) {
+perPageSelect.addEventListener('change', function() {
+const itemsPerPage = this.value;
+console.log('Items per page changed to:', itemsPerPage);
+// Placeholder for pagination logic
+alert(`Changing items per page to ${itemsPerPage} not yet implemented.`); // Placeholder alert
+// In a real app, you would refetch data from the API with pagination parameters
+// fetchDeliveries({ page: 1, perPage: itemsPerPage });
+});
+}
+
+// Event listeners for Pagination buttons (Placeholder)
+if (prevPageButton) {
+prevPageButton.addEventListener('click', function() {
+console.log('Previous page button clicked');
+// Placeholder for pagination logic
+alert('Pagination functionality not yet implemented.'); // Placeholder alert
+// In a real app, you would update the page number and refetch data
+// fetchDeliveries({ page: currentPage - 1, perPage: currentPerPage });
+});
+}
+
+if (nextPageButton) {
+nextPageButton.addEventListener('click', function() {
+console.log('Next page button clicked');
+// Placeholder for pagination logic
+alert('Pagination functionality not yet implemented.'); // Placeholder alert
+// In a real app, you would update the page number and refetch data
+// fetchDeliveries({ page: currentPage + 1, perPage: currentPerPage });
+});
+}
+
+// Add listeners for individual page number buttons (Placeholder)
+// This requires dynamically creating these buttons based on total pages
+// For now, we'll just add listeners to the existing placeholder buttons
+const pageButtons = document.querySelectorAll('.page-button');
+pageButtons.forEach(button => {
+button.addEventListener('click', function() {
+const pageNumber = this.getAttribute('data-page');
+console.log('Page button clicked for page:', pageNumber);
+// Placeholder for pagination logic
+alert(`Navigating to page ${pageNumber} not yet implemented.`); // Placeholder alert
+// In a real app, you would refetch data for the selected page
+// fetchDeliveries({ page: pageNumber, perPage: currentPerPage });
 });
 });
-}
 
 
 // Call the function to fetch deliveries when the page loads
