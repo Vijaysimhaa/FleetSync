@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FleetSync - Checkout</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lobster&family=Comfortaa:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root{--purple:#8A2BE2;--dark:#0A0A0A;--light:#FFFFFF}*{margin:0;padding:0;box-sizing:border-box;font-family:'Comfortaa',cursive}body{background:var(--dark);color:var(--light);line-height:1.6;padding:2rem 5%;display:flex;flex-direction:column;align-items:center;min-height:100vh}.logo-link{text-decoration:none;margin-bottom:2rem;display:inline-block}.logo-text{font-family:'Lobster',cursive;font-size:2.5rem;color:var(--light);text-shadow:0 0 20px var(--purple);animation:logoFloat 3s ease-in-out infinite}@keyframes logoFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+
+        /* Animation styles from login page */
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes borderPulse {
+            0% {
+                box-shadow: 0 0 10px var(--purple), inset 0 0 10px var(--purple);
+            }
+            50% {
+                box-shadow: 0 0 20px var(--purple), inset 0 0 15px var(--purple);
+            }
+            100% {
+                box-shadow: 0 0 10px var(--purple), inset 0 0 10px var(--purple);
+            }
+        }
+
+        /* Apply animation to checkout container */
+        .checkout-container{
+            background:rgba(255,255,255,.05);
+            padding:2rem;
+            border-radius:15px;
+            border:1px solid rgba(138,43,226,.3);
+            width:90%;
+            max-width:600px;
+            /* Apply animations */
+            opacity: 0; /* Start hidden for fadeInUp */
+            transform: translateY(20px); /* Start slightly below for fadeInUp */
+            animation: fadeInUp 0.3s forwards 0.2s, borderPulse 2s linear infinite; /* Apply both animations */
+        }
+
+        .checkout-heading{text-align:center;font-size:2rem;margin-bottom:1.5rem;color:var(--light)}.order-summary{margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid rgba(255,255,255,.1)}.summary-item{display:flex;justify-content:space-between;margin-bottom:.8rem}.item-name{color:rgba(255,255,255,.8)}.item-price{color:var(--light);font-weight:600}.total{display:flex;justify-content:space-between;font-size:1.2rem;padding-top:1rem}.total-label{color:rgba(255,255,255,.8);font-weight:bold}.total-amount{color:var(--purple);font-weight:bold}.payment-info h3{color:var(--light);margin-bottom:1rem}.form-group{margin-bottom:1.2rem}.form-group label{display:block;color:rgba(255,255,255,.8);margin-bottom:.5rem}.form-group input[type="text"],.form-group input[type="email"]{width:100%;padding:.8rem;border:1px solid rgba(255,255,255,.1);border-radius:8px;background:rgba(0,0,0,.3);color:var(--light);font-size:1rem}.form-group input[type="text"]:focus,.form-group input[type="email"]:focus{outline:none;border-color:var(--purple);box-shadow:0 0 5px rgba(138,43,226,.5)}.cta-button{display:inline-block;padding:1rem 2.5rem;background:var(--purple);color:var(--light);border-radius:30px;text-decoration:none;font-weight:600;margin-top:1.5rem;transition:all.3s ease;border:none;cursor:pointer;width:100%;text-align:center}.cta-button:hover{transform:translateY(-3px);box-shadow:0 0 20px var(--purple)}.back-link{color:rgba(255,255,255,.7);text-decoration:none;margin-top:1rem;display:block;text-align:center;transition:color.3s ease}.back-link:hover{color:var(--purple)}.discount-section{margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid rgba(255,255,255,.1)}.discount-form{display:flex;gap:1rem;align-items:center}.discount-form input[type="text"]{flex-grow:1;padding:.8rem;border:1px solid rgba(255,255,255,.1);border-radius:8px;background:rgba(0,0,0,.3);color:var(--light);font-size:1rem}.discount-form input[type="text"]:focus{outline:none;border-color:var(--purple);box-shadow:0 0 5px rgba(138,43,226,.5)}.apply-discount-button{padding:.8rem 1.5rem;background:rgba(138,43,226,.5);color:var(--light);border:none;border-radius:8px;cursor:pointer;transition:background-color.3s ease}.apply-discount-button:hover{background-color:var(--purple)}
+    </style>
+</head>
+<body>
+    <a href="index.html" class="logo-link">
+        <span class="logo-text">FleetSync</span>
+    </a>
+    <div class="checkout-container">
+        <h2 class="checkout-heading">Checkout</h2>
+        <div class="order-summary">
+            <h3>Order Summary</h3>
+            <div class="summary-item">
+                <span class="item-name">Selected Plan:</span>
+                <span class="item-price" id="plan-name"></span>
+            </div>
+            <div class="summary-item">
+                <span class="item-name">Base Price:</span>
+                <span class="item-price" id="base-price"></span>
+            </div>
+            <div class="summary-item">
+                <span class="item-name">Discount:</span>
+                <span class="item-price" id="discount-amount">₹0.00</span>
+            </div>
+            <div class="summary-item">
+                <span class="item-name">Subtotal:</span>
+                <span class="item-price" id="subtotal"></span>
+            </div>
+            <div class="summary-item">
+                <span class="item-name">GST (18%):</span>
+                <span class="item-price" id="gst-amount"></span>
+            </div>
+            <div class="total">
+                <span class="total-label">Total:</span>
+                <span class="total-amount" id="total-price"></span>
+            </div>
+        </div>
+
+        <div class="discount-section">
+            <h3>Discount Coupon</h3>
+            <form class="discount-form" id="discount-form">
+                <input type="text" id="discount-code" placeholder="Enter coupon code">
+                <button type="button" class="apply-discount-button" onclick="applyDiscount()">Apply</button>
+            </form>
+            <p id="discount-message" style="color: #ffcc00; margin-top: 0.5rem; font-size: 0.9rem; display: none;">Invalid coupon code.</p>
+        </div>
+
+        <div class="payment-info">
+            <h3>Payment Information</h3>
+            <form>
+                <div class="form-group">
+                    <label for="card-number">Card Number</label>
+                    <input type="text" id="card-number" name="card-number" placeholder="XXXX-XXXX-XXXX-XXXX" required>
+                </div>
+                <div class="form-group">
+                    <label for="expiry-date">Expiry Date</label>
+                    <input type="text" id="expiry-date" name="expiry-date" placeholder="MM/YY" required>
+                </div>
+                <div class="form-group">
+                    <label for="cvv">CVV</label>
+                    <input type="text" id="cvv" name="cvv" placeholder="XXX" required>
+                </div>
+                <button type="submit" class="cta-button">Place Order</button>
+            </form>
+        </div>
+        <a href="index.html#pricing" class="back-link">Back to Pricing</a>
+    </div>
+
+    <script>
+        const validDiscounts = {
+            "SAVE10": 0.10,
+            "SUMMER20": 0.20
+        };
+
+        let currentDiscount = 0;
+
+        function getPlanDetails() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const planName = urlParams.get('plan');
+            const planPrice = parseFloat(urlParams.get('price'));
+            return { name: planName, price: planPrice };
+        }
+
+        function calculateTotal(price) {
+            if (isNaN(price)) {
+                return { subtotal: 0, gst: 0, total: 0, discountedPrice: 0, discountAmount: 0 };
+            }
+            const discountAmount = price * currentDiscount;
+            const discountedPrice = price - discountAmount;
+            const gstRate = 0.18;
+            const gstAmount = discountedPrice * gstRate;
+            const totalPrice = discountedPrice + gstAmount;
+            return {
+                subtotal: discountedPrice.toFixed(2),
+                gst: gstAmount.toFixed(2),
+                total: totalPrice.toFixed(2),
+                discountAmount: discountAmount.toFixed(2) // Keep discount amount for display
+            };
+        }
+
+        function applyDiscount() {
+            const discountCodeInput = document.getElementById('discount-code');
+            const discountMessage = document.getElementById('discount-message');
+            const code = discountCodeInput.value.trim().toUpperCase();
+
+            if (validDiscounts[code]) {
+                currentDiscount = validDiscounts[code];
+                discountMessage.style.display = 'none';
+                updateCheckout();
+            } else {
+                currentDiscount = 0;
+                discountMessage.style.display = 'block';
+                updateCheckout();
+            }
+        }
+
+        function updateCheckout() {
+            const planDetails = getPlanDetails();
+            const planNameElement = document.getElementById('plan-name');
+            const basePriceElement = document.getElementById('base-price');
+            const discountAmountElement = document.getElementById('discount-amount');
+            const subtotalElement = document.getElementById('subtotal');
+            const gstAmountElement = document.getElementById('gst-amount');
+            const totalPriceElement = document.getElementById('total-price');
+
+            planNameElement.textContent = planDetails.name || 'N/A';
+            basePriceElement.textContent = isNaN(planDetails.price) ? 'N/A' : `₹${parseFloat(planDetails.price).toFixed(2)}`;
+
+            const { subtotal, gst, total, discountAmount } = calculateTotal(planDetails.price);
+            discountAmountElement.textContent = `-₹${discountAmount}`; // Display discount amount
+            subtotalElement.textContent = `₹${subtotal}`;
+            gstAmountElement.textContent = `₹${gst}`;
+            totalPriceElement.textContent = `₹${total}`;
+        }
+
+        // Initial checkout update
+        updateCheckout();
+    </script>
+</body>
+</html>

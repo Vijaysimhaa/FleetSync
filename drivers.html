@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Drivers - FleetSync</title>
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script>
+tailwind.config={
+theme:{
+extend:{
+colors:{
+primary:'#8B5CF6',
+secondary:'#4B5563',
+dark: '#111827',
+darklight: '#1F2937',
+success: '#10B981',
+warning: '#F59E0B',
+danger: '#EF4444'
+},
+borderRadius:{
+'none':'0px',
+'sm':'4px',
+DEFAULT:'8px',
+'md':'12px',
+'lg':'16px',
+'xl':'20px',
+'2xl':'24px',
+'3xl':'32px',
+'full':'9999px',
+'button':'8px'
+}
+}
+}
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
+<style>
+/* Remixicon default content */
+:where([class^="ri-"])::before { content: "\f3c2"; }
+
+/* Body styling */
+body {
+font-family: 'Inter', sans-serif;
+background-color: #111827;
+color: white;
+min-height: 100vh;
+}
+
+/* Sidebar item active state */
+.sidebar-item.active {
+background-color: rgba(139, 92, 246, 0.1);
+border-left: 3px solid #8B5CF6;
+}
+
+/* Sidebar item hover state (not active) */
+.sidebar-item:hover:not(.active) {
+background-color: rgba(75, 85, 99, 0.2);
+}
+
+/* Custom scrollbar styling */
+.custom-scrollbar::-webkit-scrollbar { width: 6px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: #1F2937; }
+.custom-scrollbar::-webkit-scrollbar-thumb {
+background-color: #4B5563;
+border-radius: 20px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #6B7280; }
+
+/* Custom checkbox styling */
+.custom-checkbox { position: relative; display: inline-block; width: 18px; height: 18px; margin-right: 8px; }
+.custom-checkbox input { opacity: 0; width: 0; height: 0; }
+.checkmark {
+position: absolute;
+top: 0;
+left: 0;
+height: 18px;
+width: 18px;
+background-color: #1F2937;
+border: 1px solid #4B5563;
+border-radius: 4px;
+}
+.custom-checkbox input:checked ~ .checkmark { background-color: #8B5CF6; border-color: #8B5CF6; }
+.checkmark:after { content: ""; position: absolute; display: none; }
+.custom-checkbox input:checked ~ .checkmark:after { display: block; }
+.custom-checkbox .checkmark:after {
+left: 6px;
+top: 2px;
+width: 5px;
+height: 10px;
+border: solid white;
+border-width: 0 2px 2px 0;
+transform: rotate(45deg);
+}
+
+/* Custom switch styling */
+.custom-switch { position: relative; display: inline-block; width: 44px; height: 22px; }
+.custom-switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+position: absolute;
+cursor: pointer;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+background-color: #4B5563;
+transition: .4s;
+border-radius: 34px;
+}
+.slider:before {
+position: absolute;
+content: "";
+height: 18px;
+width: 18px;
+left: 3px;
+bottom: 2px;
+background-color: white;
+transition: .4s;
+border-radius: 50%;
+}
+input:checked + .slider { background-color: #8B5CF6; }
+input:checked + .slider:before { transform: translateX(20px); }
+
+/* Hide number input arrows */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+-webkit-appearance: none;
+margin: 0;
+}
+
+/* Date picker dropdown styling */
+.date-picker-container { position: relative; }
+.date-picker-dropdown {
+display: none;
+position: absolute;
+top: 100%;
+left: 0;
+z-index: 50;
+width: 300px;
+background-color: #1F2937;
+border: 1px solid #4B5563;
+border-radius: 8px;
+box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+padding: 1rem;
+margin-top: 0.5rem;
+}
+.date-picker-dropdown.show { display: block; }
+
+/* Styles for the animated logo */
+.animated-logo {
+font-family: 'Lobster', cursive;
+font-size: 2.5rem; /* Adjust size as needed */
+color: #FFFFFF; /* Adjust color as needed */
+text-shadow: 0 0 5px #8A2BE2, 0 0 10px #8A2BE2; /* Thin purple glow */
+animation: logoFloat 3s ease-in-out infinite;
+}
+
+/* Floating animation keyframes */
+@keyframes logoFloat {
+0%, 100% {
+transform: translateY(0);
+}
+50% {
+transform: translateY(-10px); /* Adjust float distance as needed */
+}
+}
+
+/* Profile link styling in sidebar */
+.profile-link {
+cursor: pointer;
+}
+</style>
+</head>
+<body>
+<div class="flex h-screen overflow-hidden">
+<aside class="hidden md:flex md:flex-col w-64 bg-darklight border-r border-gray-700 transition-all duration-300">
+<div class="p-4 flex items-center border-b border-gray-700">
+<span class="animated-logo">FleetSync</span> </div>
+<div class="flex flex-col flex-1 overflow-y-auto custom-scrollbar">
+<nav class="flex-1 px-2 py-4 space-y-1">
+<a href="dashboard.html" class="sidebar-item flex items-center px-4 py-3 text-sm font-medium text-gray-300 rounded-md">
+<div class="w-6 h-6 flex items-center justify-center mr-3">
+<i class="ri-dashboard-line ri-lg"></i>
+</div>
+<span>Dashboard</span>
+</a>
+<a href="deliveries.html" class="sidebar-item flex items-center px-4 py-3 text-sm font-medium text-gray-300 rounded-md">
+<div class="w-6 h-6 flex items-center justify-center mr-3">
+<i class="ri-truck-line ri-lg"></i>
+</div>
+<span>Deliveries</span>
+</a>
+<a href="warehouses.html" class="sidebar-item flex items-center px-4 py-3 text-sm font-medium text-gray-300 rounded-md">
+<div class="w-6 h-6 flex items-center justify-center mr-3">
+<i class="ri-store-2-line ri-lg"></i>
+</div>
+<span>Warehouses</span>
+</a>
+<a href="drivers.html" class="sidebar-item active flex items-center px-4 py-3 text-sm font-medium rounded-md">
+<div class="w-6 h-6 flex items-center justify-center mr-3">
+<i class="ri-user-3-line ri-lg"></i>
+</div>
+<span>Drivers</span>
+</a>
+<a href="alerts.html" class="sidebar-item flex items-center px-4 py-3 text-sm font-medium text-gray-300 rounded-md">
+<div class="w-6 h-6 flex items-center justify-center mr-3">
+<i class="ri-notification-3-line ri-lg"></i>
+</div>
+<span>Alerts</span>
+</a>
+<a href="reports.html" class="sidebar-item flex items-center px-4 py-3 text-sm font-medium text-gray-300 rounded-md">
+<div class="w-6 h-6 flex items-center justify-center mr-3">
+<i class="ri-file-list-3-line ri-lg"></i>
+</div>
+<span>Reports</span>
+</a>
+<div class="pt-4 pb-2">
+<div class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+Settings
+</div>
+</div>
+<a href="general.html" class="sidebar-item flex items-center px-4 py-3 text-sm font-medium text-gray-300 rounded-md">
+<div class="w-6 h-6 flex items-center justify-center mr-3">
+<i class="ri-settings-line ri-lg"></i>
+</div>
+<span>General</span>
+</a>
+<a href="security.html" class="sidebar-item flex items-center px-4 py-3 text-sm font-medium text-gray-300 rounded-md">
+<div class="w-6 h-6 flex items-center justify-center mr-3">
+<i class="ri-shield-keyhole-line ri-lg"></i>
+</div>
+<span>Security</span>
+</a>
+</nav>
+<div class="p-4 border-t border-gray-700">
+<div class="flex items-center justify-between"> <a href="profile.html" class="profile-link flex items-center"> <div class="flex-shrink-0">
+<div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+<i class="ri-user-3-fill ri-lg"></i>
+</div>
+</div>
+<div class="ml-3">
+<p class="text-sm font-medium">Mr.V</p>
+<p class="text-xs text-gray-400">Administrator</p>
+</div>
+</a>
+<a href="login.html" class="ml-auto"> <div class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-700 cursor-pointer" title="Logout">
+<i class="ri-logout-box-r-line"></i>
+</div>
+</a>
+</div>
+</div>
+</div>
+</aside>
+<div class="md:hidden fixed bottom-4 left-4 z-50">
+<button type="button" class="bg-primary text-white p-3 rounded-full shadow-lg !rounded-button">
+<i class="ri-menu-line ri-lg"></i>
+</button>
+</div>
+<div class="flex-1 flex flex-col overflow-hidden bg-dark">
+<header class="bg-darklight border-b border-gray-700 py-4 px-6">
+<div class="flex items-center justify-between">
+<div class="flex items-center">
+<div class="md:hidden mr-4">
+<button type="button" class="text-gray-400 hover:text-white">
+<i class="ri-menu-line ri-lg"></i>
+</button>
+</div>
+<div class="flex items-center">
+<a href="dashboard.html" class="text-gray-400 hover:text-white mr-2">
+<i class="ri-dashboard-line"></i>
+</a>
+<span class="text-gray-400 mx-1">/</span>
+<h1 class="text-xl font-semibold">Drivers</h1>
+</div>
+</div>
+<div class="flex items-center space-x-4">
+<div class="relative">
+<button type="button" class="text-gray-400 hover:text-white p-1 rounded-full">
+<div class="w-8 h-8 flex items-center justify-center">
+<i class="ri-notification-3-line ri-lg"></i>
+</div>
+<span class="notification-dot"></span>
+</button>
+</div>
+</div>
+</header>
+<main class="flex-1 overflow-y-auto custom-scrollbar p-6">
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+<div>
+<h2 class="text-lg font-medium">Driver Management</h2>
+<p class="text-sm text-gray-400">View and manage driver details and assignments</p>
+</div>
+<div class="flex items-center space-x-3 mt-3 md:mt-0">
+<div class="relative">
+<div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
+<i class="ri-search-line"></i>
+</div>
+<input type="text" class="bg-darklight border border-gray-700 text-white text-sm rounded-md block w-full pl-10 p-2.5 !rounded-button" placeholder="Search drivers...">
+</div>
+<button class="bg-primary hover:bg-primary/90 text-white px-4 py-2.5 rounded-md text-sm font-medium !rounded-button whitespace-nowrap">
+<i class="ri-add-line mr-1"></i> Add New Driver
+</button>
+</div>
+</div>
+
+<div class="bg-darklight rounded-lg border border-gray-700">
+<div class="flex justify-between items-center p-4 border-b border-gray-700">
+<div class="flex items-center">
+<h3 class="font-medium">All Drivers</h3>
+<span class="ml-2 text-xs bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full">10 total</span>
+</div>
+<div class="flex items-center space-x-3">
+<div class="relative">
+<select class="bg-dark border border-gray-700 text-white text-sm rounded-md block w-full p-2 pr-8 appearance-none !rounded-button">
+<option selected>Bulk Actions</option>
+<option>Deactivate Selected</option>
+<option>Assign Vehicle</option>
+<option>Delete Selected</option>
+</select>
+<div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+<i class="ri-arrow-down-s-line"></i>
+</div>
+</div>
+<button class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded-md text-sm !rounded-button whitespace-nowrap">
+Apply
+</button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-sm text-left">
+<thead class="text-xs text-gray-400 uppercase bg-gray-800/30">
+<tr>
+<th scope="col" class="px-4 py-3">
+<label class="custom-checkbox">
+<input type="checkbox" id="selectAllDrivers">
+<span class="checkmark"></span>
+</label>
+</th>
+<th scope="col" class="px-4 py-3 cursor-pointer">
+<div class="flex items-center">
+ID
+<i class="ri-arrow-up-s-line ml-1"></i>
+</div>
+</th>
+<th scope="col" class="px-6 py-3">
+Driver Name
+</th>
+<th scope="col" class="px-6 py-3">
+Contact
+</th>
+<th scope="col" class="px-6 py-3">
+Vehicle
+</th>
+<th scope="col" class="px-6 py-3">
+Truck Number Plate
+</th>
+<th scope="col" class="px-6 py-3">
+Status
+</th>
+<th scope="col" class="px-4 py-3">
+<span class="sr-only">Actions</span>
+</th>
+</tr>
+</thead>
+<tbody>
+<tr class="border-b border-gray-700 hover:bg-gray-800/30">
+<td class="px-4 py-4">
+<label class="custom-checkbox">
+<input type="checkbox">
+<span class="checkmark"></span>
+</label>
+</td>
+<td class="px-4 py-4 font-medium">
+DRV-2025-042
+</td>
+<td class="px-6 py-4">
+Amit Sharma
+</td>
+<td class="px-6 py-4">
++91 98765 43210
+</td>
+<td class="px-6 py-4">
+Truck #103
+</td>
+<td class="px-6 py-4">
+MH 12 AB 1234
+</td>
+<td class="px-6 py-4">
+<span class="bg-success/10 text-success text-xs px-2.5 py-1 rounded-full">Available</span>
+</td>
+<td class="px-4 py-4">
+<div class="flex items-center space-x-2">
+<button class="text-gray-400 hover:text-white p-1 rounded-md hover:bg-gray-700" title="View Details">
+<i class="ri-eye-line"></i>
+</button>
+<button class="text-gray-400 hover:text-white p-1 rounded-md hover:bg-gray-700" title="Edit">
+<i class="ri-pencil-line"></i>
+</button>
+<button class="text-gray-400 hover:text-danger p-1 rounded-md hover:bg-gray-700" title="Delete">
+<i class="ri-delete-bin-line"></i>
+</button>
+</div>
+</td>
+</tr>
+<tr class="border-b border-gray-700 hover:bg-gray-800/30">
+<td class="px-4 py-4">
+<label class="custom-checkbox">
+<input type="checkbox">
+<span class="checkmark"></span>
+</label>
+</td>
+<td class="px-4 py-4 font-medium">
+DRV-2025-043
+</td>
+<td class="px-6 py-4">
+Priya Singh
+</td>
+<td class="px-6 py-4">
++91 99887 76655
+</td>
+<td class="px-6 py-4">
+Truck #105
+</td>
+<td class="px-6 py-4">
+DL 01 BA 5678
+</td>
+<td class="px-6 py-4">
+<span class="bg-warning/10 text-warning text-xs px-2.5 py-1 rounded-full">On Duty</span>
+</td>
+<td class="px-4 py-4">
+<div class="flex items-center space-x-2">
+<button class="text-gray-400 hover:text-white p-1 rounded-md hover:bg-gray-700" title="View Details">
+<i class="ri-eye-line"></i>
+</button>
+<button class="text-gray-400 hover:text-white p-1 rounded-md hover:bg-gray-700" title="Edit">
+<i class="ri-pencil-line"></i>
+</button>
+<button class="text-gray-400 hover:text-danger p-1 rounded-md hover:bg-gray-700" title="Delete">
+<i class="ri-delete-bin-line"></i>
+</button>
+</div>
+</td>
+</tr>
+<tr class="border-b border-gray-700 hover:bg-gray-800/30">
+<td class="px-4 py-4">
+<label class="custom-checkbox">
+<input type="checkbox">
+<span class="checkmark"></span>
+</label>
+</td>
+<td class="px-4 py-4 font-medium">
+DRV-2025-044
+</td>
+<td class="px-6 py-4">
+Rajesh Kumar
+</td>
+<td class="px-6 py-4">
++91 97654 12345
+</td>
+<td class="px-6 py-4">
+Truck #101
+</td>
+<td class="px-6 py-4">
+KA 05 CD 9012
+</td>
+<td class="px-6 py-4">
+<span class="bg-success/10 text-success text-xs px-2.5 py-1 rounded-full">Available</span>
+</td>
+<td class="px-4 py-4">
+<div class="flex items-center space-x-2">
+<button class="text-gray-400 hover:text-white p-1 rounded-md hover:bg-gray-700" title="View Details">
+<i class="ri-eye-line"></i>
+</button>
+<button class="text-gray-400 hover:text-white p-1 rounded-md hover:bg-gray-700" title="Edit">
+<i class="ri-pencil-line"></i>
+</button>
+<button class="text-gray-400 hover:text-danger p-1 rounded-md hover:bg-gray-700" title="Delete">
+<i class="ri-delete-bin-line"></i>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-4 border-t border-gray-700 flex flex-col sm:flex-row items-center justify-between">
+<div class="text-sm text-gray-400 mb-4 sm:mb-0">
+Showing <span class="font-medium text-white">1-3</span> of <span class="font-medium text-white">10</span> drivers
+</div>
+<div class="flex items-center">
+<div class="mr-4">
+<select class="bg-dark border border-gray-700 text-white text-sm rounded-md p-2 pr-8 appearance-none !rounded-button">
+<option selected>10 per page</option>
+<option>20 per page</option>
+<option>50 per page</option>
+</select>
+<div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+<i class="ri-arrow-down-s-line"></i>
+</div>
+</div>
+<div class="flex items-center space-x-1">
+<button class="p-2 text-gray-400 hover:text-white rounded-md hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+<i class="ri-arrow-left-s-line"></i>
+</button>
+<button class="p-2 bg-primary text-white rounded-md">
+1
+</button>
+<button class="p-2 text-gray-400 hover:text-white rounded-md hover:bg-gray-700">
+2
+</button>
+<button class="p-2 text-gray-400 hover:text-white rounded-md hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
+<i class="ri-arrow-right-s-line"></i>
+</button>
+</div>
+</div>
+</div>
+</div>
+
+<div id="driverDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+<div class="bg-darklight rounded-lg max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+<div class="flex justify-between items-center p-4 border-b border-gray-700">
+<h3 class="text-lg font-medium">Driver Details</h3>
+<button id="closeDriverDetailsModal" class="text-gray-400 hover:text-white">
+<i class="ri-close-line ri-lg"></i>
+</button>
+</div>
+<div class="overflow-y-auto custom-scrollbar p-6 flex-1">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+<div class="bg-dark rounded-lg p-4 border border-gray-700">
+<p class="text-sm text-gray-400">Driver ID</p>
+<h3 class="text-lg font-bold mt-1">DRV-2025-042</h3>
+</div>
+<div class="bg-dark rounded-lg p-4 border border-gray-700">
+<p class="text-sm text-gray-400">Driver Name</p>
+<h3 class="text-lg font-bold mt-1">Amit Sharma</h3>
+</div>
+<div class="bg-dark rounded-lg p-4 border border-gray-700">
+<p class="text-sm text-gray-400">Contact Phone</p>
+<h3 class="text-lg font-bold mt-1">+91 98765 43210</h3>
+</div>
+<div class="bg-dark rounded-lg p-4 border border-gray-700">
+<p class="text-sm text-gray-400">Vehicle Assigned</p>
+<h3 class="text-lg font-bold mt-1">Truck #103</h3>
+</div>
+<div class="bg-dark rounded-lg p-4 border border-gray-700">
+<p class="text-sm text-gray-400">Truck Number Plate</p>
+<h3 class="text-lg font-bold mt-1">MH 12 AB 1234</h3>
+</div>
+<div class="bg-dark rounded-lg p-4 border border-gray-700">
+<p class="text-sm text-gray-400">Status</p>
+<h3 class="text-lg font-bold mt-1"><span class="bg-success/10 text-success text-xs px-2.5 py-1 rounded-full">Available</span></h3>
+</div>
+<div class="bg-dark rounded-lg p-4 border border-gray-700">
+<p class="text-sm text-gray-400">License Expiry</p>
+<h3 class="text-lg font-bold mt-1">12/01/2026</h3>
+</div>
+</div>
+<div class="bg-dark rounded-lg p-4 border border-gray-700">
+<h4 class="text-sm font-medium text-gray-400 mb-3">Assignment History</h4>
+<p class="text-gray-300">Recent delivery assignments would be listed here.</p>
+</div>
+</div>
+<div class="p-4 border-t border-gray-700 flex justify-end space-x-3">
+<button class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-md text-sm !rounded-button whitespace-nowrap">
+Close
+</button>
+<button class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-md text-sm !rounded-button whitespace-nowrap">
+Edit Driver
+</button>
+</div>
+</div>
+</div>
+
+</main>
+</div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+// Placeholder for mobile sidebar toggle functionality
+const mobileMenuButton = document.querySelector('.md\\:hidden button');
+if (mobileMenuButton) {
+mobileMenuButton.addEventListener('click', function() {
+// Implement sidebar toggle logic here
+console.log('Mobile menu button clicked');
+});
+}
+
+// Select all drivers checkboxes
+const selectAllDrivers = document.getElementById('selectAllDrivers');
+const driverCheckboxes = document.querySelectorAll('tbody .custom-checkbox input');
+if (selectAllDrivers) {
+selectAllDrivers.addEventListener('change', function() {
+driverCheckboxes.forEach(checkbox => {
+checkbox.checked = selectAllDrivers.checked;
+});
+});
+}
+
+// Driver Details Modal functionality
+const viewDriverButtons = document.querySelectorAll('[title="View Details"]');
+const driverDetailsModal = document.getElementById('driverDetailsModal');
+const closeDriverDetailsModal = document.getElementById('closeDriverDetailsModal');
+if (viewDriverButtons.length > 0 && driverDetailsModal) {
+viewDriverButtons.forEach(button => {
+button.addEventListener('click', function() {
+// In a real application, you would fetch and populate details here
+driverDetailsModal.classList.remove('hidden');
+});
+});
+if (closeDriverDetailsModal) {
+closeDriverDetailsModal.addEventListener('click', function() {
+driverDetailsModal.classList.add('hidden');
+});
+}
+}
+
+// Close modals when clicking outside
+window.addEventListener('click', function(event) {
+if (driverDetailsModal && event.target === driverDetailsModal) {
+driverDetailsModal.classList.add('hidden');
+}
+});
+
+});
+</script>
+</body>
+</html>

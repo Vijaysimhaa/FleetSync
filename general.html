@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>General Settings - FleetSync</title>
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script>
+tailwind.config={
+theme:{
+extend:{
+colors:{
+primary:'#8B5CF6',
+secondary:'#4B5563',
+dark: '#111827',
+darklight: '#1F2937',
+success: '#10B981',
+warning: '#F59E0B',
+danger: '#EF4444'
+},
+borderRadius:{
+'none':'0px',
+'sm':'4px',
+DEFAULT:'8px',
+'md':'12px',
+'lg':'16px',
+'xl':'20px',
+'2xl':'24px',
+'3xl':'32px',
+'full':'9999px',
+'button':'8px'
+}
+}
+}
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
+<style>
+/* Remixicon default content */
+:where([class^="ri-"])::before { content: "\f3c2"; }
+
+/* Body styling */
+body {
+font-family: 'Inter', sans-serif;
+background-color: #111827;
+color: white;
+min-height: 100vh;
+}
+
+/* Sidebar item active state */
+.sidebar-item.active {
+background-color: rgba(139, 92, 246, 0.1);
+border-left: 3px solid #8B5CF6;
+}
+
+/* Sidebar item hover state (not active) */
+.sidebar-item:hover:not(.active) {
+background-color: rgba(75, 85, 99, 0.2);
+}
+
+/* Custom scrollbar styling */
+.custom-scrollbar::-webkit-scrollbar { width: 6px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: #1F2937; }
+.custom-scrollbar::-webkit-scrollbar-thumb {
+background-color: #4B5563;
+border-radius: 20px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #6B7280; }
+
+/* Custom checkbox styling */
+.custom-checkbox { position: relative; display: inline-block; width: 18px; height: 18px; margin-right: 8px; }
+.custom-checkbox input { opacity: 0; width: 0; height: 0; }
+.checkmark {
+position: absolute;
+top: 0;
+left: 0;
+height: 18px;
+width: 18px;
+background-color: #1F2937;
+border: 1px solid #4B5563;
+border-radius: 4px;
+}
+.custom-checkbox input:checked ~ .checkmark { background-color: #8B5CF6; border-color: #8B5CF6; }
+.checkmark:after { content: ""; position: absolute; display: none; }
+.custom-checkbox input:checked ~ .checkmark:after { display: block; }
+.custom-checkbox .checkmark:after {
+left: 6px;
+top: 2px;
+width: 5px;
+height: 10px;
+border: solid white;
+border-width: 0 2px 2px 0;
+transform: rotate(45deg);
+}
+
+/* Custom switch styling */
+.custom-switch { position: relative; display: inline-block; width: 44px; height: 22px; }
+.custom-switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+position: absolute;
+cursor: pointer;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+background-color: #4B5563;
+transition: .4s;
+border-radius: 34px;
+}
+.slider:before {
+position: absolute;
+content: "";
+height: 18px;
+width: 18px;
+left: 3px;
+bottom: 2px;
+background-color: white;
+transition: .4s;
+border-radius: 50%;
+}
+input:checked + .slider { background-color: #8B5CF6; }
+input:checked + .slider:before { transform: translateX(20px); }
+
+/* Hide number input arrows */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+-webkit-appearance: none;
+margin: 0;
+}
+
+/* Date picker dropdown styling */
+.date-picker-container { position: relative; }
+.date-picker-dropdown {
+display: none;
+position: absolute;
+top: 100%;
+left: 0;
+z-index: 50;
+width: 300px;
+background-color: #1F2937;
+border: 1px solid #4B5563;
+border-radius: 8px;
+box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+padding: 1rem;
+margin-top: 0.5rem;
+}
+.date-picker-dropdown.show { display: block; }
+
+/* Styles for the animated logo */
+.animated-logo {
+font-family: 'Lobster', cursive;
+font-size: 2.5rem; /* Adjust size as needed */
+color: #FFFFFF; /* Adjust color as needed */
+text-shadow: 0 0 5px #8A2BE2, 0 0 10px #8A2BE2; /* Thin purple glow */
+animation: logoFloat 3s ease-in-out infinite;
+}
+
+/* Floating animation keyframes */
+@keyframes logoFloat {
+0%, 100% {
+transform: translateY(0);
+}
+50% {
+transform: translateY(-10px); /* Adjust float distance as needed */
+}
+}
+
+/* Profile link styling in sidebar */
+.profile-link {
+cursor: pointer;
+}
+</style>
+</head>
+<body>
+<div class="flex h-screen overflow-hidden">
+<aside class="hidden md:flex md:flex-col w-64 bg-darklight border-r border-gray-700 transition-all duration-300">
+<div class="p-4 flex items-center border-b border-gray-700">
+<span class="animated-logo">FleetSync</span> </div>
+<div class="flex flex-col flex-1 overflow-y-auto custom-scrollbar">
+<nav class="flex-1 px-2 py-4 space-y-1">
+<a href="dashboard.html" class="sidebar-item flex items-center px-4 py-3 text-sm font-medium text-gray-300 rounded-md">
+<div class="w-6 h-6 flex items-center justify-center mr-3">
+<i class="ri-dashboard-line ri-lg"></i>
+</div>
+<span>Dashboard</span>
+</a>
+<a href="deliveries.html" class="sidebar-item flex items-center px-4 py-3 text-sm font-medium text-gray-300 rounded-md">
+<div class="w-6 h-6 flex items-center justify-center mr-3">
+<i class="ri-truck-line ri-lg"></i>
+</div>
+<span>Deliveries</span>
+</a>
+<a href="warehouses.html" class="sidebar-item flex items-center px-4 py-3 text-sm font-medium text-gray-300 rounded-md">
+<div class="w-6 h-6 flex items-center justify-center mr-3">
+<i class="ri-store-2-line ri-lg"></i>
+</div>
+<span>Warehouses</span>
+</a>
+<a href="drivers.html" class="sidebar-item flex items-center px-4 py-3 text-sm font-medium text-gray-300 rounded-md">
+<div class="w-6 h-6 flex items-center justify-center mr-3">
+<i class="ri-user-3-line ri-lg"></i>
+</div>
+<span>Drivers</span>
+</a>
+<a href="alerts.html" class="sidebar-item flex items-center px-4 py-3 text-sm font-medium text-gray-300 rounded-md">
+<div class="w-6 h-6 flex items-center justify-center mr-3">
+<i class="ri-notification-3-line ri-lg"></i>
+</div>
+<span>Alerts</span>
+</a>
+<a href="reports.html" class="sidebar-item flex items-center px-4 py-3 text-sm font-medium text-gray-300 rounded-md">
+<div class="w-6 h-6 flex items-center justify-center mr-3">
+<i class="ri-file-list-3-line ri-lg"></i>
+</div>
+<span>Reports</span>
+</a>
+<div class="pt-4 pb-2">
+<div class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+Settings
+</div>
+</div>
+<a href="general.html" class="sidebar-item active flex items-center px-4 py-3 text-sm font-medium rounded-md">
+<div class="w-6 h-6 flex items-center justify-center mr-3">
+<i class="ri-settings-line ri-lg"></i>
+</div>
+<span>General</span>
+</a>
+<a href="security.html" class="sidebar-item flex items-center px-4 py-3 text-sm font-medium text-gray-300 rounded-md">
+<div class="w-6 h-6 flex items-center justify-center mr-3">
+<i class="ri-shield-keyhole-line ri-lg"></i>
+</div>
+<span>Security</span>
+</a>
+</nav>
+<div class="p-4 border-t border-gray-700">
+<div class="flex items-center justify-between"> <a href="profile.html" class="profile-link flex items-center"> <div class="flex-shrink-0">
+<div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+<i class="ri-user-3-fill ri-lg"></i>
+</div>
+</div>
+<div class="ml-3">
+<p class="text-sm font-medium">Mr.V</p>
+<p class="text-xs text-gray-400">Administrator</p>
+</div>
+</a>
+<a href="login.html" class="ml-auto"> <div class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-700 cursor-pointer" title="Logout">
+<i class="ri-logout-box-r-line"></i>
+</div>
+</a>
+</div>
+</div>
+</div>
+</aside>
+<div class="md:hidden fixed bottom-4 left-4 z-50">
+<button type="button" class="bg-primary text-white p-3 rounded-full shadow-lg !rounded-button">
+<i class="ri-menu-line ri-lg"></i>
+</button>
+</div>
+<div class="flex-1 flex flex-col overflow-hidden bg-dark">
+<header class="bg-darklight border-b border-gray-700 py-4 px-6">
+<div class="flex items-center justify-between">
+<div class="flex items-center">
+<div class="md:hidden mr-4">
+<button type="button" class="text-gray-400 hover:text-white">
+<i class="ri-menu-line ri-lg"></i>
+</button>
+</div>
+<div class="flex items-center">
+<a href="dashboard.html" class="text-gray-400 hover:text-white mr-2">
+<i class="ri-dashboard-line"></i>
+</a>
+<span class="text-gray-400 mx-1">/</span>
+<h1 class="text-xl font-semibold">General Settings</h1>
+</div>
+</div>
+<div class="flex items-center space-x-4">
+<div class="relative">
+<button type="button" class="text-gray-400 hover:text-white p-1 rounded-full">
+<div class="w-8 h-8 flex items-center justify-center">
+<i class="ri-notification-3-line ri-lg"></i>
+</div>
+<span class="notification-dot"></span>
+</button>
+</div>
+</div>
+</header>
+<main class="flex-1 overflow-y-auto custom-scrollbar p-6">
+<div class="mb-6">
+<h2 class="text-lg font-medium">General Application Settings</h2>
+<p class="text-sm text-gray-400">Configure general application preferences and options</p>
+</div>
+
+<div class="space-y-6">
+<div class="bg-darklight rounded-lg border border-gray-700 p-6">
+<h3 class="text-lg font-medium mb-4">General Preferences</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div>
+<label for="defaultCurrency" class="block text-sm font-medium text-gray-400 mb-1">Default Currency</label>
+<div class="relative">
+<select id="defaultCurrency" class="bg-dark border border-gray-700 text-white text-sm rounded-md block w-full p-2.5 pr-8 appearance-none !rounded-button">
+<option value="USD">USD ($)</option>
+<option value="EUR">EUR (€)</option>
+<option value="GBP">GBP (£)</option>
+<option value="INR" selected>INR (₹)</option>
+</select>
+<div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+<i class="ri-arrow-down-s-line"></i>
+</div>
+</div>
+</div>
+<div>
+<label for="timezone" class="block text-sm font-medium text-gray-400 mb-1">Timezone</label>
+<div class="relative">
+<select id="timezone" class="bg-dark border border-gray-700 text-white text-sm rounded-md block w-full p-2.5 pr-8 appearance-none !rounded-button">
+<option value="UTC">UTC</option>
+<option value="GMT">GMT</option>
+<option value="IST" selected>IST (India Standard Time)</option>
+</select>
+<div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+<i class="ri-arrow-down-s-line"></i>
+</div>
+</div>
+</div>
+<div>
+<label for="dateFormat" class="block text-sm font-medium text-gray-400 mb-1">Date Format</label>
+<div class="relative">
+<select id="dateFormat" class="bg-dark border border-gray-700 text-white text-sm rounded-md block w-full p-2.5 pr-8 appearance-none !rounded-button">
+<option value="MM/DD/YYYY">MM/DD/YYYY</option>
+<option value="DD/MM/YYYY" selected>DD/MM/YYYY</option>
+<option value="YYYY-MM-DD">YYYY-MM-DD</option>
+</select>
+<div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+<i class="ri-arrow-down-s-line"></i>
+</div>
+</div>
+</div>
+<div>
+<label for="timeFormat" class="block text-sm font-medium text-gray-400 mb-1">Time Format</label>
+<div class="relative">
+<select id="timeFormat" class="bg-dark border border-gray-700 text-white text-sm rounded-md block w-full p-2.5 pr-8 appearance-none !rounded-button">
+<option value="12">12-hour (AM/PM)</option>
+<option value="24" selected>24-hour</option>
+</select>
+<div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+<i class="ri-arrow-down-s-line"></i>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="bg-darklight rounded-lg border border-gray-700 p-6">
+<h3 class="text-lg font-medium mb-4">Notification Settings</h3>
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<label for="emailNotifications" class="text-sm font-medium text-gray-300">Email Notifications</label>
+<label class="custom-switch">
+<input type="checkbox" id="emailNotifications" checked>
+<span class="slider"></span>
+</label>
+</div>
+<div class="flex items-center justify-between">
+<label for="smsNotifications" class="text-sm font-medium text-gray-300">SMS Notifications</label>
+<label class="custom-switch">
+<input type="checkbox" id="smsNotifications">
+<span class="slider"></span>
+</label>
+</div>
+<div class="flex items-center justify-between">
+<label for="inAppNotifications" class="text-sm font-medium text-gray-300">In-App Notifications</label>
+<label class="custom-switch">
+<input type="checkbox" id="inAppNotifications" checked>
+<span class="slider"></span>
+</label>
+</div>
+</div>
+</div>
+
+<div class="bg-darklight rounded-lg border border-gray-700 p-6">
+<h3 class="text-lg font-medium mb-4">Data Retention</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div>
+<label for="deliveryDataRetention" class="block text-sm font-medium text-gray-400 mb-1">Delivery Data Retention Period</label>
+<div class="relative">
+<select id="deliveryDataRetention" class="bg-dark border border-gray-700 text-white text-sm rounded-md block w-full p-2.5 pr-8 appearance-none !rounded-button">
+<option value="90">90 Days</option>
+<option value="180">180 Days</option>
+<option value="365" selected>1 Year</option>
+<option value="730">2 Years</option>
+<option value="0">Indefinite</option>
+</select>
+<div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+<i class="ri-arrow-down-s-line"></i>
+</div>
+</div>
+</div>
+<div>
+<label for="alertDataRetention" class="block text-sm font-medium text-gray-400 mb-1">Alert Data Retention Period</label>
+<div class="relative">
+<select id="alertDataRetention" class="bg-dark border border-gray-700 text-white text-sm rounded-md block w-full p-2.5 pr-8 appearance-none !rounded-button">
+<option value="30">30 Days</option>
+<option value="90" selected>90 Days</option>
+<option value="180">180 Days</option>
+<option value="365">1 Year</option>
+</select>
+<div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+<i class="ri-arrow-down-s-line"></i>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="bg-darklight rounded-lg border border-gray-700 p-6">
+<h3 class="text-lg font-medium mb-4">Subscription Details</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+<div class="bg-dark rounded-lg p-4 border border-gray-700">
+<p class="text-sm text-gray-400">Current Plan</p>
+<h3 class="text-lg font-bold mt-1">Pro Plan</h3>
+</div>
+<div class="bg-dark rounded-lg p-4 border border-gray-700">
+<p class="text-sm text-gray-400">Status</p>
+<h3 class="text-lg font-bold mt-1"><span class="bg-success/10 text-success text-xs px-2.5 py-1 rounded-full">Active</span></h3>
+</div>
+<div class="bg-dark rounded-lg p-4 border border-gray-700">
+<p class="text-sm text-gray-400">Renewal Date</p>
+<h3 class="text-lg font-bold mt-1">June 10, 2025</h3>
+</div>
+<div class="bg-dark rounded-lg p-4 border border-gray-700">
+<p class="text-sm text-gray-400">Payment Method</p>
+<h3 class="text-lg font-bold mt-1">Visa ending in 1234</h3>
+</div>
+</div>
+<div class="flex justify-end">
+<button id="cancelSubscriptionButton" class="bg-danger hover:bg-danger/90 text-white px-4 py-2.5 rounded-md text-sm font-medium !rounded-button whitespace-nowrap">
+Cancel Subscription
+</button>
+</div>
+</div>
+
+<div class="flex justify-end">
+<button class="bg-primary hover:bg-primary/90 text-white px-6 py-2.5 rounded-md text-sm font-medium !rounded-button whitespace-nowrap">
+Save Changes
+</button>
+</div>
+</div>
+
+<div id="cancelSubscriptionModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+<div class="bg-darklight rounded-lg p-6 max-w-md w-full">
+<div class="flex justify-between items-start mb-4">
+<h3 class="text-lg font-medium">Confirm Cancellation</h3>
+<button id="closeCancelSubscriptionModal" class="text-gray-400 hover:text-white">
+<i class="ri-close-line ri-lg"></i>
+</button>
+</div>
+<div class="mb-6">
+<p class="text-gray-300 mb-2">Are you sure you want to cancel your subscription?</p>
+<p class="text-gray-400 text-sm">Your subscription will remain active until the next renewal date.</p>
+</div>
+<div class="flex justify-end space-x-3">
+<button id="cancelCancelSubscription" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-md !rounded-button whitespace-nowrap">
+Keep Subscription
+</button>
+<button id="confirmCancelSubscription" class="bg-danger hover:bg-danger/90 text-white px-4 py-2 rounded-md text-sm !rounded-button whitespace-nowrap">
+Confirm Cancellation
+</button>
+</div>
+</div>
+</div>
+
+
+</main>
+</div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+// Placeholder for mobile sidebar toggle functionality
+const mobileMenuButton = document.querySelector('.md\\:hidden button');
+if (mobileMenuButton) {
+mobileMenuButton.addEventListener('click', function() {
+// Implement sidebar toggle logic here
+console.log('Mobile menu button clicked');
+});
+}
+
+// Cancel Subscription Modal functionality
+const cancelSubscriptionButton = document.getElementById('cancelSubscriptionButton');
+const cancelSubscriptionModal = document.getElementById('cancelSubscriptionModal');
+const closeCancelSubscriptionModal = document.getElementById('closeCancelSubscriptionModal');
+const cancelCancelSubscription = document.getElementById('cancelCancelSubscription');
+const confirmCancelSubscription = document.getElementById('confirmCancelSubscription');
+
+if (cancelSubscriptionButton && cancelSubscriptionModal) {
+cancelSubscriptionButton.addEventListener('click', function() {
+cancelSubscriptionModal.classList.remove('hidden');
+});
+
+if (closeCancelSubscriptionModal) {
+closeCancelSubscriptionModal.addEventListener('click', function() {
+cancelSubscriptionModal.classList.add('hidden');
+});
+}
+
+if (cancelCancelSubscription) {
+cancelCancelSubscription.addEventListener('click', function() {
+cancelSubscriptionModal.classList.add('hidden');
+});
+}
+
+if (confirmCancelSubscription) {
+confirmCancelSubscription.addEventListener('click', function() {
+// Implement subscription cancellation logic here
+console.log('Subscription cancellation confirmed');
+cancelSubscriptionModal.classList.add('hidden');
+// Optionally, show a success message or update the UI
+});
+}
+
+// Close modal when clicking outside
+window.addEventListener('click', function(event) {
+if (event.target === cancelSubscriptionModal) {
+cancelSubscriptionModal.classList.add('hidden');
+}
+});
+}
+
+});
+</script>
+</body>
+</html>

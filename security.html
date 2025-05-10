@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Security Settings - FleetSync</title>
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script>
+tailwind.config={
+theme:{
+extend:{
+colors:{
+primary:'#8B5CF6',
+secondary:'#4B5563',
+dark: '#111827',
+darklight: '#1F2937',
+success: '#10B981',
+warning: '#F59E0B',
+danger: '#EF4444'
+},
+borderRadius:{
+'none':'0px',
+'sm':'4px',
+DEFAULT:'8px',
+'md':'12px',
+'lg':'16px',
+'xl':'20px',
+'2xl':'24px',
+'3xl':'32px',
+'full':'9999px',
+'button':'8px'
+}
+}
+}
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
+<style>
+/* Remixicon default content */
+:where([class^="ri-"])::before { content: "\f3c2"; }
+
+/* Body styling */
+body {
+font-family: 'Inter', sans-serif;
+background-color: #111827;
+color: white;
+min-height: 100vh;
+}
+
+/* Sidebar item active state */
+.sidebar-item.active {
+background-color: rgba(139, 92, 246, 0.1);
+border-left: 3px solid #8B5CF6;
+}
+
+/* Sidebar item hover state (not active) */
+.sidebar-item:hover:not(.active) {
+background-color: rgba(75, 85, 99, 0.2);
+}
+
+/* Custom scrollbar styling */
+.custom-scrollbar::-webkit-scrollbar { width: 6px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: #1F2937; }
+.custom-scrollbar::-webkit-scrollbar-thumb {
+background-color: #4B5563;
+border-radius: 20px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #6B7280; }
+
+/* Custom checkbox styling */
+.custom-checkbox { position: relative; display: inline-block; width: 18px; height: 18px; margin-right: 8px; }
+.custom-checkbox input { opacity: 0; width: 0; height: 0; }
+.checkmark {
+position: absolute;
+top: 0;
+left: 0;
+height: 18px;
+width: 18px;
+background-color: #1F2937;
+border: 1px solid #4B5563;
+border-radius: 4px;
+}
+.custom-checkbox input:checked ~ .checkmark { background-color: #8B5CF6; border-color: #8B5CF6; }
+.checkmark:after { content: ""; position: absolute; display: none; }
+.custom-checkbox input:checked ~ .checkmark:after { display: block; }
+.custom-checkbox .checkmark:after {
+left: 6px;
+top: 2px;
+width: 5px;
+height: 10px;
+border: solid white;
+border-width: 0 2px 2px 0;
+transform: rotate(45deg);
+}
+
+/* Custom switch styling */
+.custom-switch { position: relative; display: inline-block; width: 44px; height: 22px; }
+.custom-switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+position: absolute;
+cursor: pointer;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+background-color: #4B5563;
+transition: .4s;
+border-radius: 34px;
+}
+.slider:before {
+position: absolute;
+content: "";
+height: 18px;
+width: 18px;
+left: 3px;
+bottom: 2px;
+background-color: white;
+transition: .4s;
+border-radius: 50%;
+}
+input:checked + .slider { background-color: #8B5CF6; }
+input:checked + .slider:before { transform: translateX(20px); }
+
+/* Hide number input arrows */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+-webkit-appearance: none;
+margin: 0;
+}
+
+/* Date picker dropdown styling */
+.date-picker-container { position: relative; }
+.date-picker-dropdown {
+display: none;
+position: absolute;
+top: 100%;
+left: 0;
+z-index: 50;
+width: 300px;
+background-color: #1F2937;
+border: 1px solid #4B5563;
+border-radius: 8px;
+box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+padding: 1rem;
+margin-top: 0.5rem;
+}
+.date-picker-dropdown.show { display: block; }
+
+/* Styles for the animated logo */
+.animated-logo {
+font-family: 'Lobster', cursive;
+font-size: 2.5rem; /* Adjust size as needed */
+color: #FFFFFF; /* Adjust color as needed */
+text-shadow: 0 0 5px #8A2BE2, 0 0 10px #8A2BE2; /* Thin purple glow */
+animation: logoFloat 3s ease-in-out infinite;
+}
+
+/* Floating animation keyframes */
+@keyframes logoFloat {
+0%, 100% {
+transform: translateY(0);
+}
+50% {
+transform: translateY(-10px); /* Adjust float distance as needed */
+}
+}
+
+/* Card Styling for clickable notices */
+.clickable-card {
+cursor: pointer;
+transition: background-color 0.2s ease-in-out;
+}
+
+.clickable-card:hover {
+background-color: rgba(75, 85, 99, 0.2); /* secondary with opacity */
+}
+
+/* Profile link styling in sidebar */
+.profile-link {
+cursor: pointer;
+}
+</style>
+</head>
+<body>
+<div class="flex h-screen overflow-hidden">
+<aside class="hidden md:flex md:flex-col w-64 bg-darklight border-r border-gray-700 transition-all duration-300">
+<div class="p-4 flex items-center border-b border-gray-700">
+<span class="animated-logo">FleetSync</span> </div>
+<div class="flex flex-col flex-1 overflow-y-auto custom-scrollbar">
+<nav class="flex-1 px-2 py-4 space-y-1">
+<a href="dashboard.html" class="sidebar-item flex items-center px-4 py-3 text-sm font-medium text-gray-300 rounded-md">
+<div class="w-6 h-6 flex items-center justify-center mr-3">
+<i class="ri-dashboard-line ri-lg"></i>
+</div>
+<span>Dashboard</span>
+</a>
+<a href="deliveries.html" class="sidebar-item flex items-center px-4 py-3 text-sm font-medium text-gray-300 rounded-md">
+<div class="w-6 h-6 flex items-center justify-center mr-3">
+<i class="ri-truck-line ri-lg"></i>
+</div>
+<span>Deliveries</span>
+</a>
+<a href="warehouses.html" class="sidebar-item flex items-center px-4 py-3 text-sm font-medium text-gray-300 rounded-md">
+<div class="w-6 h-6 flex items-center justify-center mr-3">
+<i class="ri-store-2-line ri-lg"></i>
+</div>
+<span>Warehouses</span>
+</a>
+<a href="drivers.html" class="sidebar-item flex items-center px-4 py-3 text-sm font-medium text-gray-300 rounded-md">
+<div class="w-6 h-6 flex items-center justify-center mr-3">
+<i class="ri-user-3-line ri-lg"></i>
+</div>
+<span>Drivers</span>
+</a>
+<a href="alerts.html" class="sidebar-item flex items-center px-4 py-3 text-sm font-medium text-gray-300 rounded-md">
+<div class="w-6 h-6 flex items-center justify-center mr-3">
+<i class="ri-notification-3-line ri-lg"></i>
+</div>
+<span>Alerts</span>
+</a>
+<a href="reports.html" class="sidebar-item flex items-center px-4 py-3 text-sm font-medium text-gray-300 rounded-md">
+<div class="w-6 h-6 flex items-center justify-center mr-3">
+<i class="ri-file-list-3-line ri-lg"></i>
+</div>
+<span>Reports</span>
+</a>
+<div class="pt-4 pb-2">
+<div class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+Settings
+</div>
+</div>
+<a href="general.html" class="sidebar-item flex items-center px-4 py-3 text-sm font-medium text-gray-300 rounded-md">
+<div class="w-6 h-6 flex items-center justify-center mr-3">
+<i class="ri-settings-line ri-lg"></i>
+</div>
+<span>General</span>
+</a>
+<a href="security.html" class="sidebar-item active flex items-center px-4 py-3 text-sm font-medium rounded-md">
+<div class="w-6 h-6 flex items-center justify-center mr-3">
+<i class="ri-shield-keyhole-line ri-lg"></i>
+</div>
+<span>Security</span>
+</a>
+</nav>
+<div class="p-4 border-t border-gray-700">
+<div class="flex items-center justify-between"> <a href="profile.html" class="profile-link flex items-center"> <div class="flex-shrink-0">
+<div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+<i class="ri-user-3-fill ri-lg"></i>
+</div>
+</div>
+<div class="ml-3">
+<p class="text-sm font-medium">Mr.V</p>
+<p class="text-xs text-gray-400">Administrator</p>
+</div>
+</a>
+<a href="login.html" class="ml-auto"> <div class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-700 cursor-pointer" title="Logout">
+<i class="ri-logout-box-r-line"></i>
+</div>
+</a>
+</div>
+</div>
+</div>
+</aside>
+<div class="md:hidden fixed bottom-4 left-4 z-50">
+<button type="button" class="bg-primary text-white p-3 rounded-full shadow-lg !rounded-button">
+<i class="ri-menu-line ri-lg"></i>
+</button>
+</div>
+<div class="flex-1 flex flex-col overflow-hidden bg-dark">
+<header class="bg-darklight border-b border-gray-700 py-4 px-6">
+<div class="flex items-center justify-between">
+<div class="flex items-center">
+<div class="md:hidden mr-4">
+<button type="button" class="text-gray-400 hover:text-white">
+<i class="ri-menu-line ri-lg"></i>
+</button>
+</div>
+<div class="flex items-center">
+<a href="dashboard.html" class="text-gray-400 hover:text-white mr-2">
+<i class="ri-dashboard-line"></i>
+</a>
+<span class="text-gray-400 mx-1">/</span>
+<h1 class="text-xl font-semibold">Security Settings</h1>
+</div>
+</div>
+<div class="flex items-center space-x-4">
+<div class="relative">
+<button type="button" class="text-gray-400 hover:text-white p-1 rounded-full">
+<div class="w-8 h-8 flex items-center justify-center">
+<i class="ri-notification-3-line ri-lg"></i>
+</div>
+<span class="notification-dot"></span>
+</button>
+</div>
+</div>
+</header>
+<main class="flex-1 overflow-y-auto custom-scrollbar p-6">
+<div class="mb-6">
+<h2 class="text-lg font-medium">Application Security Settings</h2>
+<p class="text-sm text-gray-400">Configure security preferences and access controls</p>
+</div>
+
+<div class="space-y-6">
+<div id="passwordPolicyCard" class="bg-darklight rounded-lg border border-gray-700 p-6 clickable-card">
+<div class="flex justify-between items-center">
+<div>
+<h3 class="text-lg font-medium">Password Policy</h3>
+<p class="text-sm text-gray-400">View the current password policy requirements.</p>
+</div>
+<div class="w-8 h-8 flex items-center justify-center rounded-full bg-primary/10 text-primary">
+<i class="ri-lock-password-line ri-lg"></i>
+</div>
+</div>
+</div>
+
+<div class="bg-darklight rounded-lg border border-gray-700 p-6">
+<h3 class="text-lg font-medium mb-4">Two-Factor Authentication (2FA)</h3>
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<label for="enable2FA" class="text-sm font-medium text-gray-300">Enable 2FA for all users</label>
+<label class="custom-switch">
+<input type="checkbox" id="enable2FA">
+<span class="slider"></span>
+</label>
+</div>
+<p class="text-sm text-gray-400">When enabled, users will be prompted to set up 2FA on their next login.</p>
+</div>
+</div>
+
+<div class="bg-darklight rounded-lg border border-gray-700 p-6">
+<h3 class="text-lg font-medium mb-4">Session Management</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div>
+<label for="sessionTimeout" class="block text-sm font-medium text-gray-400 mb-1">Session Timeout (minutes)</label>
+<input type="number" id="sessionTimeout" class="bg-dark border border-gray-700 text-white text-sm rounded-md block w-full p-2.5 !rounded-button" value="60" min="15" max="360">
+</div>
+<div>
+<label for="idleLogout" class="block text-sm font-medium text-gray-400 mb-1">Idle Logout</label>
+<div class="flex items-center h-full">
+<label class="custom-switch">
+<input type="checkbox" id="idleLogout" checked>
+<span class="slider"></span>
+</label>
+</div>
+</div>
+</div>
+</div>
+
+<div id="termsCard" class="bg-darklight rounded-lg border border-gray-700 p-6 clickable-card">
+<div class="flex justify-between items-center">
+<div>
+<h3 class="text-lg font-medium">Terms & Conditions Notice</h3>
+<p class="text-sm text-gray-400">Review the application's Terms & Conditions.</p>
+</div>
+<div class="w-8 h-8 flex items-center justify-center rounded-full bg-primary/10 text-primary">
+<i class="ri-file-text-line ri-lg"></i>
+</div>
+</div>
+</div>
+
+<div id="passwordPolicyModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+<div class="bg-darklight rounded-lg max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+<div class="flex justify-between items-center p-4 border-b border-gray-700">
+<h3 class="text-lg font-medium">FleetSync Password Policy</h3>
+<button id="closePasswordPolicyModal" class="text-gray-400 hover:text-white">
+<i class="ri-close-line ri-lg"></i>
+</button>
+</div>
+<div class="overflow-y-auto custom-scrollbar p-6 text-gray-300 text-sm flex-1">
+<p class="mb-4">To ensure the security of your account, passwords must meet the following criteria:</p>
+<ul class="list-disc list-inside mb-4">
+<li>Minimum length of 8 characters.</li>
+<li>Must contain at least one uppercase letter.</li>
+<li>Must contain at least one lowercase letter.</li>
+<li>Must contain at least one number.</li>
+<li>Symbols are optional but recommended for stronger security.</li>
+</ul>
+<p>It is recommended to use a unique password for your FleetSync account that is not used on other websites or applications.</p>
+</div>
+<div class="p-4 border-t border-gray-700 flex justify-end">
+<button class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-md text-sm !rounded-button whitespace-nowrap" id="closePasswordPolicyModalButton">
+Close
+</button>
+</div>
+</div>
+</div>
+
+<div id="termsModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+<div class="bg-darklight rounded-lg max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+<div class="flex justify-between items-center p-4 border-b border-gray-700">
+<h3 class="text-lg font-medium">FleetSync Terms & Conditions</h3>
+<button id="closeTermsModal" class="text-gray-400 hover:text-white">
+<i class="ri-close-line ri-lg"></i>
+</button>
+</div>
+<div class="overflow-y-auto custom-scrollbar p-6 text-gray-300 text-sm flex-1">
+<p class="mb-4">Welcome to FleetSync. These terms and conditions outline the rules and regulations for the use of FleetSync's Website and Application.</p>
+<p class="mb-4">By accessing this website and using the application, we assume you accept these terms and conditions. Do not continue to use FleetSync if you do not agree to take all of the terms and conditions stated on this page.</p>
+<h4 class="font-semibold text-white mb-2">License</h4>
+<p class="mb-4">Unless otherwise stated, FleetSync and/or its licensors own the intellectual property rights for all material on FleetSync. All intellectual property rights are reserved. You may access this from FleetSync for your own personal use subjected to restrictions set in these terms and conditions.</p>
+<p class="mb-4">You must not:</p>
+<ul class="list-disc list-inside mb-4">
+<li>Republish material from FleetSync</li>
+<li>Sell, rent or sub-license material from FleetSync</li>
+<li>Reproduce, duplicate or copy material from FleetSync</li>
+<li>Redistribute content from FleetSync</li>
+</ul>
+<h4 class="font-semibold text-white mb-2">Hyperlinking to our Content</h4>
+<p class="mb-4">The following organizations may link to our Website without prior written approval:</p>
+<ul class="list-disc list-inside mb-4">
+<li>Government agencies;</li>
+<li>Search engines;</li>
+<li>News organizations;</li>
+<li>Online directory distributors may link to our Website in the same manner as they hyperlink to the Websites of other listed businesses; and</li>
+<li>System wide Accredited Businesses except soliciting non-profit organizations, charity shopping malls, and charity fundraising groups which may not hyperlink to our Web site.</li>
+</ul>
+<p class="mb-4">These organizations may link to our home page, to publications or to other Website information so long as the link: (a) is not in any way deceptive; (b) does not falsely imply sponsorship, endorsement or approval of the linking party and its products or services; and (c) fits within the context of the linking party’s site.</p>
+<h4 class="font-semibold text-white mb-2">iFrames</h4>
+<p class="mb-4">Without prior approval and written permission, you may not create frames around our Webpages that alter in any way the visual presentation or appearance of our Website.</p>
+<h4 class="font-semibold text-white mb-2">Content Liability</h4>
+<p class="mb-4">We shall not be held responsible for any content that appears on your Website. You agree to protect and defend us against all claims that is rising on your Website. No link(s) should appear on any Website that may be interpreted as libelous, obscene or criminal, or which infringes, otherwise violates, or advocates the infringement or other violation of, any third party rights.</p>
+<h4 class="font-semibold text-white mb-2">Reservation of Rights</h4>
+<p class="mb-4">We reserve the right to request that you remove all links or any particular link to our Website. You approve to immediately remove all links to our Website upon request. We also reserve the right to amen these terms and conditions and it’s linking policy at any time. By continuously linking to our Website, you agree to be bound to and follow these linking terms and conditions.</p>
+<h4 class="font-semibold text-white mb-2">Removal of links from our website</h4>
+<p class="mb-4">If you find any link on our Website that is offensive for any reason, you are free to contact and inform us any moment. We will consider requests to remove links but we are not obligated to or so or to respond to you directly.</p>
+<p class="mb-4">We do not ensure that the information on this website is correct, we do not warrant its completeness or accuracy; nor do we promise to ensure that the website remains available or that the material on the website is kept up to date.</p>
+<h4 class="font-semibold text-white mb-2">Disclaimer</h4>
+<p class="mb-4">To the maximum extent permitted by applicable law, we exclude all representations, warranties and conditions relating to our website and the use of this website. Nothing in this disclaimer will:</p>
+<ul class="list-disc list-inside mb-4">
+<li>Limit or exclude our or your liability for death or personal injury;</li>
+<li>Limit or exclude our or your liability for fraud or fraudulent misrepresentation;</li>
+<li>Limit any of our or your liabilities in any way that is not permitted under applicable law; or</li>
+<li>Exclude any of our or your liabilities that may not be excluded under applicable law.</li>
+</ul>
+<p class="mb-4">The limitations and prohibitions of liability set in this Section and elsewhere in this disclaimer: (a) are subject to the preceding paragraph; and (b) govern all liabilities arising under the disclaimer, including liabilities arising in contract, in tort and for breach of statutory duty.</p>
+<p>As long as the website and the application are provided free of charge, we will not be liable for any loss or damage of any nature.</p>
+</div>
+<div class="p-4 border-t border-gray-700 flex justify-end">
+<button class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-md text-sm !rounded-button whitespace-nowrap" id="closeTermsModalButton">
+Close
+</button>
+</div>
+</div>
+</div>
+
+
+<div class="flex justify-end">
+<button class="bg-primary hover:bg-primary/90 text-white px-6 py-2.5 rounded-md text-sm font-medium !rounded-button whitespace-nowrap">
+Save Changes
+</button>
+</div>
+</div>
+
+</main>
+</div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+// Placeholder for mobile sidebar toggle functionality
+const mobileMenuButton = document.querySelector('.md\\:hidden button');
+if (mobileMenuButton) {
+mobileMenuButton.addEventListener('click', function() {
+// Implement sidebar toggle logic here
+console.log('Mobile menu button clicked');
+});
+}
+
+// Password Policy Modal functionality
+const passwordPolicyCard = document.getElementById('passwordPolicyCard');
+const passwordPolicyModal = document.getElementById('passwordPolicyModal');
+const closePasswordPolicyModal = document.getElementById('closePasswordPolicyModal');
+const closePasswordPolicyModalButton = document.getElementById('closePasswordPolicyModalButton');
+
+if (passwordPolicyCard && passwordPolicyModal) {
+passwordPolicyCard.addEventListener('click', function() {
+passwordPolicyModal.classList.remove('hidden');
+});
+
+if (closePasswordPolicyModal) {
+closePasswordPolicyModal.addEventListener('click', function() {
+passwordPolicyModal.classList.add('hidden');
+});
+}
+
+if (closePasswordPolicyModalButton) {
+closePasswordPolicyModalButton.addEventListener('click', function() {
+passwordPolicyModal.classList.add('hidden');
+});
+}
+
+// Close modal when clicking outside
+window.addEventListener('click', function(event) {
+if (event.target === passwordPolicyModal) {
+passwordPolicyModal.classList.add('hidden');
+}
+});
+}
+
+
+// Terms and Conditions Modal functionality
+const termsCard = document.getElementById('termsCard');
+const termsModal = document.getElementById('termsModal');
+const closeTermsModal = document.getElementById('closeTermsModal');
+const closeTermsModalButton = document.getElementById('closeTermsModalButton');
+
+if (termsCard && termsModal) {
+termsCard.addEventListener('click', function() {
+termsModal.classList.remove('hidden');
+});
+
+if (closeTermsModal) {
+closeTermsModal.addEventListener('click', function() {
+termsModal.classList.add('hidden');
+});
+}
+
+if (closeTermsModalButton) {
+closeTermsModalButton.addEventListener('click', function() {
+termsModal.classList.add('hidden');
+});
+}
+
+// Close modal when clicking outside
+window.addEventListener('click', function(event) {
+if (event.target === termsModal) {
+termsModal.classList.add('hidden');
+}
+});
+}
+});
+</script>
+</body>
+</html>

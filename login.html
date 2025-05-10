@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FleetSync - Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lobster&family=Comfortaa:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root{--purple:#8A2BE2;--dark:#0A0A0A;--light:#FFFFFF}*{margin:0;padding:0;box-sizing:border-box;font-family:'Comfortaa',cursive}body{background:var(--dark);color:var(--light);line-height:1.6;padding:2rem 5%;display:flex;flex-direction:column;align-items:center;min-height:100vh}.logo-link{text-decoration:none;margin-bottom:2rem;display:inline-block}.logo-text{font-family:'Lobster',cursive;font-size:2.5rem;color:var(--light);text-shadow:0 0 20px var(--purple);animation:logoFloat 3s ease-in-out infinite}@keyframes logoFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}.login-container{background:rgba(255,255,255,.05);padding:2rem;border-radius:15px;border:1px solid rgba(138,43,226,.3);width:90%;max-width:400px;box-shadow:0 10px 30px rgba(0,0,0,.3);opacity:0;transform:translateY(20px);transition:opacity 0.3s ease-in-out, transform 0.3s ease-in-out;animation:fadeInUp 0.3s forwards 0.2s, borderPulse 2s linear infinite}@keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}@keyframes borderPulse{0%{box-shadow:0 0 10px var(--purple), inset 0 0 10px var(--purple)}50%{box-shadow:0 0 20px var(--purple), inset 0 0 15px var(--purple)}100%{box-shadow:0 0 10px var(--purple), inset 0 0 10px var(--purple)}}.login-heading{text-align:center;font-size:2rem;margin-bottom:1.5rem;color:var(--light)}.login-form .form-group{margin-bottom:1.2rem}.login-form label{display:block;color:rgba(255,255,255,.8);margin-bottom:.5rem}.login-form input[type="text"],.login-form input[type="password"]{width:100%;padding:.8rem;border:1px solid rgba(255,255,255,.1);border-radius:8px;background:rgba(0,0,0,.3);color:var(--light);font-size:1rem}.login-form input[type="text"]:focus,.login-form input[type="password"]:focus{outline:none;border-color:var(--purple);box-shadow:0 0 5px rgba(138,43,226,.5)}.login-form button{display:inline-block;padding:1rem 2.5rem;background:var(--purple);color:var(--light);border-radius:30px;text-decoration:none;font-weight:600;margin-top:1.5rem;transition:all.3s ease;border:none;cursor:pointer;width:100%;text-align:center}.login-form button:hover{transform:translateY(-3px);box-shadow:0 0 20px var(--purple)}.signup-link{color:rgba(255,255,255,.7);text-decoration:none;margin-top:1rem;display:block;text-align:center;transition:color.3s ease}.signup-link:hover{color:var(--purple)}.error-message{color:#FF4500;margin-top:1rem;text-align:center}
+    </style>
+</head>
+<body>
+    <a href="index.html" class="logo-link">
+        <span class="logo-text">FleetSync</span>
+    </a>
+    <div class="login-container">
+        <h2 class="login-heading">Login</h2>
+        <form class="login-form" id="login-form">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit">Login</button>
+        </form>
+        <a href="signup.html" class="signup-link">Don't have an account? Sign up</a>
+        <p class="error-message" id="login-error" style="display:none;">Invalid username or password.</p>
+    </div>
+    <script>
+        const loginForm = document.getElementById('login-form');
+        const loginError = document.getElementById('login-error');
+
+        loginForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            const username = loginForm.username.value.trim();
+            const password = loginForm.password.value.trim();
+
+            // **VERY INSECURE** Hardcoded credentials for demonstration purposes only.
+            if (username === 'user' && password === 'password') {
+                // Store user session (insecure, for demonstration only).
+                localStorage.setItem('user', username);
+                // Redirect to the dashboard.
+                window.location.href = 'dashboard.html';
+            } else {
+                loginError.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FleetSync - Sign Up</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lobster&family=Comfortaa:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root{--purple:#8A2BE2;--dark:#0A0A0A;--light:#FFFFFF}*{margin:0;padding:0;box-sizing:border-box;font-family:'Comfortaa',cursive}body{background:var(--dark);color:var(--light);line-height:1.6;padding:2rem 5%;display:flex;flex-direction:column;align-items:center;min-height:100vh}.logo-link{text-decoration:none;margin-bottom:2rem;display:inline-block}.logo-text{font-family:'Lobster',cursive;font-size:2.5rem;color:var(--light);text-shadow:0 0 20px var(--purple);animation:logoFloat 3s ease-in-out infinite}@keyframes logoFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}.signup-container{background:rgba(255,255,255,.05);padding:2rem;border-radius:15px;border:1px solid rgba(138,43,226,.3);width:90%;max-width:400px;box-shadow:0 10px 30px rgba(0,0,0,.3);opacity:0;transform:translateY(20px);transition:opacity 0.3s ease-in-out, transform 0.3s ease-in-out;animation:fadeInUp 0.3s forwards 0.2s, borderPulse 2s linear infinite}@keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}@keyframes borderPulse{0%{box-shadow:0 0 10px var(--purple), inset 0 0 10px var(--purple)}50%{box-shadow:0 0 20px var(--purple), inset 0 0 15px var(--purple)}100%{box-shadow:0 0 10px var(--purple), inset 0 0 10px var(--purple)}}.signup-heading{text-align:center;font-size:2rem;margin-bottom:1.5rem;color:var(--light)}.signup-form .form-group{margin-bottom:1.2rem}.signup-form label{display:block;color:rgba(255,255,255,.8);margin-bottom:.5rem}.signup-form input[type="text"],.signup-form input[type="email"],.signup-form input[type="password"]{width:100%;padding:.8rem;border:1px solid rgba(255,255,255,.1);border-radius:8px;background:rgba(0,0,0,.3);color:var(--light);font-size:1rem}.signup-form input[type="text"]:focus,.signup-form input[type="email"]:focus,.signup-form input[type="password"]:focus{outline:none;border-color:var(--purple);box-shadow:0 0 5px rgba(138,43,226,.5)}.signup-form button{display:inline-block;padding:1rem 2.5rem;background:var(--purple);color:var(--light);border-radius:30px;text-decoration:none;font-weight:600;margin-top:1.5rem;transition:all.3s ease;border:none;cursor:pointer;width:100%;text-align:center}.signup-form button:hover{transform:translateY(-3px);box-shadow:0 0 20px var(--purple)}.login-link{color:rgba(255,255,255,.7);text-decoration:none;margin-top:1rem;display:block;text-align:center;transition:color.3s ease}.login-link:hover{color:var(--purple)}.error-message{color:#FF4500;margin-top:1rem;text-align:center}
+    </style>
+</head>
+<body>
+    <a href="index.html" class="logo-link">
+        <span class="logo-text">FleetSync</span>
+    </a>
+    <div class="signup-container">
+        <h2 class="signup-heading">Sign Up</h2>
+        <form class="signup-form">
+            <div class="form-group">
+                <label for="name">Your Name</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="new-username">Username</label>
+                <input type="text" id="new-username" name="new-username" required>
+            </div>
+            <div class="form-group">
+                <label for="new-password">Password</label>
+                <input type="password" id="new-password" name="new-password" required>
+            </div>
+            <button type="submit">Sign Up</button>
+        </form>
+        <a href="login.html" class="login-link">Already have an account? Log in</a>
+        <p class="error-message" id="signup-error" style="display:none;">Something went wrong during sign up.</p>
+    </div>
+</body>
+</html>
