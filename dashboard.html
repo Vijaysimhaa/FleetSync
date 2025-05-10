@@ -123,8 +123,7 @@ background-color: white;
 transition: .4s;
 border-radius: 50%;
 }
-input:checked + .slider { background-color: #8B5CF6; }
-input:checked + .slider:before { transform: translateX(20px); }
+input:checked + .slider { transform: translateX(20px); }
 
 /* Hide number input arrows */
 input[type="number"]::-webkit-inner-spin-button,
@@ -298,7 +297,7 @@ Settings
 </div>
 <div>
 <p class="text-sm text-gray-400">Total Deliveries</p>
-<h3 class="text-2xl font-bold mt-1">1,245</h3>
+<h3 class="text-2xl font-bold mt-1" id="total-deliveries">Loading...</h3>
 </div>
 </div>
 </div>
@@ -309,7 +308,7 @@ Settings
 </div>
 <div>
 <p class="text-sm text-gray-400">Completed Deliveries</p>
-<h3 class="text-2xl font-bold mt-1">1,180</h3>
+<h3 class="text-2xl font-bold mt-1" id="completed-deliveries">Loading...</h3>
 </div>
 </div>
 </div>
@@ -320,7 +319,7 @@ Settings
 </div>
 <div>
 <p class="text-sm text-gray-400">Pending Deliveries</p>
-<h3 class="text-2xl font-bold mt-1">65</h3>
+<h3 class="text-2xl font-bold mt-1" id="pending-deliveries">Loading...</h3>
 </div>
 </div>
 </div>
@@ -331,7 +330,7 @@ Settings
 </div>
 <div>
 <p class="text-sm text-gray-400">Delayed Deliveries</p>
-<h3 class="text-2xl font-bold mt-1">15</h3>
+<h3 class="text-2xl font-bold mt-1" id="delayed-deliveries">Loading...</h3>
 </div>
 </div>
 </div>
@@ -345,54 +344,8 @@ Settings
 
 <div class="bg-darklight rounded-lg p-6 border border-gray-700 flex flex-col">
 <h3 class="text-lg font-medium mb-4">Recent Activity</h3>
-<div class="flex-1 overflow-y-auto custom-scrollbar pr-4">
-<ul class="space-y-4">
-<li class="flex items-center">
-<div class="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary mr-3">
-<i class="ri-truck-line"></i>
-</div>
-<div>
-<p class="text-sm font-medium">Delivery DEL-2025-1090 Scheduled</p>
-<p class="text-xs text-gray-400">Just now</p>
-</div>
-</li>
-<li class="flex items-center">
-<div class="flex-shrink-0 w-8 h-8 rounded-full bg-success/10 flex items-center justify-center text-success mr-3">
-<i class="ri-checkbox-circle-line"></i>
-</div>
-<div>
-<p class="text-sm font-medium">Delivery DEL-2025-1084 Completed</p>
-<p class="text-xs text-gray-400">5 minutes ago</p>
-</div>
-</li>
-<li class="flex items-center">
-<div class="flex-shrink-0 w-8 h-8 rounded-full bg-warning/10 flex items-center justify-center text-warning mr-3">
-<i class="ri-time-line"></i>
-</div>
-<div>
-<p class="text-sm font-medium">Delivery DEL-2025-1082 Delayed</p>
-<p class="text-xs text-gray-400">1 hour ago</p>
-</div>
-</li>
-<li class="flex items-center">
-<div class="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary mr-3">
-<i class="ri-user-3-line"></i>
-</div>
-<div>
-<p class="text-sm font-medium">Driver Robert Johnson Assigned</p>
-<p class="text-xs text-gray-400">2 hours ago</p>
-</div>
-</li>
-<li class="flex items-center">
-<div class="flex-shrink-0 w-8 h-8 rounded-full bg-success/10 flex items-center justify-center text-success mr-3">
-<i class="ri-store-2-line"></i>
-</div>
-<div>
-<p class="text-sm font-medium">Warehouse A Inventory Updated</p>
-<p class="text-xs text-gray-400">Yesterday</p>
-</div>
-</li>
-</ul>
+<div class="flex-1 overflow-y-auto custom-scrollbar pr-4" id="recent-activity-list">
+<p class="text-gray-400">Loading recent activity...</p>
 </div>
 </div>
 </div>
@@ -423,7 +376,51 @@ console.log('Mobile menu button clicked');
 });
 }
 
-// Echarts - Delivery Status Chart
+// Function to fetch dashboard data from a hypothetical Netlify Function API
+async function fetchDashboardData() {
+// This URL points to a Netlify Function named 'getDashboardData'
+const dashboardDataUrl = '/.netlify/functions/getDashboardData';
+
+try {
+const response = await fetch(dashboardDataUrl);
+if (!response.ok) {
+// Handle non-2xx responses
+const errorText = await response.text(); // Get error details from the response body
+throw new Error(`HTTP error! status: ${response.status}, details: ${errorText}`);
+}
+const data = await response.json();
+console.log('Fetched dashboard data:', data); // Log data to console
+
+// Update the HTML with fetched data
+document.getElementById('total-deliveries').textContent = data.totalDeliveries || 'N/A';
+document.getElementById('completed-deliveries').textContent = data.completedDeliveries || 'N/A';
+document.getElementById('pending-deliveries').textContent = data.pendingDeliveries || 'N/A';
+document.getElementById('delayed-deliveries').textContent = data.delayedDeliveries || 'N/A';
+
+// Update recent activity list (example)
+const recentActivityList = document.getElementById('recent-activity-list');
+recentActivityList.innerHTML = ''; // Clear loading message
+if (data.recentActivity && data.recentActivity.length > 0) {
+data.recentActivity.forEach(activity => {
+const listItem = document.createElement('li');
+listItem.classList.add('flex', 'items-center');
+listItem.innerHTML = `
+                    <div class="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary mr-3">
+                        <i class="${activity.iconClass}"></i> </div>
+                    <div>
+                        <p class="text-sm font-medium">${activity.message}</p>
+                        <p class="text-xs text-gray-400">${activity.time}</p>
+                    </div>
+                `;
+recentActivityList.appendChild(listItem);
+});
+} else {
+recentActivityList.innerHTML = '<p class="text-gray-400">No recent activity.</p>';
+}
+
+// You would also update the charts here with data from the API
+// Example: Update Delivery Status Chart
+if (data.deliveryStatusData) {
 const deliveryStatusChartElement = document.getElementById('deliveryStatusChart');
 if (deliveryStatusChartElement) {
 const deliveryStatusChart = echarts.init(deliveryStatusChartElement);
@@ -464,24 +461,25 @@ color: '#FFFFFF' // white
 labelLine: {
 show: false
 },
-data: [
-{ value: 1180, name: 'Completed', itemStyle: { color: '#10B981' } }, // success
-{ value: 65, name: 'Pending', itemStyle: { color: '#F59E0B' } },    // warning
-{ value: 15, name: 'Delayed', itemStyle: { color: '#EF4444' } },     // danger
-{ value: 50, name: 'Scheduled', itemStyle: { color: '#8B5CF6' } }    // primary
-]
+// Use data from the API
+data: data.deliveryStatusData.map(item => ({
+value: item.value,
+name: item.name,
+itemStyle: { color: item.color } // Assuming API provides color
+}))
 }
 ]
 };
 deliveryStatusChart.setOption(deliveryStatusOption);
-
-// Make charts responsive
 window.addEventListener('resize', function() {
 deliveryStatusChart.resize();
 });
 }
+}
 
-// Placeholder for Fleet Utilization Chart (Echarts)
+// Implement similar logic for Fleet Utilization and Warehouse Stock Levels charts
+// Example: Update Fleet Utilization Chart
+if (data.fleetUtilizationData) {
 const fleetUtilizationChartElement = document.getElementById('fleetUtilizationChart');
 if (fleetUtilizationChartElement) {
 const fleetUtilizationChart = echarts.init(fleetUtilizationChartElement);
@@ -501,7 +499,8 @@ containLabel: true
 xAxis: [
 {
 type: 'category',
-data: ['Truck 1', 'Truck 2', 'Truck 3', 'Truck 4', 'Truck 5'],
+// Use data from the API
+data: data.fleetUtilizationData.map(item => item.name),
 axisTick: {
 alignWithLabel: true
 },
@@ -538,7 +537,8 @@ series: [
 name: 'Hours Used',
 type: 'bar',
 barWidth: '60%',
-data: [120, 150, 90, 110, 130],
+// Use data from the API
+data: data.fleetUtilizationData.map(item => item.value),
 itemStyle: {
 color: '#8B5CF6', // primary
 borderRadius: [4, 4, 0, 0]
@@ -551,8 +551,10 @@ window.addEventListener('resize', function() {
 fleetUtilizationChart.resize();
 });
 }
+}
 
-// Placeholder for Warehouse Stock Levels Chart (Echarts)
+// Example: Update Warehouse Stock Levels Chart
+if (data.stockLevelsData) {
 const stockLevelsChartElement = document.getElementById('stockLevelsChart');
 if (stockLevelsChartElement) {
 const stockLevelsChart = echarts.init(stockLevelsChartElement);
@@ -561,7 +563,8 @@ tooltip: {
 trigger: 'axis'
 },
 legend: {
-data: ['Warehouse A', 'Warehouse B'],
+// Use data from the API
+data: ['Warehouse A', 'Warehouse B'], // Assuming these names are consistent
 textStyle: {
 color: '#A0AEC0' // gray-400
 }
@@ -575,7 +578,8 @@ containLabel: true
 xAxis: {
 type: 'category',
 boundaryGap: false,
-data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+// Use data from the API
+data: data.stockLevelsData.labels,
 axisLabel: {
 color: '#A0AEC0' // gray-400
 },
@@ -611,7 +615,8 @@ series: [
 name: 'Warehouse A',
 type: 'line',
 stack: 'Total',
-data: [120, 132, 101, 134, 90, 230],
+// Use data from the API
+data: data.stockLevelsData.warehouseA,
 itemStyle: {
 color: '#10B981' // success
 },
@@ -626,7 +631,8 @@ color: 'rgba(16, 185, 129, 0.3)' // success with opacity
 name: 'Warehouse B',
 type: 'line',
 stack: 'Total',
-data: [220, 182, 191, 234, 290, 330],
+// Use data from the API
+data: data.stockLevelsData.warehouseB,
 itemStyle: {
 color: '#8B5CF6' // primary
 },
@@ -637,6 +643,228 @@ areaStyle: {
 color: 'rgba(139, 92, 246, 0.3)' // primary with opacity
 }
 }
+]
+};
+stockLevelsChart.setOption(stockLevelsOption);
+window.addEventListener('resize', function() {
+stockLevelsChart.resize();
+});
+}
+}
+
+
+} catch (error) {
+console.error('Error fetching dashboard data:', error);
+// Display an error message or fallback data if fetching fails
+document.getElementById('total-deliveries').textContent = 'Error';
+document.getElementById('completed-deliveries').textContent = 'Error';
+document.getElementById('pending-deliveries').textContent = 'Error';
+document.getElementById('delayed-deliveries').textContent = 'Error';
+document.getElementById('recent-activity-list').innerHTML = '<p class="text-danger">Failed to load recent activity.</p>';
+// Handle chart errors as well - perhaps clear charts or show error
+const deliveryStatusChartElement = document.getElementById('deliveryStatusChart');
+if (deliveryStatusChartElement) {
+echarts.init(deliveryStatusChartElement).clear(); // Clear chart on error
+deliveryStatusChartElement.innerHTML = '<p class="text-center text-danger">Failed to load chart data.</p>';
+}
+const fleetUtilizationChartElement = document.getElementById('fleetUtilizationChart');
+if (fleetUtilizationChartElement) {
+echarts.init(fleetUtilizationChartElement).clear(); // Clear chart on error
+fleetUtilizationChartElement.innerHTML = '<p class="text-center text-danger">Failed to load chart data.</p>';
+}
+const stockLevelsChartElement = document.getElementById('stockLevelsChart');
+if (stockLevelsChartElement) {
+echarts.init(stockLevelsChartElement).clear(); // Clear chart on error
+stockLevelsChartElement.innerHTML = '<p class="text-center text-danger">Failed to load chart data.</p>';
+}
+}
+}
+
+// Call the function to fetch data when the page loads
+fetchDashboardData();
+
+// Echarts - Delivery Status Chart (Initial setup - will be updated by fetchDashboardData)
+// This initial setup is still useful for defining the chart structure before data is loaded
+const deliveryStatusChartElement = document.getElementById('deliveryStatusChart');
+if (deliveryStatusChartElement) {
+const deliveryStatusChart = echarts.init(deliveryStatusChartElement);
+const deliveryStatusOption = {
+tooltip: {
+trigger: 'item'
+},
+legend: {
+top: 'bottom',
+left: 'center',
+textStyle: {
+color: '#A0AEC0' // gray-400
+}
+},
+series: [
+{
+name: 'Delivery Status',
+type: 'pie',
+radius: ['40%', '70%'],
+avoidLabelOverlap: false,
+itemStyle: {
+borderRadius: 10,
+borderColor: '#111827', // dark
+borderWidth: 2
+},
+label: {
+show: false,
+position: 'center'
+},
+emphasis: {
+label: {
+show: true,
+fontSize: 20,
+fontWeight: 'bold',
+color: '#FFFFFF' // white
+}
+},
+labelLine: {
+show: false
+},
+// Initial empty data - will be replaced by fetched data
+data: []
+}
+]
+};
+deliveryStatusChart.setOption(deliveryStatusOption);
+
+// Make charts responsive
+window.addEventListener('resize', function() {
+deliveryStatusChart.resize();
+});
+}
+
+// Placeholder for Fleet Utilization Chart (Echarts) - will be updated dynamically
+const fleetUtilizationChartElement = document.getElementById('fleetUtilizationChart');
+if (fleetUtilizationChartElement) {
+const fleetUtilizationChart = echarts.init(fleetUtilizationChartElement);
+const fleetUtilizationOption = {
+tooltip: {
+trigger: 'axis',
+axisPointer: {
+type: 'shadow'
+}
+},
+grid: {
+left: '3%',
+right: '4%',
+bottom: '3%',
+containLabel: true
+},
+xAxis: [
+{
+type: 'category',
+data: [], // Dynamic data
+axisTick: {
+alignWithLabel: true
+},
+axisLabel: {
+color: '#A0AEC0' // gray-400
+},
+axisLine: {
+lineStyle: {
+color: '#4B5563' // secondary
+}
+}
+}
+],
+yAxis: [
+{
+type: 'value',
+axisLabel: {
+color: '#A0AEC0' // gray-400
+},
+axisLine: {
+lineStyle: {
+color: '#4B5563' // secondary
+}
+},
+splitLine: {
+lineStyle: {
+color: '#1F2937' // darklight
+}
+}
+}
+],
+series: [
+{
+name: 'Hours Used',
+type: 'bar',
+barWidth: '60%',
+data: [], // Dynamic data
+itemStyle: {
+color: '#8B5CF6', // primary
+borderRadius: [4, 4, 0, 0]
+}
+}
+]
+};
+fleetUtilizationChart.setOption(fleetUtilizationOption);
+window.addEventListener('resize', function() {
+fleetUtilizationChart.resize();
+});
+}
+
+// Placeholder for Warehouse Stock Levels Chart (Echarts) - will be updated dynamically
+const stockLevelsChartElement = document.getElementById('stockLevelsChart');
+if (stockLevelsChartElement) {
+const stockLevelsChart = echarts.init(stockLevelsChartElement);
+const stockLevelsOption = {
+tooltip: {
+trigger: 'axis'
+},
+legend: {
+data: [], // Dynamic data
+textStyle: {
+color: '#A0AEC0' // gray-400
+}
+},
+grid: {
+left: '3%',
+right: '4%',
+bottom: '3%',
+containLabel: true
+},
+xAxis: {
+type: 'category',
+boundaryGap: false,
+data: [], // Dynamic data
+axisLabel: {
+color: '#A0AEC0' // gray-400
+},
+axisLine: {
+lineStyle: {
+color: '#4B5563' // secondary
+}
+},
+splitLine: {
+lineStyle: {
+color: '#1F2937' // darklight
+}
+}
+},
+yAxis: {
+type: 'value',
+axisLabel: {
+color: '#A0AEC0' // gray-400
+},
+axisLine: {
+lineStyle: {
+color: '#4B5563' // secondary
+}
+},
+splitLine: {
+lineStyle: {
+color: '#1F2937' // darklight
+}
+}
+},
+series: [
+// Dynamic series data will go here
 ]
 };
 stockLevelsChart.setOption(stockLevelsOption);
