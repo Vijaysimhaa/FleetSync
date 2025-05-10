@@ -4,74 +4,99 @@
 const admin = require('firebase-admin');
 
 // Initialize Firebase Admin SDK if it hasn't been initialized yet
-// This is important for serverless functions that might be reused
+// This check is important for serverless environments where function instances
+// might be reused across multiple requests.
 if (!admin.apps.length) {
-  // Use environment variable for service account key
-  // The content of the JSON file is stored as a string in the environment variable
-  const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
+  try {
+    // Retrieve the service account key from Netlify Environment Variables.
+    // The JSON content was stored as a string, so we need to parse it.
+    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
 
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
-    // You might need to add databaseURL if you're using Realtime Database,
-    // but for Firestore, it's often not necessary here.
-  });
+    // Initialize the Firebase Admin SDK with the service account credentials.
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount)
+      // If you were using Firebase Realtime Database, you might also need
+      // to add databaseURL here. For Firestore, it's often not needed.
+    });
+
+    console.log('Firebase Admin SDK initialized successfully.');
+
+  } catch (error) {
+    // Log any errors during initialization. This is crucial for debugging.
+    console.error("Firebase Admin initialization error:", error);
+
+    // Return an error response if initialization fails.
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: "Failed to initialize Firebase Admin SDK" })
+    };
+  }
 }
 
-// Get a reference to the Firestore database
+// Get a reference to the Firestore database instance.
 const db = admin.firestore();
 
-// Handler function for the Netlify Function
+// The main handler function for the Netlify Function.
+// This function will be executed when the Netlify Function endpoint is called.
 exports.handler = async function(event, context) {
   try {
     // --- Fetch Data from Firestore ---
+    // This is where you'll write your database queries to get the actual data
+    // for your dashboard.
 
-    // Example: Fetching total deliveries count (assuming a 'deliveries' collection)
+    // Example: Fetching total deliveries count from a 'deliveries' collection.
+    // This assumes you have a collection named 'deliveries' in your Firestore.
     const deliveriesSnapshot = await db.collection('deliveries').get();
-    const totalDeliveries = deliveriesSnapshot.size;
+    const totalDeliveries = deliveriesSnapshot.size; // Get the number of documents in the collection
 
-    // Example: Fetching completed deliveries count (assuming a 'deliveries' collection with a 'status' field)
+    // Example: Fetching completed deliveries count.
+    // This assumes each delivery document has a 'status' field.
     const completedDeliveriesSnapshot = await db.collection('deliveries').where('status', '==', 'Completed').get();
     const completedDeliveries = completedDeliveriesSnapshot.size;
 
-    // Example: Fetching pending deliveries count
+    // Example: Fetching pending deliveries count.
     const pendingDeliveriesSnapshot = await db.collection('deliveries').where('status', '==', 'Pending').get();
     const pendingDeliveries = pendingDeliveriesSnapshot.size;
 
-     // Example: Fetching delayed deliveries count
+     // Example: Fetching delayed deliveries count.
     const delayedDeliveriesSnapshot = await db.collection('deliveries').where('status', '==', 'Delayed').get();
     const delayedDeliveries = delayedDeliveriesSnapshot.size;
 
 
-    // Example: Fetching recent activity (assuming an 'activity' collection, ordered by timestamp)
+    // Example: Fetching recent activity.
+    // This assumes you have an 'activity' collection with documents
+    // that have a 'timestamp' field (Firestore Timestamp recommended)
+    // and fields like 'iconClass', 'message', and 'time'.
     const activitySnapshot = await db.collection('activity')
-                                  .orderBy('timestamp', 'desc') // Assuming a 'timestamp' field
-                                  .limit(5) // Get the 5 most recent activities
+                                  .orderBy('timestamp', 'desc') // Order by timestamp descending (most recent first)
+                                  .limit(5) // Get the top 5 recent activities
                                   .get();
 
     const recentActivity = activitySnapshot.docs.map(doc => {
       const data = doc.data();
-      // Format the data as your frontend expects
+      // Map the Firestore document data to the format your frontend expects.
       return {
         iconClass: data.iconClass, // Assuming iconClass is stored in Firestore
         message: data.message,
         time: data.time // Assuming time is stored or formatted in Firestore
         // You might need to format the timestamp here if storing raw timestamps
+        // Example: time: data.timestamp ? data.timestamp.toDate().toLocaleString() : 'N/A'
       };
     });
 
-    // Example: Fetching data for Delivery Status Chart
-    // This might involve aggregating data from the 'deliveries' collection
-    // For simplicity, let's structure it based on the counts we already got
+    // Example: Data structure for Delivery Status Chart (derived from counts)
     const deliveryStatusData = [
-      { value: completedDeliveries, name: 'Completed', color: '#10B981' },
-      { value: pendingDeliveries, name: 'Pending', color: '#F59E0B' },
-      { value: delayedDeliveries, name: 'Delayed', color: '#EF4444' },
-      // You might need to query for 'Scheduled' or other statuses
-      { value: totalDeliveries - completedDeliveries - pendingDeliveries - delayedDeliveries, name: 'Scheduled', color: '#8B5CF6' } // Example calculation
+      { value: completedDeliveries, name: 'Completed', color: '#10B981' }, // success
+      { value: pendingDeliveries, name: 'Pending', color: '#F59E0B' },    // warning
+      { value: delayedDeliveries, name: 'Delayed', color: '#EF4444' },     // danger
+      // Calculate scheduled deliveries based on total and other statuses
+      { value: totalDeliveries - completedDeliveries - pendingDeliveries - delayedDeliveries, name: 'Scheduled', color: '#8B5CF6' } // primary
     ];
 
     // --- Placeholder for other chart data fetching ---
-    // You would add similar logic here to fetch data for Fleet Utilization and Stock Levels charts
+    // You would add similar logic here to query Firestore for data needed
+    // for your Fleet Utilization and Warehouse Stock Levels charts.
+    // For now, we'll return placeholder data for these charts.
     const fleetUtilizationData = [
         { value: 130, name: 'Truck A' },
         { value: 160, name: 'Truck B' },
@@ -88,11 +113,12 @@ exports.handler = async function(event, context) {
 
     // --- End of Fetch Data from Firestore ---
 
-    // Return the fetched data as a JSON response
+    // Return the fetched data as a JSON response.
+    // The frontend JavaScript will receive this JSON object.
     return {
-      statusCode: 200,
+      statusCode: 200, // HTTP status code for success
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json" // Indicate that the response is JSON
       },
       body: JSON.stringify({
         totalDeliveries: totalDeliveries,
@@ -107,7 +133,10 @@ exports.handler = async function(event, context) {
     };
 
   } catch (error) {
+    // Log any errors that occur during the function execution (e.g., database errors).
     console.error("Error fetching dashboard data:", error);
+
+    // Return an error response to the frontend.
     return {
       statusCode: 500, // Internal Server Error
       body: JSON.stringify({ error: "Failed to fetch dashboard data", details: error.message })
