@@ -1,5 +1,5 @@
 ![logo](https://github.com/user-attachments/assets/fd80c540-e84a-464a-b2a0-a00a046a58e5)
-
+[![Netlify Status](https://api.netlify.com/api/v1/badges/83466067-108a-4be9-a10f-d451fa03424a/deploy-status)](https://app.netlify.com/sites/fleetsyncweb/deploys)
 ## 🏠 Overview
 
 **Transform Your Manufacturing Logistics**
