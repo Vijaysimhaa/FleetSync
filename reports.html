@@ -316,10 +316,10 @@ Settings
 </div>
 <div class="flex items-center space-x-3">
 <div class="relative">
-<select class="bg-dark border border-gray-700 text-white text-sm rounded-md block w-full p-2 pr-8 appearance-none !rounded-button">
-<option selected>Bulk Actions</option>
-<option>Download Selected</option>
-<option>Delete Selected</option>
+<select id="reportBulkActions" class="bg-dark border border-gray-700 text-white text-sm rounded-md block w-full p-2 pr-8 appearance-none !rounded-button">
+<option value="" selected>Bulk Actions</option>
+<option value="download">Download Selected</option>
+<option value="delete">Delete Selected</option>
 </select>
 <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
 <i class="ri-arrow-down-s-line"></i>
@@ -520,11 +520,11 @@ Showing <span class="font-medium text-white">1-3</span> of <span class="font-med
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
 <div class="bg-dark rounded-lg p-4 border border-gray-700">
 <p class="text-sm text-gray-400">Report ID</p>
-<h3 class="text-lg font-bold mt-1">RPT-2025-001</h3>
+<h3 class="text-lg font-bold mt-1 report-detail-id">RPT-2025-001</h3>
 </div>
 <div class="bg-dark rounded-lg p-4 border border-gray-700">
 <p class="text-sm text-gray-400">Report Name</p>
-<h3 class="text-lg font-bold mt-1">Monthly Delivery Summary - April</h3>
+<h3 class="text-lg font-bold mt-1 report-detail-name">Monthly Delivery Summary - April</h3>
 </div>
 <div class="bg-dark rounded-lg p-4 border border-gray-700">
 <p class="text-sm text-gray-400">Report Type</p>
@@ -548,7 +548,7 @@ Showing <span class="font-medium text-white">1-3</span> of <span class="font-med
 <button class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-md text-sm !rounded-button whitespace-nowrap">
 Close
 </button>
-<button class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-md text-sm !rounded-button whitespace-nowrap">
+<button id="downloadReportDetail" class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-md text-sm !rounded-button whitespace-nowrap">
 <i class="ri-download-line mr-1"></i> Download Report
 </button>
 </div>
@@ -608,5 +608,6 @@ reportDetailsModal.classList.add('hidden');
 
 });
 </script>
+<script src="js/report-download.js"></script>
 </body>
 </html>
