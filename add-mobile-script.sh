@@ -28,7 +28,7 @@ for page in "${PAGES[@]}"; do
   cp "$page" "${page}.bak"
   
   # Add script reference before closing body tag
-  sed -i '' 's/<\/script>\n<\/body>\n<\/html>/<\/script>\n<script src="apply-mobile-changes.js"><\/script>\n<\/body>\n<\/html>/g' "$page"
+  sed -i '' 's/<\/script>\n<\/body>\n<\/html>/<\/script>\n<script src="js\/apply-mobile-changes.js"><\/script>\n<\/body>\n<\/html>/g' "$page"
   
   echo "Completed $page"
 done
