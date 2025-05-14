@@ -530,121 +530,243 @@ deliveryDetailsModal.classList.add('hidden');
 
 
 // Function to fetch delivery data from a Netlify Function
-async function fetchDeliveries() {
-const deliveriesDataUrl = '/.netlify/functions/getDeliveries'; // URL for your Netlify Function
+function loadDeliveries() {
+    // Static delivery data
+    const deliveries = [
+        {
+            id: "DEL1001",
+            origin: "Warehouse A",
+            destination: "123 Main St, New York, NY",
+            driver: "John Smith",
+            scheduled: "2023-06-15 08:00 AM",
+            eta: "2023-06-15 10:30 AM",
+            status: "Completed",
+            items: [
+                { name: "Laptop", quantity: 5, weight: "10 kg" },
+                { name: "Monitors", quantity: 10, weight: "50 kg" }
+            ],
+            notes: "Customer requested delivery before noon"
+        },
+        {
+            id: "DEL1002",
+            origin: "Warehouse B",
+            destination: "456 Park Ave, Boston, MA",
+            driver: "Sarah Johnson",
+            scheduled: "2023-06-15 09:15 AM",
+            eta: "2023-06-15 12:45 PM",
+            status: "In Transit",
+            items: [
+                { name: "Smartphones", quantity: 20, weight: "5 kg" },
+                { name: "Tablets", quantity: 15, weight: "7.5 kg" }
+            ],
+            notes: "Call customer 30 minutes before arrival"
+        },
+        {
+            id: "DEL1003",
+            origin: "Warehouse A",
+            destination: "789 Oak St, Chicago, IL",
+            driver: "Michael Brown",
+            scheduled: "2023-06-15 10:30 AM",
+            eta: "2023-06-15 02:00 PM",
+            status: "Delayed",
+            items: [
+                { name: "Printers", quantity: 3, weight: "30 kg" },
+                { name: "Paper Reams", quantity: 50, weight: "125 kg" }
+            ],
+            notes: "Traffic delay on I-90, ETA pushed back by 1 hour"
+        },
+        {
+            id: "DEL1004",
+            origin: "Warehouse C",
+            destination: "321 Pine St, Seattle, WA",
+            driver: "Emily Davis",
+            scheduled: "2023-06-16 08:45 AM",
+            eta: "2023-06-16 11:15 AM",
+            status: "Pending",
+            items: [
+                { name: "Desk Chairs", quantity: 8, weight: "160 kg" },
+                { name: "Desks", quantity: 4, weight: "200 kg" }
+            ],
+            notes: "Heavy items, need lift gate truck"
+        },
+        {
+            id: "DEL1005",
+            origin: "Warehouse B",
+            destination: "654 Maple Ave, Austin, TX",
+            driver: "David Wilson",
+            scheduled: "2023-06-16 09:30 AM",
+            eta: "2023-06-16 12:00 PM",
+            status: "Completed",
+            items: [
+                { name: "Keyboards", quantity: 25, weight: "12.5 kg" },
+                { name: "Mice", quantity: 25, weight: "5 kg" }
+            ],
+            notes: "Customer signature required"
+        },
+        {
+            id: "DEL1006",
+            origin: "Warehouse A",
+            destination: "987 Cedar Rd, Miami, FL",
+            driver: "Jessica Martinez",
+            scheduled: "2023-06-16 10:15 AM",
+            eta: "2023-06-16 01:45 PM",
+            status: "Loading",
+            items: [
+                { name: "Servers", quantity: 2, weight: "40 kg" },
+                { name: "Network Switches", quantity: 5, weight: "10 kg" }
+            ],
+            notes: "Fragile equipment, handle with care"
+        },
+        {
+            id: "DEL1007",
+            origin: "Warehouse C",
+            destination: "159 Birch Ln, Denver, CO",
+            driver: "Robert Taylor",
+            scheduled: "2023-06-17 08:30 AM",
+            eta: "2023-06-17 11:00 AM",
+            status: "Cancelled",
+            items: [
+                { name: "Headphones", quantity: 30, weight: "6 kg" },
+                { name: "Speakers", quantity: 10, weight: "20 kg" }
+            ],
+            notes: "Cancelled by customer due to change in requirements"
+        },
+        {
+            id: "DEL1008",
+            origin: "Warehouse B",
+            destination: "753 Spruce St, Portland, OR",
+            driver: "Amanda Clark",
+            scheduled: "2023-06-17 09:45 AM",
+            eta: "2023-06-17 12:30 PM",
+            status: "Pending",
+            items: [
+                { name: "Monitors", quantity: 12, weight: "60 kg" },
+                { name: "Docking Stations", quantity: 12, weight: "12 kg" }
+            ],
+            notes: "Business closed for lunch 12-1 PM"
+        },
+        {
+            id: "DEL1009",
+            origin: "Warehouse A",
+            destination: "852 Elm St, San Francisco, CA",
+            driver: "Thomas Anderson",
+            scheduled: "2023-06-17 10:00 AM",
+            eta: "2023-06-17 01:30 PM",
+            status: "In Transit",
+            items: [
+                { name: "Laptops", quantity: 15, weight: "30 kg" },
+                { name: "Laptop Bags", quantity: 15, weight: "7.5 kg" }
+            ],
+            notes: "High priority customer, ensure on-time delivery"
+        },
+        {
+            id: "DEL1010",
+            origin: "Warehouse C",
+            destination: "426 Walnut Ave, Philadelphia, PA",
+            driver: "Jennifer White",
+            scheduled: "2023-06-18 08:15 AM",
+            eta: "2023-06-18 10:45 AM",
+            status: "Pending",
+            items: [
+                { name: "Printers", quantity: 5, weight: "50 kg" },
+                { name: "Toner Cartridges", quantity: 20, weight: "10 kg" }
+            ],
+            notes: "Delivery to loading dock in rear of building"
+        }
+    ];
+    
+    console.log('Loaded deliveries data:', deliveries);
 
-try {
-const response = await fetch(deliveriesDataUrl);
-if (!response.ok) {
-const errorText = await response.text();
-throw new Error(`HTTP error! status: ${response.status}, details: ${errorText}`);
-}
-const deliveries = await response.json();
-console.log('Fetched deliveries data:', deliveries); // Log data to console
+    // Clear existing table rows
+    deliveriesTableBody.innerHTML = '';
 
-// Clear existing table rows
-deliveriesTableBody.innerHTML = '';
+    if (deliveries && deliveries.length > 0) {
+        // Populate the table with static data
+        deliveries.forEach(delivery => {
+            const row = document.createElement('tr');
+            row.classList.add('border-b', 'border-gray-700', 'hover:bg-gray-800/30');
 
-if (deliveries && deliveries.length > 0) {
-// Populate the table with fetched data
-deliveries.forEach(delivery => {
-const row = document.createElement('tr');
-row.classList.add('border-b', 'border-gray-700', 'hover:bg-gray-800/30');
+            // Determine status class
+            let statusClass = 'bg-gray-700 text-gray-300'; // Default
+            if (delivery.status === 'Completed') {
+                statusClass = 'bg-success/10 text-success';
+            } else if (delivery.status === 'Pending' || delivery.status === 'In Transit' || delivery.status === 'Loading') {
+                statusClass = 'bg-warning/10 text-warning';
+            } else if (delivery.status === 'Delayed' || delivery.status === 'Cancelled') {
+                statusClass = 'bg-danger/10 text-danger';
+            }
 
-// Determine status class
-let statusClass = 'bg-gray-700 text-gray-300'; // Default
-if (delivery.status === 'Completed') {
-statusClass = 'bg-success/10 text-success';
-} else if (delivery.status === 'Pending' || delivery.status === 'In Transit' || delivery.status === 'Loading') {
-statusClass = 'bg-warning/10 text-warning';
-} else if (delivery.status === 'Delayed' || delivery.status === 'Cancelled') {
-statusClass = 'bg-danger/10 text-danger';
-}
-
-
-row.innerHTML = `
-                    <td class="px-4 py-4">
-                        <label class="custom-checkbox">
-                            <input type="checkbox" data-delivery-id="${delivery.id}">
-                            <span class="checkmark"></span>
-                        </label>
-                    </td>
-                    <td class="px-4 py-4 font-medium">
-                        ${delivery.id || 'N/A'}
-                    </td>
-                    <td class="px-6 py-4">
-                        ${delivery.origin || 'N/A'}
-                    </td>
-                    <td class="px-6 py-4">
-                        ${delivery.destination || 'N/A'}
-                    </td>
-                    <td class="px-6 py-4">
-                        ${delivery.driver || 'N/A'}
-                    </td>
-                    <td class="px-6 py-4">
-                        ${delivery.scheduled || 'N/A'}
-                    </td>
-                    <td class="px-6 py-4">
-                        ${delivery.eta || 'N/A'}
-                    </td>
-                    <td class="px-6 py-4">
-                        <span class="${statusClass} text-xs px-2.5 py-1 rounded-full">
-                            ${delivery.status || 'N/A'}
-                        </span>
-                    </td>
-                    <td class="px-4 py-4">
-                        <div class="flex items-center space-x-2">
-                            <button class="text-gray-400 hover:text-white p-1 rounded-md hover:bg-gray-700 view-details-button" title="View Details" data-delivery-id="${delivery.id}">
-                                <i class="ri-eye-line"></i>
-                            </button>
-                            <button class="text-gray-400 hover:text-white p-1 rounded-md hover:bg-gray-700 edit-delivery-button" title="Edit" data-delivery-id="${delivery.id}">
-                                <i class="ri-pencil-line"></i>
-                            </button>
-                            <button class="text-gray-400 hover:text-danger p-1 rounded-md hover:bg-gray-700 delete-delivery-button" title="Delete" data-delivery-id="${delivery.id}">
-                                <i class="ri-delete-bin-line"></i>
-                            </button>
-                        </div>
-                    </td>
-                `;
-deliveriesTableBody.appendChild(row);
-});
-
-// Update total count and showing info
-totalDeliveriesCountSpan.textContent = `${deliveries.length} total`;
-showingDeliveriesSpan.textContent = `1-${deliveries.length} of ${deliveries.length} deliveries`; // Simple for now, need pagination logic for real data
-
-// Add event listeners for action buttons in rows
-addActionButtonListeners(deliveries);
-
-} else {
-deliveriesTableBody.innerHTML = `
-                <tr>
-                    <td colspan="9" class="text-center py-4 text-gray-400">No deliveries found.</td>
-                </tr>
+            row.innerHTML = `
+                <td class="px-4 py-4">
+                    <label class="custom-checkbox">
+                        <input type="checkbox" data-delivery-id="${delivery.id}">
+                        <span class="checkmark"></span>
+                    </label>
+                </td>
+                <td class="px-4 py-4 font-medium">
+                    ${delivery.id || 'N/A'}
+                </td>
+                <td class="px-6 py-4">
+                    ${delivery.origin || 'N/A'}
+                </td>
+                <td class="px-6 py-4">
+                    ${delivery.destination || 'N/A'}
+                </td>
+                <td class="px-6 py-4">
+                    ${delivery.driver || 'N/A'}
+                </td>
+                <td class="px-6 py-4">
+                    ${delivery.scheduled || 'N/A'}
+                </td>
+                <td class="px-6 py-4">
+                    ${delivery.eta || 'N/A'}
+                </td>
+                <td class="px-6 py-4">
+                    <span class="${statusClass} text-xs px-2.5 py-1 rounded-full">
+                        ${delivery.status || 'N/A'}
+                    </span>
+                </td>
+                <td class="px-4 py-4">
+                    <div class="flex items-center space-x-2">
+                        <button class="text-gray-400 hover:text-white p-1 rounded-md hover:bg-gray-700 view-details-button" title="View Details" data-delivery-id="${delivery.id}">
+                            <i class="ri-eye-line"></i>
+                        </button>
+                        <button class="text-gray-400 hover:text-white p-1 rounded-md hover:bg-gray-700 edit-delivery-button" title="Edit" data-delivery-id="${delivery.id}">
+                            <i class="ri-pencil-line"></i>
+                        </button>
+                        <button class="text-gray-400 hover:text-danger p-1 rounded-md hover:bg-gray-700 delete-delivery-button" title="Delete" data-delivery-id="${delivery.id}">
+                            <i class="ri-delete-bin-line"></i>
+                        </button>
+                    </div>
+                </td>
             `;
-totalDeliveriesCountSpan.textContent = '0 total';
-showingDeliveriesSpan.textContent = '0-0 of 0 deliveries';
-}
+            deliveriesTableBody.appendChild(row);
+        });
 
-// Re-attach select all listener after populating rows
-if (selectAllDeliveriesCheckbox) {
-selectAllDeliveriesCheckbox.checked = false; // Reset select all
-const deliveryCheckboxes = document.querySelectorAll('#deliveries-table-body .custom-checkbox input');
-selectAllDeliveriesCheckbox.removeEventListener('change', handleSelectAllChange); // Remove previous listener
-selectAllDeliveriesCheckbox.addEventListener('change', handleSelectAllChange); // Add new listener
-}
+        // Update total count and showing info
+        totalDeliveriesCountSpan.textContent = `${deliveries.length} total`;
+        showingDeliveriesSpan.textContent = `1-${deliveries.length} of ${deliveries.length} deliveries`;
 
+        // Add event listeners for action buttons in rows
+        addActionButtonListeners(deliveries);
 
-} catch (error) {
-console.error('Error fetching deliveries data:', error);
-deliveriesTableBody.innerHTML = `
+    } else {
+        deliveriesTableBody.innerHTML = `
             <tr>
-                <td colspan="9" class="text-center py-4 text-danger">Failed to load deliveries. ${error.message}</td>
+                <td colspan="9" class="text-center py-4 text-gray-400">No deliveries found.</td>
             </tr>
         `;
-totalDeliveriesCountSpan.textContent = 'Error';
-showingDeliveriesSpan.textContent = 'Error loading deliveries';
-}
+        totalDeliveriesCountSpan.textContent = '0 total';
+        showingDeliveriesSpan.textContent = '0-0 of 0 deliveries';
+    }
+
+    // Re-attach select all listener after populating rows
+    if (selectAllDeliveriesCheckbox) {
+        selectAllDeliveriesCheckbox.checked = false; // Reset select all
+        const deliveryCheckboxes = document.querySelectorAll('#deliveries-table-body .custom-checkbox input');
+        selectAllDeliveriesCheckbox.removeEventListener('change', handleSelectAllChange); // Remove previous listener
+        selectAllDeliveriesCheckbox.addEventListener('change', handleSelectAllChange); // Add new listener
+    }
 }
 
 // Function to add event listeners to action buttons in dynamically created rows
@@ -814,8 +936,8 @@ alert(`Navigating to page ${pageNumber} not yet implemented.`); // Placeholder a
 });
 
 
-// Call the function to fetch deliveries when the page loads
-fetchDeliveries();
+// Call the function to load static deliveries data when the page loads
+loadDeliveries();
 
 });
 </script>
