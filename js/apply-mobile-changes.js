@@ -17,41 +17,73 @@ document.addEventListener('DOMContentLoaded', function() {
     const overlay = document.createElement('div');
     overlay.id = 'sidebar-overlay';
     overlay.className = 'fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden';
-    document.body.insertBefore(overlay, document.querySelector('.flex-1'));
+    document.body.appendChild(overlay);
     return overlay;
   }
 
   function updateMobileMenuButton() {
-    // Update mobile menu button if it exists
-    const button = document.querySelector('.md\\:hidden button');
-    if (button) {
+    // Find or create mobile menu button
+    let button = document.querySelector('.md\\:hidden button');
+    
+    if (!button) {
+      // Create mobile menu button if it doesn't exist
+      const buttonContainer = document.createElement('div');
+      buttonContainer.className = 'md:hidden fixed bottom-4 left-4 z-50';
+      
+      button = document.createElement('button');
+      button.id = 'mobile-menu-button';
+      button.className = 'bg-primary text-white p-3 rounded-full shadow-lg !rounded-button';
+      button.innerHTML = '<i class="ri-menu-line ri-lg"></i>';
+      
+      buttonContainer.appendChild(button);
+      document.body.appendChild(buttonContainer);
+    } else if (!button.id) {
       button.id = 'mobile-menu-button';
     }
+    
     return button;
   }
 
   function updateHeaderMenuButton() {
-    // Update header menu button if it exists
-    const button = document.querySelector('.md\\:hidden .mr-4 button');
-    if (button) {
-      button.id = 'header-menu-button';
+    // Find header menu button in the mobile header
+    const headerMenuContainer = document.querySelector('.md\\:hidden.mr-4');
+    
+    if (headerMenuContainer) {
+      const button = headerMenuContainer.querySelector('button');
+      if (button && !button.id) {
+        button.id = 'header-menu-button';
+        return button;
+      }
+      return button;
     }
-    return button;
+    
+    return null;
   }
 
   function toggleSidebar() {
     if (!sidebar) return;
     
+    // Toggle sidebar visibility and positioning
     sidebar.classList.toggle('hidden');
-    sidebar.classList.toggle('fixed');
-    sidebar.classList.toggle('inset-0');
-    sidebar.classList.toggle('z-50');
-    sidebar.classList.toggle('h-full');
-    sidebar.classList.toggle('w-3/4');
     
-    // Toggle overlay
-    if (sidebarOverlay) {
-      sidebarOverlay.classList.toggle('hidden');
+    // If sidebar is now visible, add mobile styling
+    if (!sidebar.classList.contains('hidden')) {
+      sidebar.classList.add('fixed', 'inset-0', 'z-50', 'h-full', 'w-3/4');
+      document.body.style.overflow = 'hidden'; // Prevent scrolling when sidebar is open
+      
+      // Show overlay
+      if (sidebarOverlay) {
+        sidebarOverlay.classList.remove('hidden');
+      }
+    } else {
+      // Remove mobile styling when hiding
+      sidebar.classList.remove('fixed', 'inset-0', 'z-50', 'h-full', 'w-3/4');
+      document.body.style.overflow = ''; // Restore scrolling
+      
+      // Hide overlay
+      if (sidebarOverlay) {
+        sidebarOverlay.classList.add('hidden');
+      }
     }
   }
 
@@ -72,6 +104,15 @@ document.addEventListener('DOMContentLoaded', function() {
   // Add mobile-specific CSS
   addMobileCSS();
 
+  // Make tables responsive
+  makeTablesResponsive();
+  
+  // Make forms responsive
+  makeFormsResponsive();
+  
+  // Adjust chart sizes on window resize
+  setupChartResizing();
+
   function addMobileCSS() {
     const style = document.createElement('style');
     style.textContent = `
@@ -80,6 +121,7 @@ document.addEventListener('DOMContentLoaded', function() {
         aside.fixed {
           transition: all 0.3s ease-in-out;
           overflow-y: auto;
+          box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
         }
         
         /* Improve table responsiveness */
@@ -87,6 +129,7 @@ document.addEventListener('DOMContentLoaded', function() {
           display: block;
           overflow-x: auto;
           white-space: nowrap;
+          font-size: 0.875rem !important;
         }
         
         /* Adjust chart heights for mobile */
@@ -120,8 +163,89 @@ document.addEventListener('DOMContentLoaded', function() {
         .mt-6 {
           margin-top: 1rem !important;
         }
+        
+        /* Improve form elements on mobile */
+        input, select, textarea {
+          font-size: 16px !important; /* Prevents iOS zoom on focus */
+        }
+        
+        /* Improve button sizing on mobile */
+        button {
+          min-height: 44px; /* Minimum touch target size */
+        }
+        
+        /* Stack flex items on mobile */
+        .flex.flex-col.md\\:flex-row {
+          flex-direction: column !important;
+        }
+        
+        /* Adjust modal sizing */
+        .modal-content {
+          width: 95% !important;
+          max-width: 95% !important;
+          margin: 0 auto;
+        }
+        
+        /* Improve dropdown positioning */
+        .dropdown-menu {
+          position: fixed !important;
+          left: 0 !important;
+          right: 0 !important;
+          width: 100% !important;
+          bottom: 0 !important;
+          top: auto !important;
+          border-radius: 12px 12px 0 0 !important;
+          max-height: 80vh !important;
+        }
       }
     `;
     document.head.appendChild(style);
+  }
+  
+  function makeTablesResponsive() {
+    // Find all tables and make them responsive
+    const tables = document.querySelectorAll('table');
+    tables.forEach(table => {
+      if (!table.parentElement.classList.contains('table-responsive')) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'table-responsive overflow-x-auto';
+        table.parentNode.insertBefore(wrapper, table);
+        wrapper.appendChild(table);
+      }
+    });
+  }
+  
+  function makeFormsResponsive() {
+    // Find all form elements and ensure they're properly sized for mobile
+    const formElements = document.querySelectorAll('input, select, textarea');
+    formElements.forEach(el => {
+      // Add appropriate classes for mobile
+      if (!el.classList.contains('mobile-friendly')) {
+        el.classList.add('mobile-friendly');
+        
+        // Ensure minimum height for touch targets
+        if (el.tagName === 'INPUT' || el.tagName === 'SELECT') {
+          el.style.minHeight = '44px';
+        }
+      }
+    });
+  }
+  
+  function setupChartResizing() {
+    // Find all chart elements
+    const chartElements = document.querySelectorAll('[id$="Chart"]');
+    
+    // Set up resize event for charts
+    if (chartElements.length > 0) {
+      window.addEventListener('resize', function() {
+        // Resize all charts when window size changes
+        chartElements.forEach(chartEl => {
+          const chart = echarts.getInstanceByDom(chartEl);
+          if (chart) {
+            chart.resize();
+          }
+        });
+      });
+    }
   }
 });
