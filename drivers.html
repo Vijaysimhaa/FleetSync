@@ -302,7 +302,7 @@ Settings
 </div>
 <input type="text" class="bg-darklight border border-gray-700 text-white text-sm rounded-md block w-full pl-10 p-2.5 !rounded-button" placeholder="Search drivers...">
 </div>
-<button class="bg-primary hover:bg-primary/90 text-white px-4 py-2.5 rounded-md text-sm font-medium !rounded-button whitespace-nowrap">
+<button id="add-driver-button" class="bg-primary hover:bg-primary/90 text-white px-4 py-2.5 rounded-md text-sm font-medium !rounded-button whitespace-nowrap">
 <i class="ri-add-line mr-1"></i> Add New Driver
 </button>
 </div>
@@ -316,17 +316,17 @@ Settings
 </div>
 <div class="flex items-center space-x-3">
 <div class="relative">
-<select class="bg-dark border border-gray-700 text-white text-sm rounded-md block w-full p-2 pr-8 appearance-none !rounded-button">
-<option selected>Bulk Actions</option>
-<option>Deactivate Selected</option>
-<option>Assign Vehicle</option>
-<option>Delete Selected</option>
+<select id="driverBulkActions" class="bg-dark border border-gray-700 text-white text-sm rounded-md block w-full p-2 pr-8 appearance-none !rounded-button">
+<option value="" selected>Bulk Actions</option>
+<option value="deactivate">Deactivate Selected</option>
+<option value="assign-vehicle">Assign Vehicle</option>
+<option value="delete">Delete Selected</option>
 </select>
 <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
 <i class="ri-arrow-down-s-line"></i>
 </div>
 </div>
-<button class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded-md text-sm !rounded-button whitespace-nowrap">
+<button id="applyBulkAction" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded-md text-sm !rounded-button whitespace-nowrap">
 Apply
 </button>
 </div>
@@ -576,6 +576,137 @@ Edit Driver
 </div>
 </div>
 
+<!-- Assign Vehicle Modal -->
+<div id="assignVehicleModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+<div class="bg-darklight rounded-lg max-w-md w-full overflow-hidden flex flex-col">
+<div class="flex justify-between items-center p-4 border-b border-gray-700">
+<h3 class="text-lg font-medium">Assign Vehicle</h3>
+<button id="closeAssignVehicleModal" class="text-gray-400 hover:text-white">
+<i class="ri-close-line ri-lg"></i>
+</button>
+</div>
+<div class="p-6">
+<p class="text-sm text-gray-400 mb-4">Assign a vehicle to the selected driver(s).</p>
+<form id="assignVehicleForm">
+<div class="mb-4">
+<label for="assignVehicleSelect" class="block mb-2 text-sm font-medium text-white">Select Vehicle</label>
+<select id="assignVehicleSelect" name="assignVehicleSelect" class="bg-dark border border-gray-700 text-white text-sm rounded-md block w-full p-2.5 !rounded-button" required>
+<option value="" disabled selected>Select a vehicle</option>
+<option value="Truck #101">Truck #101</option>
+<option value="Truck #102">Truck #102</option>
+<option value="Truck #103">Truck #103</option>
+<option value="Truck #104">Truck #104</option>
+<option value="Truck #105">Truck #105</option>
+<option value="Truck #106">Truck #106</option>
+<option value="Truck #107">Truck #107</option>
+</select>
+</div>
+<div class="mb-4">
+<label for="assignTruckNumber" class="block mb-2 text-sm font-medium text-white">Truck Number Plate</label>
+<input type="text" id="assignTruckNumber" name="assignTruckNumber" class="bg-dark border border-gray-700 text-white text-sm rounded-md block w-full p-2.5 !rounded-button" placeholder="Enter number plate" required>
+</div>
+<div>
+<label for="assignNotes" class="block mb-2 text-sm font-medium text-white">Notes</label>
+<textarea id="assignNotes" name="assignNotes" rows="2" class="bg-dark border border-gray-700 text-white text-sm rounded-md block w-full p-2.5 !rounded-button" placeholder="Enter any additional notes"></textarea>
+</div>
+</form>
+</div>
+<div class="p-4 border-t border-gray-700 flex justify-end space-x-3">
+<button id="cancelAssignVehicle" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-md text-sm !rounded-button whitespace-nowrap">
+Cancel
+</button>
+<button id="submitAssignVehicle" class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-md text-sm !rounded-button whitespace-nowrap">
+Assign Vehicle
+</button>
+</div>
+</div>
+</div>
+
+<!-- Add New Driver Modal -->
+<div id="addDriverModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+<div class="bg-darklight rounded-lg max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+<div class="flex justify-between items-center p-4 border-b border-gray-700">
+<h3 class="text-lg font-medium">Add New Driver</h3>
+<button id="closeAddDriverModal" class="text-gray-400 hover:text-white">
+<i class="ri-close-line ri-lg"></i>
+</button>
+</div>
+<div class="overflow-y-auto custom-scrollbar p-6 flex-1">
+<form id="addDriverForm">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+<div class="col-span-1 md:col-span-2">
+<label for="driverName" class="block mb-2 text-sm font-medium text-white">Driver Name</label>
+<input type="text" id="driverName" name="driverName" class="bg-dark border border-gray-700 text-white text-sm rounded-md block w-full p-2.5 !rounded-button" placeholder="Enter full name" required>
+</div>
+<div>
+<label for="driverContact" class="block mb-2 text-sm font-medium text-white">Contact Number</label>
+<input type="tel" id="driverContact" name="driverContact" class="bg-dark border border-gray-700 text-white text-sm rounded-md block w-full p-2.5 !rounded-button" placeholder="Enter phone number" required>
+</div>
+<div>
+<label for="driverEmail" class="block mb-2 text-sm font-medium text-white">Email Address</label>
+<input type="email" id="driverEmail" name="driverEmail" class="bg-dark border border-gray-700 text-white text-sm rounded-md block w-full p-2.5 !rounded-button" placeholder="Enter email address">
+</div>
+<div>
+<label for="driverVehicle" class="block mb-2 text-sm font-medium text-white">Vehicle</label>
+<select id="driverVehicle" name="driverVehicle" class="bg-dark border border-gray-700 text-white text-sm rounded-md block w-full p-2.5 !rounded-button" required>
+<option value="" disabled selected>Select vehicle</option>
+<option value="Truck #101">Truck #101</option>
+<option value="Truck #102">Truck #102</option>
+<option value="Truck #103">Truck #103</option>
+<option value="Truck #104">Truck #104</option>
+<option value="Truck #105">Truck #105</option>
+</select>
+</div>
+<div>
+<label for="driverTruckNumber" class="block mb-2 text-sm font-medium text-white">Truck Number Plate</label>
+<input type="text" id="driverTruckNumber" name="driverTruckNumber" class="bg-dark border border-gray-700 text-white text-sm rounded-md block w-full p-2.5 !rounded-button" placeholder="Enter number plate" required>
+</div>
+<div>
+<label for="driverStatus" class="block mb-2 text-sm font-medium text-white">Status</label>
+<select id="driverStatus" name="driverStatus" class="bg-dark border border-gray-700 text-white text-sm rounded-md block w-full p-2.5 !rounded-button" required>
+<option value="available">Available</option>
+<option value="on-duty">On Duty</option>
+<option value="off-duty">Off Duty</option>
+<option value="on-leave">On Leave</option>
+</select>
+</div>
+<div>
+<label for="driverLicenseNumber" class="block mb-2 text-sm font-medium text-white">License Number</label>
+<input type="text" id="driverLicenseNumber" name="driverLicenseNumber" class="bg-dark border border-gray-700 text-white text-sm rounded-md block w-full p-2.5 !rounded-button" placeholder="Enter license number" required>
+</div>
+<div>
+<label for="driverLicenseExpiry" class="block mb-2 text-sm font-medium text-white">License Expiry Date</label>
+<input type="date" id="driverLicenseExpiry" name="driverLicenseExpiry" class="bg-dark border border-gray-700 text-white text-sm rounded-md block w-full p-2.5 !rounded-button" required>
+</div>
+</div>
+<div class="bg-dark rounded-lg p-4 border border-gray-700">
+<h4 class="text-sm font-medium text-gray-400 mb-3">Additional Information</h4>
+<div class="mb-4">
+<label for="driverAddress" class="block mb-2 text-sm font-medium text-white">Address</label>
+<textarea id="driverAddress" name="driverAddress" rows="2" class="bg-dark border border-gray-700 text-white text-sm rounded-md block w-full p-2.5 !rounded-button" placeholder="Enter residential address"></textarea>
+</div>
+<div class="mb-4">
+<label for="driverExperience" class="block mb-2 text-sm font-medium text-white">Experience (years)</label>
+<input type="number" id="driverExperience" name="driverExperience" min="0" class="bg-dark border border-gray-700 text-white text-sm rounded-md block w-full p-2.5 !rounded-button" placeholder="Enter years of experience">
+</div>
+<div>
+<label for="driverNotes" class="block mb-2 text-sm font-medium text-white">Notes</label>
+<textarea id="driverNotes" name="driverNotes" rows="2" class="bg-dark border border-gray-700 text-white text-sm rounded-md block w-full p-2.5 !rounded-button" placeholder="Enter any additional notes"></textarea>
+</div>
+</div>
+</form>
+</div>
+<div class="p-4 border-t border-gray-700 flex justify-end space-x-3">
+<button id="cancelAddDriver" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-md text-sm !rounded-button whitespace-nowrap">
+Cancel
+</button>
+<button id="submitAddDriver" class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-md text-sm !rounded-button whitespace-nowrap">
+Add Driver
+</button>
+</div>
+</div>
+</div>
+
 </main>
 </div>
 </div>
@@ -620,10 +751,318 @@ driverDetailsModal.classList.add('hidden');
 }
 }
 
+// Add New Driver Modal functionality
+const addDriverButton = document.getElementById('add-driver-button');
+const addDriverModal = document.getElementById('addDriverModal');
+const closeAddDriverModal = document.getElementById('closeAddDriverModal');
+const cancelAddDriver = document.getElementById('cancelAddDriver');
+const submitAddDriver = document.getElementById('submitAddDriver');
+const addDriverForm = document.getElementById('addDriverForm');
+
+if (addDriverButton && addDriverModal) {
+// Open modal when Add New Driver button is clicked
+addDriverButton.addEventListener('click', function() {
+addDriverModal.classList.remove('hidden');
+});
+
+// Close modal when close button is clicked
+if (closeAddDriverModal) {
+closeAddDriverModal.addEventListener('click', function() {
+addDriverModal.classList.add('hidden');
+addDriverForm.reset(); // Reset form when closing
+});
+}
+
+// Close modal when Cancel button is clicked
+if (cancelAddDriver) {
+cancelAddDriver.addEventListener('click', function() {
+addDriverModal.classList.add('hidden');
+addDriverForm.reset(); // Reset form when canceling
+});
+}
+
+// Handle form submission
+if (submitAddDriver && addDriverForm) {
+submitAddDriver.addEventListener('click', function(e) {
+e.preventDefault();
+
+// Check form validity
+if (addDriverForm.checkValidity()) {
+// Get form data
+const driverName = document.getElementById('driverName').value;
+const driverContact = document.getElementById('driverContact').value;
+const driverEmail = document.getElementById('driverEmail').value;
+const driverVehicle = document.getElementById('driverVehicle').value;
+const driverTruckNumber = document.getElementById('driverTruckNumber').value;
+const driverStatus = document.getElementById('driverStatus').value;
+const driverLicenseNumber = document.getElementById('driverLicenseNumber').value;
+const driverLicenseExpiry = document.getElementById('driverLicenseExpiry').value;
+const driverAddress = document.getElementById('driverAddress').value;
+const driverExperience = document.getElementById('driverExperience').value;
+const driverNotes = document.getElementById('driverNotes').value;
+
+// Generate a unique ID for the new driver
+const driverId = 'DRV-' + new Date().getFullYear() + '-' + String(Math.floor(Math.random() * 1000)).padStart(3, '0');
+
+// In a real application, you would send this data to a server
+console.log('Adding new driver:', {
+id: driverId,
+name: driverName,
+contact: driverContact,
+email: driverEmail,
+vehicle: driverVehicle,
+truckNumber: driverTruckNumber,
+status: driverStatus,
+licenseNumber: driverLicenseNumber,
+licenseExpiry: driverLicenseExpiry,
+address: driverAddress,
+experience: driverExperience,
+notes: driverNotes
+});
+
+// Format status for display
+let statusClass = '';
+let statusText = '';
+switch(driverStatus) {
+case 'available':
+statusClass = 'bg-success/10 text-success';
+statusText = 'Available';
+break;
+case 'on-duty':
+statusClass = 'bg-warning/10 text-warning';
+statusText = 'On Duty';
+break;
+case 'off-duty':
+statusClass = 'bg-gray-500/10 text-gray-400';
+statusText = 'Off Duty';
+break;
+case 'on-leave':
+statusClass = 'bg-danger/10 text-danger';
+statusText = 'On Leave';
+break;
+default:
+statusClass = 'bg-gray-500/10 text-gray-400';
+statusText = driverStatus;
+}
+
+// For demo purposes, add the new driver to the table
+const tbody = document.querySelector('table tbody');
+const newRow = document.createElement('tr');
+newRow.className = 'border-b border-gray-700 hover:bg-gray-800/30';
+newRow.innerHTML = `
+<td class="px-4 py-4">
+<label class="custom-checkbox">
+<input type="checkbox">
+<span class="checkmark"></span>
+</label>
+</td>
+<td class="px-4 py-4 font-medium">
+${driverId}
+</td>
+<td class="px-6 py-4">
+${driverName}
+</td>
+<td class="px-6 py-4">
+${driverContact}
+</td>
+<td class="px-6 py-4">
+${driverVehicle}
+</td>
+<td class="px-6 py-4">
+${driverTruckNumber}
+</td>
+<td class="px-6 py-4">
+<span class="${statusClass} text-xs px-2.5 py-1 rounded-full">${statusText}</span>
+</td>
+<td class="px-4 py-4">
+<div class="flex items-center space-x-2">
+<button class="text-gray-400 hover:text-white p-1 rounded-md hover:bg-gray-700" title="View Details">
+<i class="ri-eye-line"></i>
+</button>
+<button class="text-gray-400 hover:text-white p-1 rounded-md hover:bg-gray-700" title="Edit">
+<i class="ri-pencil-line"></i>
+</button>
+<button class="text-gray-400 hover:text-danger p-1 rounded-md hover:bg-gray-700" title="Delete">
+<i class="ri-delete-bin-line"></i>
+</button>
+</div>
+</td>
+`;
+tbody.appendChild(newRow);
+
+// Update driver count
+const driverCountElement = document.querySelector('.flex.items-center h3 + span');
+if (driverCountElement) {
+const currentCount = parseInt(driverCountElement.textContent.split(' ')[0]) || 0;
+driverCountElement.textContent = (currentCount + 1) + ' total';
+}
+
+// Close the modal and reset the form
+addDriverModal.classList.add('hidden');
+addDriverForm.reset();
+
+// Show success message (you could implement a toast notification here)
+alert('Driver added successfully!');
+} else {
+// Trigger HTML5 validation
+addDriverForm.reportValidity();
+}
+});
+}
+}
+
+// Driver Bulk Actions functionality
+const driverBulkActions = document.getElementById('driverBulkActions');
+const applyBulkAction = document.getElementById('applyBulkAction');
+const assignVehicleModal = document.getElementById('assignVehicleModal');
+const closeAssignVehicleModal = document.getElementById('closeAssignVehicleModal');
+const cancelAssignVehicle = document.getElementById('cancelAssignVehicle');
+const submitAssignVehicle = document.getElementById('submitAssignVehicle');
+const assignVehicleForm = document.getElementById('assignVehicleForm');
+
+if (applyBulkAction && driverBulkActions) {
+applyBulkAction.addEventListener('click', function() {
+const selectedAction = driverBulkActions.value;
+if (!selectedAction) {
+alert('Please select an action to perform.');
+return;
+}
+
+// Get all selected drivers
+const selectedDrivers = [];
+const checkboxes = document.querySelectorAll('tbody .custom-checkbox input:checked');
+if (checkboxes.length === 0) {
+alert('Please select at least one driver.');
+return;
+}
+
+checkboxes.forEach(checkbox => {
+const row = checkbox.closest('tr');
+const driverId = row.querySelector('td:nth-child(2)').textContent.trim();
+const driverName = row.querySelector('td:nth-child(3)').textContent.trim();
+selectedDrivers.push({ id: driverId, name: driverName, row: row });
+});
+
+console.log('Selected drivers:', selectedDrivers.map(d => ({ id: d.id, name: d.name })));
+
+// Perform the selected action
+switch (selectedAction) {
+case 'deactivate':
+// Deactivate selected drivers
+selectedDrivers.forEach(driver => {
+const statusCell = driver.row.querySelector('td:nth-child(7) span');
+statusCell.className = 'bg-gray-500/10 text-gray-400 text-xs px-2.5 py-1 rounded-full';
+statusCell.textContent = 'Off Duty';
+});
+alert(`${selectedDrivers.length} driver(s) have been set to Off Duty.`);
+break;
+
+case 'assign-vehicle':
+// Show the assign vehicle modal
+assignVehicleModal.classList.remove('hidden');
+break;
+
+case 'delete':
+// Confirm before deleting
+if (confirm(`Are you sure you want to delete ${selectedDrivers.length} driver(s)?`)) {
+selectedDrivers.forEach(driver => {
+driver.row.remove();
+});
+// Update driver count
+const driverCountElement = document.querySelector('.flex.items-center h3 + span');
+if (driverCountElement) {
+const currentCount = parseInt(driverCountElement.textContent.split(' ')[0]) || 0;
+driverCountElement.textContent = (currentCount - selectedDrivers.length) + ' total';
+}
+alert(`${selectedDrivers.length} driver(s) have been deleted.`);
+}
+break;
+}
+
+// Reset the select dropdown
+driverBulkActions.value = '';
+});
+}
+
+// Assign Vehicle Modal functionality
+if (assignVehicleModal) {
+// Close modal when close button is clicked
+if (closeAssignVehicleModal) {
+closeAssignVehicleModal.addEventListener('click', function() {
+assignVehicleModal.classList.add('hidden');
+assignVehicleForm.reset();
+});
+}
+
+// Close modal when Cancel button is clicked
+if (cancelAssignVehicle) {
+cancelAssignVehicle.addEventListener('click', function() {
+assignVehicleModal.classList.add('hidden');
+assignVehicleForm.reset();
+});
+}
+
+// Handle form submission
+if (submitAssignVehicle && assignVehicleForm) {
+submitAssignVehicle.addEventListener('click', function(e) {
+e.preventDefault();
+
+// Check form validity
+if (assignVehicleForm.checkValidity()) {
+// Get form data
+const vehicle = document.getElementById('assignVehicleSelect').value;
+const truckNumber = document.getElementById('assignTruckNumber').value;
+const notes = document.getElementById('assignNotes').value;
+
+// Get all selected drivers
+const selectedDrivers = [];
+const checkboxes = document.querySelectorAll('tbody .custom-checkbox input:checked');
+checkboxes.forEach(checkbox => {
+const row = checkbox.closest('tr');
+const driverId = row.querySelector('td:nth-child(2)').textContent.trim();
+selectedDrivers.push({ id: driverId, row: row });
+});
+
+// In a real application, you would send this data to a server
+console.log('Assigning vehicle:', {
+vehicle: vehicle,
+truckNumber: truckNumber,
+notes: notes,
+drivers: selectedDrivers.map(d => d.id)
+});
+
+// For demo purposes, update the vehicle and truck number in the table
+selectedDrivers.forEach(driver => {
+driver.row.querySelector('td:nth-child(5)').textContent = vehicle;
+driver.row.querySelector('td:nth-child(6)').textContent = truckNumber;
+});
+
+// Close the modal and reset the form
+assignVehicleModal.classList.add('hidden');
+assignVehicleForm.reset();
+
+// Show success message
+alert(`Vehicle ${vehicle} (${truckNumber}) has been assigned to ${selectedDrivers.length} driver(s).`);
+} else {
+// Trigger HTML5 validation
+assignVehicleForm.reportValidity();
+}
+});
+}
+}
+
 // Close modals when clicking outside
 window.addEventListener('click', function(event) {
 if (driverDetailsModal && event.target === driverDetailsModal) {
 driverDetailsModal.classList.add('hidden');
+}
+if (addDriverModal && event.target === addDriverModal) {
+addDriverModal.classList.add('hidden');
+addDriverForm.reset();
+}
+if (assignVehicleModal && event.target === assignVehicleModal) {
+assignVehicleModal.classList.add('hidden');
+assignVehicleForm.reset();
 }
 });
 
