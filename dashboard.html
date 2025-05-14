@@ -98,6 +98,55 @@ border-width: 0 2px 2px 0;
 transform: rotate(45deg);
 }
 
+/* Mobile sidebar enhancements */
+@media (max-width: 768px) {
+  aside.fixed {
+    transition: all 0.3s ease-in-out;
+    overflow-y: auto;
+  }
+  
+  /* Improve table responsiveness */
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  
+  /* Adjust chart heights for mobile */
+  #deliveryStatusChart,
+  #fleetUtilizationChart,
+  #stockLevelsChart {
+    height: 250px !important;
+  }
+  
+  /* Improve card spacing on mobile */
+  .p-6 {
+    padding: 1rem;
+  }
+  
+  /* Adjust font sizes for mobile */
+  h1.text-xl {
+    font-size: 1.1rem;
+  }
+  
+  h3.text-2xl {
+    font-size: 1.5rem;
+  }
+  
+  /* Improve spacing for mobile */
+  .gap-6 {
+    gap: 1rem;
+  }
+  
+  .mb-6 {
+    margin-bottom: 1rem;
+  }
+  
+  .mt-6 {
+    margin-top: 1rem;
+  }
+}
+
 /* Custom switch styling */
 .custom-switch { position: relative; display: inline-block; width: 44px; height: 22px; }
 .custom-switch input { opacity: 0; width: 0; height: 0; }
@@ -256,16 +305,20 @@ Settings
 </div>
 </aside>
 <div class="md:hidden fixed bottom-4 left-4 z-50">
-<button type="button" class="bg-primary text-white p-3 rounded-full shadow-lg !rounded-button">
+<button type="button" id="mobile-menu-button" class="bg-primary text-white p-3 rounded-full shadow-lg !rounded-button">
 <i class="ri-menu-line ri-lg"></i>
 </button>
 </div>
+
+<!-- Mobile sidebar overlay -->
+<div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden"></div>
+
 <div class="flex-1 flex flex-col overflow-hidden bg-dark">
 <header class="bg-darklight border-b border-gray-700 py-4 px-6">
 <div class="flex items-center justify-between">
 <div class="flex items-center">
 <div class="md:hidden mr-4">
-<button type="button" class="text-gray-400 hover:text-white">
+<button type="button" id="header-menu-button" class="text-gray-400 hover:text-white">
 <i class="ri-menu-line ri-lg"></i>
 </button>
 </div>
@@ -367,13 +420,36 @@ Settings
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-// Placeholder for mobile sidebar toggle functionality
-const mobileMenuButton = document.querySelector('.md\\:hidden button');
+// Mobile sidebar toggle functionality
+const sidebar = document.querySelector('aside');
+const sidebarOverlay = document.getElementById('sidebar-overlay');
+const mobileMenuButton = document.getElementById('mobile-menu-button');
+const headerMenuButton = document.getElementById('header-menu-button');
+
+function toggleSidebar() {
+    sidebar.classList.toggle('hidden');
+    sidebar.classList.toggle('fixed');
+    sidebar.classList.toggle('inset-0');
+    sidebar.classList.toggle('z-50');
+    sidebar.classList.toggle('h-full');
+    sidebar.classList.toggle('w-3/4');
+    
+    // Toggle overlay
+    sidebarOverlay.classList.toggle('hidden');
+}
+
+// Add event listeners for mobile menu buttons
 if (mobileMenuButton) {
-mobileMenuButton.addEventListener('click', function() {
-// Implement sidebar toggle logic here
-console.log('Mobile menu button clicked');
-});
+    mobileMenuButton.addEventListener('click', toggleSidebar);
+}
+
+if (headerMenuButton) {
+    headerMenuButton.addEventListener('click', toggleSidebar);
+}
+
+// Close sidebar when clicking overlay
+if (sidebarOverlay) {
+    sidebarOverlay.addEventListener('click', toggleSidebar);
 }
 
 // Function to load static dashboard data
@@ -689,5 +765,6 @@ loadDashboardData();
 
 });
 </script>
+<script src="js/apply-mobile-changes.js"></script>
 </body>
 </html>
