@@ -68,6 +68,7 @@
     showAddDriver: false,
     showTerms: false,
     showCancel: false,
+    currentAnalytics: 'funnel',
     planWarehouseLimit() {
         if (this.planType === 'Basic') return 1;
         if (this.planType === 'Professional') return 2;
@@ -115,6 +116,15 @@
         inAppNotifications: true,
         dataRetention: '90',
         autoBackup: true
+    },
+    generateSyntheticData() {
+        const syntheticData = {
+            deliveries: generateDeliveryData(),
+            customers: generateCustomerData(),
+            vehicles: generateVehicleData()
+        };
+        document.querySelector('#syntheticDataPreview pre').textContent = 
+            JSON.stringify(syntheticData, null, 2);
     }
 }" class="min-h-screen bg-white">
     <!-- Plan Selector for Demo -->
@@ -212,6 +222,107 @@
                     </div>
                 </div>
             </div>
+            <div class="dashboard-card p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-semibold">Analytics & Reports</h2>
+                    <div class="flex gap-2">
+                        <button class="btn bg-primary text-white px-4 py-2 rounded-md" @click="generateSyntheticData()">Generate Data</button>
+                        <button class="btn bg-primary text-white px-4 py-2 rounded-md" @click="">Export</button>
+                    </div>
+                </div>
+                
+                <!-- Analytics Tabs -->
+                <div class="mb-6">
+                    <div class="border-b border-gray-200">
+                        <nav class="-mb-px flex" aria-label="Tabs">
+                            <button @click="currentAnalytics = 'funnel'" :class="{'border-primary text-primary': currentAnalytics === 'funnel'}" class="w-1/3 py-4 px-1 text-center border-b-2 font-medium text-sm">Funnel Analysis</button>
+                            <button @click="currentAnalytics = 'cohort'" :class="{'border-primary text-primary': currentAnalytics === 'cohort'}" class="w-1/3 py-4 px-1 text-center border-b-2 font-medium text-sm">Cohort Analysis</button>
+                            <button @click="currentAnalytics = 'synthetic'" :class="{'border-primary text-primary': currentAnalytics === 'synthetic'}" class="w-1/3 py-4 px-1 text-center border-b-2 font-medium text-sm">Synthetic Data</button>
+                        </nav>
+                    </div>
+                </div>
+
+                <!-- Funnel Analysis -->
+                <div x-show="currentAnalytics === 'funnel'" class="space-y-6">
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h3 class="text-lg font-medium mb-4">Delivery Funnel Analysis</h3>
+                        <div id="funnelChart" class="h-80"></div>
+                    </div>
+                    <div class="grid grid-cols-4 gap-4 text-center">
+                        <div class="bg-white p-4 rounded-lg shadow">
+                            <div class="text-2xl font-bold text-primary">85%</div>
+                            <div class="text-sm text-gray-600">Order Creation</div>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow">
+                            <div class="text-2xl font-bold text-primary">72%</div>
+                            <div class="text-sm text-gray-600">Driver Assignment</div>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow">
+                            <div class="text-2xl font-bold text-primary">68%</div>
+                            <div class="text-sm text-gray-600">Pickup Complete</div>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow">
+                            <div class="text-2xl font-bold text-primary">62%</div>
+                            <div class="text-sm text-gray-600">Delivery Complete</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cohort Analysis -->
+                <div x-show="currentAnalytics === 'cohort'" class="space-y-6">
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h3 class="text-lg font-medium mb-4">Customer Retention Cohort</h3>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead>
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cohort</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Month 0</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Month 1</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Month 2</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Month 3</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200" id="cohortTable">
+                                    <!-- Cohort data will be injected here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="cohortChart" class="h-80 mt-4"></div>
+                    </div>
+                </div>
+
+                <!-- Synthetic Data -->
+                <div x-show="currentAnalytics === 'synthetic'" class="space-y-6">
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h3 class="text-lg font-medium mb-4">Synthetic Data Generation</h3>
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Date Range</label>
+                                <select class="bg-white border border-gray-300 text-gray-900 text-sm rounded-md block w-full p-2.5">
+                                    <option>Last 7 days</option>
+                                    <option>Last 30 days</option>
+                                    <option>Last 90 days</option>
+                                    <option>Custom Range</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Data Type</label>
+                                <select class="bg-white border border-gray-300 text-gray-900 text-sm rounded-md block w-full p-2.5">
+                                    <option>Delivery Data</option>
+                                    <option>Customer Data</option>
+                                    <option>Vehicle Data</option>
+                                    <option>All Data Types</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="syntheticDataPreview" class="border rounded-lg p-4 bg-white">
+                            <pre class="text-sm text-gray-600 overflow-x-auto"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <script>
             document.addEventListener('DOMContentLoaded', function() {
                 // Map
@@ -256,7 +367,156 @@
                         }
                     });
                 }
+
+                // Initialize Funnel Chart
+                const funnelChart = echarts.init(document.getElementById('funnelChart'));
+                const funnelOption = {
+                    title: {
+                        text: 'Delivery Process Funnel',
+                        left: 'center'
+                    },
+                    tooltip: {
+                        trigger: 'item',
+                        formatter: '{b} : {c}%'
+                    },
+                    series: [
+                        {
+                            name: 'Funnel',
+                            type: 'funnel',
+                            left: '10%',
+                            top: 60,
+                            bottom: 60,
+                            width: '80%',
+                            min: 0,
+                            max: 100,
+                            minSize: '0%',
+                            maxSize: '100%',
+                            sort: 'descending',
+                            gap: 2,
+                            label: {
+                                show: true,
+                                position: 'inside'
+                            },
+                            labelLine: {
+                                length: 10,
+                                lineStyle: {
+                                    width: 1,
+                                    type: 'solid'
+                                }
+                            },
+                            itemStyle: {
+                                borderColor: '#fff',
+                                borderWidth: 1
+                            },
+                            emphasis: {
+                                label: {
+                                    fontSize: 20
+                                }
+                            },
+                            data: [
+                                { value: 85, name: 'Order Creation' },
+                                { value: 72, name: 'Driver Assignment' },
+                                { value: 68, name: 'Pickup Complete' },
+                                { value: 62, name: 'Delivery Complete' }
+                            ]
+                        }
+                    ]
+                };
+                funnelChart.setOption(funnelOption);
+
+                // Initialize Cohort Chart
+                initCohortAnalysis();
             });
+
+            function initCohortAnalysis() {
+                const cohortData = generateCohortData();
+                populateCohortTable(cohortData);
+                
+                const cohortChart = echarts.init(document.getElementById('cohortChart'));
+                const cohortOption = {
+                    title: {
+                        text: 'Customer Retention by Cohort',
+                        left: 'center'
+                    },
+                    tooltip: {
+                        trigger: 'axis'
+                    },
+                    legend: {
+                        data: ['Jan 2025', 'Feb 2025', 'Mar 2025', 'Apr 2025', 'May 2025'],
+                        bottom: 0
+                    },
+                    xAxis: {
+                        type: 'category',
+                        data: ['Month 0', 'Month 1', 'Month 2', 'Month 3']
+                    },
+                    yAxis: {
+                        type: 'value',
+                        axisLabel: {
+                            formatter: '{value}%'
+                        }
+                    },
+                    series: cohortData.map(cohort => ({
+                        name: cohort.month,
+                        type: 'line',
+                        data: cohort.retention
+                    }))
+                };
+                cohortChart.setOption(cohortOption);
+            }
+
+            function generateCohortData() {
+                return [
+                    { month: 'Jan 2025', retention: [100, 75, 65, 60] },
+                    { month: 'Feb 2025', retention: [100, 78, 68, 62] },
+                    { month: 'Mar 2025', retention: [100, 80, 70, 65] },
+                    { month: 'Apr 2025', retention: [100, 82, 72, 68] },
+                    { month: 'May 2025', retention: [100, 85, 75, 70] }
+                ];
+            }
+
+            function populateCohortTable(cohortData) {
+                const table = document.getElementById('cohortTable');
+                cohortData.forEach(cohort => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${cohort.month}</td>
+                        ${cohort.retention.map(value => 
+                            `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${value}%</td>`
+                        ).join('')}
+                    `;
+                    table.appendChild(row);
+                });
+            }
+
+            function generateDeliveryData() {
+                // Generate synthetic delivery data
+                return Array.from({ length: 10 }, (_, i) => ({
+                    id: `DEL-${String(i + 1).padStart(4, '0')}`,
+                    customer: `Customer ${i + 1}`,
+                    status: ['Pending', 'In Transit', 'Delivered'][Math.floor(Math.random() * 3)],
+                    timestamp: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString()
+                }));
+            }
+
+            function generateCustomerData() {
+                // Generate synthetic customer data
+                return Array.from({ length: 5 }, (_, i) => ({
+                    id: `CUST-${String(i + 1).padStart(4, '0')}`,
+                    name: `Customer ${i + 1}`,
+                    deliveries: Math.floor(Math.random() * 50),
+                    joinDate: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString()
+                }));
+            }
+
+            function generateVehicleData() {
+                // Generate synthetic vehicle data
+                return Array.from({ length: 3 }, (_, i) => ({
+                    id: `VEH-${String(i + 1).padStart(4, '0')}`,
+                    type: ['Truck', 'Van', 'Bike'][i % 3],
+                    status: ['Active', 'Maintenance', 'Idle'][Math.floor(Math.random() * 3)],
+                    lastService: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString()
+                }));
+            }
             </script>
         </section>
         <!-- Deliveries Section -->
