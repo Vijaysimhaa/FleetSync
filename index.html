@@ -263,6 +263,7 @@
             <a href="index.html" class="text-logo">
                 <span>FleetSync</span>
             </a>
+            <!-- Desktop Nav -->
             <div class="hidden md:flex items-center space-x-8 text-sm">
                 <a href="#features" class="hover:opacity-70 transition-opacity">Features</a>
                 <a href="#pricing" class="hover:opacity-70 transition-opacity">Pricing</a>
@@ -270,8 +271,44 @@
                 <a href="signup.html" class="hover:opacity-70 transition-opacity">Login</a>
                 <a href="checkout.html?plan=professional" class="btn">Get Started</a>
             </div>
+            <!-- Hamburger for Mobile -->
+            <button id="mobileMenuBtn" class="md:hidden focus:outline-none" aria-label="Open menu">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+        </div>
+        <!-- Mobile Dropdown Menu -->
+        <div id="mobileMenu" class="md:hidden fixed top-0 left-0 w-full h-full bg-white bg-opacity-95 z-50 flex flex-col items-center justify-center space-y-8 text-xl font-medium hidden">
+            <button id="closeMobileMenu" class="absolute top-6 right-6">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+            <a href="#features" class="block" onclick="closeMenu()">Features</a>
+            <a href="#pricing" class="block" onclick="closeMenu()">Pricing</a>
+            <a href="contact.html" class="block" onclick="closeMenu()">Contact</a>
+            <a href="signup.html" class="block" onclick="closeMenu()">Login</a>
+            <a href="checkout.html?plan=professional" class="btn w-48 text-center" onclick="closeMenu()">Get Started</a>
         </div>
     </nav>
+    <script>
+        // Mobile menu toggle logic
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const closeMobileMenu = document.getElementById('closeMobileMenu');
+        function closeMenu() {
+            mobileMenu.classList.add('hidden');
+        }
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.remove('hidden');
+        });
+        closeMobileMenu.addEventListener('click', closeMenu);
+        // Optional: close menu on link click
+        mobileMenu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', closeMenu);
+        });
+    </script>
 
     <!-- Hero Section -->
     <section class="min-h-screen flex items-center justify-center p-6">
