@@ -164,6 +164,18 @@
                                 <span class="opacity-70">GST (18%)</span>
                                 <span id="gst">₹4,499.82</span>
                             </div>
+                            <!-- Add discount section -->
+                            <div class="mt-4 mb-4">
+                                <div class="flex gap-2">
+                                    <input type="text" id="couponCode" class="input-field" placeholder="Enter coupon code">
+                                    <button onclick="applyCoupon()" type="button" class="bg-black hover:bg-gray-800 text-white px-4 py-2 rounded-md">Apply</button>
+                                </div>
+                                <div id="couponMessage" class="text-sm mt-2 hidden"></div>
+                            </div>
+                            <div id="discountRow" class="flex justify-between items-center hidden">
+                                <span class="opacity-70">Discount</span>
+                                <span id="discount" class="text-green-600">-₹0</span>
+                            </div>
                             <div class="border-t border-gray-200 pt-4 mt-4">
                                 <div class="flex justify-between items-center font-medium">
                                     <span class="opacity-70">Total</span>
@@ -234,7 +246,8 @@
                 const gst = plan.price * 0.18;
                 document.getElementById('gst').textContent = `₹${gst.toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
                 const total = plan.price + gst;
-                document.getElementById('total').textContent = `₹${total.toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+                const discount = parseFloat(document.getElementById('discount').textContent.replace('-₹', '').replace(',', '')) || 0;
+                document.getElementById('total').textContent = `₹${(total - discount).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
             } else {
                 document.getElementById('subtotal').textContent = '-';
                 document.getElementById('gst').textContent = '-';
@@ -285,6 +298,39 @@
                     form.querySelector('button[type="submit"]').onclick = null;
                 }
             }, 0);
+        }
+
+        function applyCoupon() {
+            const couponCode = document.getElementById('couponCode').value.trim();
+            const couponMessage = document.getElementById('couponMessage');
+            const discountRow = document.getElementById('discountRow');
+            const discountElement = document.getElementById('discount');
+            const subtotal = parseFloat(document.getElementById('subtotal').textContent.replace('₹', '').replace(',', '')) || 0;
+
+            if (couponCode === 'ADMIN100') {
+                // 100% discount for admin
+                const discount = subtotal;
+                discountElement.textContent = `-₹${discount.toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+                discountRow.classList.remove('hidden');
+                couponMessage.textContent = 'Admin discount applied successfully!';
+                couponMessage.classList.remove('hidden', 'text-red-600');
+                couponMessage.classList.add('text-green-600');
+            } else if (couponCode === 'SAVE10') {
+                // Regular 10% discount
+                const discount = subtotal * 0.1;
+                discountElement.textContent = `-₹${discount.toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+                discountRow.classList.remove('hidden');
+                couponMessage.textContent = 'Coupon applied successfully!';
+                couponMessage.classList.remove('hidden', 'text-red-600');
+                couponMessage.classList.add('text-green-600');
+            } else {
+                discountElement.textContent = '-₹0';
+                discountRow.classList.add('hidden');
+                couponMessage.textContent = 'Invalid coupon code.';
+                couponMessage.classList.remove('hidden', 'text-green-600');
+                couponMessage.classList.add('text-red-600');
+            }
+            updateOrderSummary(document.getElementById('planSelect').value);
         }
 
         document.addEventListener('DOMContentLoaded', function() {
