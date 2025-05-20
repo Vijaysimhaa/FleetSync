@@ -155,8 +155,8 @@
       // Check if user is already signed in
       auth.onAuthStateChanged(function(user) {
           if (user) {
-              // User is signed in, redirect to plan selection
-              window.location.href = 'plan.html';
+              // User is signed in, redirect to checkout
+              window.location.href = 'checkout.html';
           }
       });
 
@@ -172,7 +172,7 @@
                 displayName: user.displayName,
                 photoURL: user.photoURL
             }));
-            window.location.href = 'plan.html';
+            window.location.href = 'checkout.html';
           })
           .catch(error => {
             console.error('Google sign-up failed:', error);
@@ -234,7 +234,7 @@
                       displayName: user.displayName,
                       photoURL: user.photoURL
                   }));
-                  window.location.href = 'plan.html';
+                  window.location.href = 'checkout.html';
               })
               .catch((error) => {
                   console.error('Sign up failed:', error);
