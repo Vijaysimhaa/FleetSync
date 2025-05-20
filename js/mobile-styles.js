@@ -282,9 +282,7 @@ document.addEventListener('DOMContentLoaded', () => {
         /* Mobile menu enhancements */
         @media (max-width: 768px) {
             #mobileMenu {
-                background: rgba(255, 255, 255, 0.98);
-                backdrop-filter: blur(10px);
-                box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+                background-color: #ffffff;
             }
 
             #mobileMenu .text-logo {
