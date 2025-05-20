@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - FleetSync</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --text-color: #141414;
+            --bg-color: #ffffff;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.2;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            transition: border-color 0.3s ease;
+            background: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--text-color);
+        }
+
+        .btn {
+            position: relative;
+            display: inline-block;
+            padding: 1rem 2rem;
+            color: var(--text-color);
+            text-decoration: none;
+            border: 1px solid currentColor;
+            overflow: hidden;
+            transition: color 0.3s ease;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--text-color);
+            transition: transform 0.3s ease;
+            z-index: -1;
+        }
+
+        .btn:hover {
+            color: var(--bg-color);
+        }
+
+        .btn:hover::before {
+            transform: translateX(100%);
+        }
+
+        .fade-in {
+            opacity: 0;
+            animation: fadeIn 0.8s ease forwards;
+            animation-delay: var(--delay, 0s);
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        .contact-card {
+            padding: 2rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            background: var(--bg-color);
+            transition: transform 0.3s ease;
+        }
+
+        .contact-card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 w-full p-6 z-50 bg-white border-b">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <a href="index.html" class="text-2xl font-bold">
+                FleetSync
+            </a>
+            <div class="space-x-8">
+                <a href="index.html" class="opacity-70 hover:opacity-100">Home</a>
+                <a href="#" class="opacity-100">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contact Section -->
+    <section class="min-h-screen pt-24 px-6">
+        <div class="max-w-7xl mx-auto py-16">
+            <div class="text-center mb-16 fade-in">
+                <h1 class="text-5xl font-medium mb-4">Get in Touch</h1>
+                <p class="opacity-70 text-lg max-w-2xl mx-auto">Have questions about FleetSync? We're here to help. Reach out to us and we'll get back to you as soon as possible.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+                <!-- Email Contact -->
+                <div class="contact-card fade-in" style="--delay: 0.2s">
+                    <div class="text-2xl mb-4">📧</div>
+                    <h3 class="text-xl font-medium mb-2">Email Us</h3>
+                    <p class="opacity-70 mb-4">Send us an email anytime, we'll respond within 24 hours</p>
+                    <a href="mailto:support@fleetsync.com" class="underline hover:opacity-80">support@fleetsync.com</a>
+                </div>
+
+                <!-- Phone Contact -->
+                <div class="contact-card fade-in" style="--delay: 0.4s">
+                    <div class="text-2xl mb-4">📱</div>
+                    <h3 class="text-xl font-medium mb-2">Call Us</h3>
+                    <p class="opacity-70 mb-4">Available Monday to Friday, 9:00 AM to 6:00 PM IST</p>
+                    <a href="tel:+919876543210" class="underline hover:opacity-80">+91 98765 43210</a>
+                </div>
+
+                <!-- Office Location -->
+                <div class="contact-card fade-in" style="--delay: 0.6s">
+                    <div class="text-2xl mb-4">📍</div>
+                    <h3 class="text-xl font-medium mb-2">Visit Us</h3>
+                    <p class="opacity-70 mb-4">Come visit our office in Bangalore</p>
+                    <address class="not-italic opacity-70">
+                        123 Tech Park<br>
+                        Electronic City Phase 1<br>
+                        Bangalore, 560100
+                    </address>
+                </div>
+            </div>
+
+            <!-- Contact Form -->
+            <div class="max-w-2xl mx-auto fade-in" style="--delay: 0.8s">
+                <form class="space-y-6" id="contactForm">
+                    <div>
+                        <label class="block mb-2 text-sm">Your Name</label>
+                        <input type="text" class="input-field" required>
+                    </div>
+                    <div>
+                        <label class="block mb-2 text-sm">Email Address</label>
+                        <input type="email" class="input-field" required>
+                    </div>
+                    <div>
+                        <label class="block mb-2 text-sm">Subject</label>
+                        <input type="text" class="input-field" required>
+                    </div>
+                    <div>
+                        <label class="block mb-2 text-sm">Message</label>
+                        <textarea class="input-field" rows="4" required></textarea>
+                    </div>
+                    <button type="submit" class="btn w-full">Send Message</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 px-6 border-t">
+        <div class="max-w-7xl mx-auto text-center">
+            <p class="opacity-70 text-sm">© 2025 FleetSync. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Thank you for your message! We will get back to you soon.');
+            this.reset();
+        });
+    </script>
+</body>
+</html>
