@@ -3,713 +3,586 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FleetSync - Industrial Logistics Management</title>
-    <link href="https://fonts.googleapis.com/css2?family=Lobster&family=Comfortaa:wght@300;400;600&display=swap" rel="stylesheet">
-    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
-    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <title>FleetSync - Fleet Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --purple: #8A2BE2;
-            --dark: #0A0A0A;
-            --light: #FFFFFF;
+            --text-color: #141414;
+            --bg-color: #ffffff;
         }
-        
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Comfortaa', cursive;
         }
-        
+
         body {
-            background: var(--dark);
-            color: var(--light);
-            line-height: 1.6;
-            overflow-x: hidden;
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.2;
         }
-        
-        .header {
-            padding: 1rem 5%;
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 1000;
-            background: rgba(10, 10, 10, .95);
-            backdrop-filter: blur(10px);
-            animation: slideDown .5s ease;
-        }
-        
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
+
         .logo {
-            font-family: 'Lobster', cursive;
-            font-size: 2.5rem;
-            color: var(--light);
-            text-shadow: 0 0 20px var(--purple);
-            animation: logoFloat 3s ease-in-out infinite;
+            display: block;
+            width: 150px;
+            height: auto;
         }
-        
-        .nav-menu {
-            display: flex;
-            gap: 1.5rem;
+
+        .logo img {
+            transition: transform 0.3s ease;
         }
-        
-        .nav-item {
-            color: var(--light);
-            text-decoration: none;
-            padding: .8rem 1.2rem;
-            border-radius: 8px;
-            transition: all .3s ease;
-            position: relative;
+
+        .logo:hover img {
+            transform: scale(1.05);
         }
-        
-        .nav-item::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: var(--purple);
-            transition: width .3s ease;
+
+        .text-reveal {
+            overflow: hidden;
         }
-        
-        .nav-item:hover::after {
-            width: 100%;
+
+        .text-reveal span {
+            display: block;
+            animation: reveal 1s cubic-bezier(0.77, 0, 0.175, 1);
         }
-        
-        /* Mobile menu styles */
-        .mobile-menu-toggle {
-            display: none;
-            cursor: pointer;
-            font-size: 1.5rem;
-            color: var(--light);
-            z-index: 1001;
+
+        @keyframes reveal {
+            from {
+                transform: translateY(100%);
+            }
+            to {
+                transform: translateY(0);
+            }
         }
-        
-        .mobile-menu {
-            display: none;
+
+        .fade-in {
+            opacity: 0;
+            animation: fadeIn 0.8s ease forwards;
+            animation-delay: var(--delay, 0s);
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        .grain {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(10, 10, 10, .98);
-            z-index: 999;
-            flex-direction: column;
+            pointer-events: none;
+            opacity: 0.05;
+            background-image: url('data:image/png;base64,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');
+        }
+
+        .heading {
+            font-size: clamp(2.5rem, 8vw, 4.5rem);
+            line-height: 1;
+            letter-spacing: -0.02em;
+        }
+
+        .btn {
+            position: relative;
+            display: inline-block;
+            padding: 1rem 2rem;
+            color: var(--text-color);
+            text-decoration: none;
+            border: 1px solid currentColor;
+            overflow: hidden;
+            transition: color 0.3s ease;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--text-color);
+            transition: transform 0.3s ease;
+            z-index: -1;
+        }
+
+        .btn:hover {
+            color: var(--bg-color);
+        }
+
+        .btn:hover::before {
+            transform: translateX(100%);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+        }
+
+        .stat-card {
+            padding: 2rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            line-height: 1;
+        }
+
+        .stat-label {
+            opacity: 0.7;
+            font-size: 0.875rem;
+        }
+
+        /* Loading Animation */
+        .loader-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-color);
+            display: flex;
             justify-content: center;
             align-items: center;
-            gap: 1.5rem;
-            transform: translateY(-100%);
-            transition: transform 0.3s ease-in-out;
+            z-index: 9999;
+            transition: opacity 0.5s, visibility 0.5s;
         }
-        
-        .mobile-menu.active {
-            transform: translateY(0);
+
+        .loader-wrapper.loaded {
+            opacity: 0;
+            visibility: hidden;
         }
-        
-        .mobile-menu .nav-item {
-            font-size: 1.2rem;
-            padding: 1rem 2rem;
+
+        .loader-text {
+            font-size: 3rem;
+            font-weight: bold;
+            opacity: 0;
+            transform: scale(0.8);
+            animation: textPop 1s cubic-bezier(0.3, 1, 0.4, 1) forwards;
         }
-        
-        .mobile-menu-close {
-            position: absolute;
-            top: 2rem;
-            right: 2rem;
+
+        @keyframes textPop {
+            0% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.1);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Section Styles */
+        .section-padding {
+            padding: 6rem 0;
+        }
+
+        .feature-card {
+            padding: 2rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .testimonial-card {
+            background: rgba(0, 0, 0, 0.02);
+            padding: 2rem;
+            border-radius: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .heading {
+                font-size: 2.5rem;
+            }
+        }
+
+        /* Animated Text Logo */
+        .text-logo {
             font-size: 1.5rem;
-            color: var(--light);
-            cursor: pointer;
-        }
-        
-        .hero {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            padding: 6rem 5% 2rem;
-            background: linear-gradient(135deg, var(--dark) 40%, var(--purple) 150%);
+            font-weight: bold;
+            letter-spacing: 0.05em;
             position: relative;
             overflow: hidden;
         }
-        
-        .hero-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            transform: translateY(50px);
-            opacity: 0;
-            animation: fadeInUp 1s forwards .5s;
-            z-index: 1;
-        }
-        
-        h1 {
-            font-size: 4rem;
-            margin-bottom: 1.5rem;
-            line-height: 1.2;
-        }
-        
-        .section-heading {
-            text-align: center;
-            font-size: 2.5rem;
-            margin: 4rem 0;
-            position: relative;
-        }
-        
-        .section-heading::after {
-            content: '';
-            position: absolute;
-            bottom: -15px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100px;
-            height: 3px;
-            background: var(--purple);
-        }
-        
-        .features-section {
-            padding: 4rem 5%;
-            background: var(--dark);
-        }
-        
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 2rem;
-            max-width: 1200px;
-            margin: 2rem auto;
-        }
-        
-        .feature-item {
-            background: rgba(255, 255, 255, .05);
-            padding: 2rem;
-            border-radius: 15px;
-            border: 1px solid rgba(138, 43, 226, .3);
-            transition: all .4s ease;
-            transform: translateY(50px);
-            opacity: 0;
-        }
-        
-        .feature-item.visible {
-            transform: translateY(0);
-            opacity: 1;
-        }
-        
-        .feature-item:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(138, 43, 226, .2);
-        }
-        
-        .feature-item h3 {
-            margin-bottom: 1rem;
-        }
-        
-        .services-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 2rem;
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 5%;
-        }
-        
-        .feature-card {
-            background: rgba(255, 255, 255, .05);
-            padding: 2rem;
-            border-radius: 15px;
-            border: 1px solid rgba(138, 43, 226, .3);
-            transition: all .4s ease;
-            transform: translateY(50px);
-            opacity: 0;
-        }
-        
-        .feature-card.visible {
-            transform: translateY(0);
-            opacity: 1;
-        }
-        
-        .feature-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(138, 43, 226, .2);
-        }
-        
-        .pricing-section {
-            padding: 4rem 5%;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        .pricing-grid {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 2rem;
-            margin-top: 2rem;
-            padding: 0 5%;
-        }
-        
-        .price-card {
-            background: rgba(255, 255, 255, .05);
-            padding: 2rem;
-            border-radius: 15px;
-            border: 1px solid rgba(138, 43, 226, .3);
-            transition: all .4s ease;
-            display: flex;
-            flex-direction: column;
-            width: calc(25% - 2rem);
-            min-width: 280px;
-        }
-        
-        @media(max-width: 1200px) {
-            .price-card {
-                width: calc(33.333% - 2rem);
-            }
-        }
-        
-        @media(max-width: 960px) {
-            .price-card {
-                width: calc(50% - 2rem);
-            }
-        }
-        
-        @media(max-width: 600px) {
-            .price-card {
-                width: 100%;
-            }
-        }
-        
-        .price-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(138, 43, 226, .2);
-        }
-        
-        .price-tag {
-            font-size: 2.5rem;
-            margin: 1rem 0;
-            color: var(--purple);
-            text-align: center;
-        }
-        
-        .per-month {
-            font-size: 1rem;
-            color: rgba(255, 255, 255, .7);
-        }
-        
-        .free-trial {
-            color: #00FF7F;
-            font-size: .9rem;
-            margin-bottom: .5rem;
-            text-align: center;
-        }
-        
-        .no-trial {
-            color: #FF4500;
-            font-size: .9rem;
-            margin-bottom: .5rem;
-            text-align: center;
-        }
-        
-        .cta-button {
+
+        .text-logo span {
             display: inline-block;
-            padding: 1rem 2.5rem;
-            background: var(--light);
-            color: var(--dark);
-            border-radius: 30px;
-            text-decoration: none;
-            font-weight: 600;
-            margin-top: 1rem;
-            transition: all .3s ease;
-            box-shadow: 0 0 30px var(--purple);
-            text-align: center;
+            animation: textShine 3s ease-in-out infinite;
+            background: linear-gradient(
+                90deg,
+                var(--text-color) 0%,
+                var(--text-color) 50%,
+                #666 51%,
+                var(--text-color) 52%,
+                var(--text-color) 100%
+            );
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-        
-        .cta-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 0 40px var(--purple);
-        }
-        
-        .price-card ul {
-            list-style: none;
-            padding: 0 1rem;
-            margin-bottom: 1rem;
-            flex-grow: 1;
-        }
-        
-        .price-card li {
-            padding: .5rem 0;
-        }
-        
-        .about-section {
-            padding: 4rem 5%;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        .about-card {
-            background: rgba(255, 255, 255, .05);
-            padding: 3rem;
-            border-radius: 15px;
-            border: 1px solid rgba(138, 43, 226, .3);
-            transform: translateY(50px);
-            opacity: 0;
-            transition: all .4s ease;
-            text-align: center;
-        }
-        
-        .about-card.visible {
-            transform: translateY(0);
-            opacity: 1;
-        }
-        
-        .about-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(138, 43, 226, .2);
-        }
-        
-        footer {
-            background: var(--dark);
-            padding: 3rem 5%;
-            color: var(--light);
-            text-align: center;
-            border-top: 1px solid rgba(255, 255, 255, .1);
-            margin-top: 4rem;
-        }
-        
-        .footer-links {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        .footer-links a {
-            color: var(--light);
-            text-decoration: none;
-            transition: color .3s ease;
-            padding: 0.5rem;
-        }
-        
-        .footer-links a:hover {
-            color: var(--purple);
-        }
-        
-        .social-icons {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-        }
-        
-        .social-icons a {
-            color: var(--light);
-            text-decoration: none;
-            transition: color .3s ease;
-        }
-        
-        .social-icons a:hover {
-            color: var(--purple);
-        }
-        
-        .footer-bottom {
-            font-size: .8rem;
-            color: rgba(255, 255, 255, .5);
-        }
-        
-        @keyframes logoFloat {
-            0%, 100% {
-                transform: translateY(0);
+
+        @keyframes textShine {
+            0% {
+                background-position: 100% 50%;
             }
-            50% {
-                transform: translateY(-10px);
-            }
-        }
-        
-        @keyframes fadeInUp {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        @keyframes slideDown {
-            from {
-                transform: translateY(-100%);
-            }
-            to {
-                transform: translateY(0);
-            }
-        }
-        
-        /* Responsive styles */
-        @media(max-width: 1024px) {
-            h1 {
-                font-size: 3.5rem;
-            }
-            .services-grid {
-                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            }
-        }
-        
-        @media(max-width: 768px) {
-            .nav-menu {
-                display: none;
-            }
-            .mobile-menu-toggle {
-                display: block;
-            }
-            .mobile-menu {
-                display: flex;
-            }
-            h1 {
-                font-size: 2.8rem;
-            }
-            .section-heading {
-                font-size: 2rem;
-            }
-            .services-grid {
-                grid-template-columns: 1fr;
-            }
-            .footer-links {
-                flex-direction: column;
-                align-items: center;
-            }
-        }
-        
-        @media(max-width: 480px) {
-            .logo {
-                font-size: 2rem;
-            }
-            h1 {
-                font-size: 2.2rem;
-            }
-            .hero {
-                padding-top: 5rem;
-            }
-            .section-heading {
-                font-size: 1.8rem;
-                margin: 3rem 0;
-            }
-            .feature-item, .feature-card, .price-card, .about-card {
-                padding: 1.5rem;
-            }
-            .cta-button {
-                padding: 0.8rem 2rem;
-                font-size: 0.9rem;
+            100% {
+                background-position: -100% 50%;
             }
         }
     </style>
 </head>
 <body>
-    <header class="header">
-        <nav>
-            <div class="logo">FleetSync</div>
-            <div class="nav-menu">
-                <a href="#features" class="nav-item">Features</a>
-                <a href="#services" class="nav-item">Services</a>
-                <a href="#pricing" class="nav-item">Pricing</a>
-                <a href="#about" class="nav-item">About</a>
-                <a href="login.html" class="nav-item">Login</a>
-                <a href="contact.html" class="nav-item">Contact Us</a>
-            </div>
-            <div class="mobile-menu-toggle">
-                <ion-icon name="menu-outline"></ion-icon>
-            </div>
-        </nav>
-    </header>
-    
-    <div class="mobile-menu">
-        <div class="mobile-menu-close">
-            <ion-icon name="close-outline"></ion-icon>
-        </div>
-        <a href="#features" class="nav-item">Features</a>
-        <a href="#services" class="nav-item">Services</a>
-        <a href="#pricing" class="nav-item">Pricing</a>
-        <a href="#about" class="nav-item">About</a>
-        <a href="login.html" class="nav-item">Login</a>
-        <a href="contact.html" class="nav-item">Contact Us</a>
+    <!-- Loading Animation -->
+    <div class="loader-wrapper">
+        <div class="loader-text">FleetSync</div>
     </div>
 
-    <section class="hero">
-        <div class="hero-content">
-            <h1>Transform Your Manufacturing Logistics</h1>
-            <p>FleetSync provides end-to-end solutions for managing factory-to-warehouse logistics with real-time tracking, inventory management, and driver coordination.</p>
-            <a href="#features" class="cta-button">Explore Features</a>
-        </div>
-    </section>
+    <!-- Grain Effect -->
+    <div class="grain"></div>
 
-    <section id="features" class="features-section">
-        <h2 class="section-heading">Key Features</h2>
-        <div class="features-grid">
-            <div class="feature-item">
-                <h3><ion-icon name="map-outline"></ion-icon> Real-Time Tracking</h3>
-                <p>Monitor your fleet and inventory movements with precise GPS tracking and location updates.</p>
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 w-full p-6 z-50 bg-white shadow-sm backdrop-blur-sm">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <a href="index.html" class="text-logo">
+                <span>FleetSync</span>
+            </a>
+            <div class="hidden md:flex items-center space-x-8 text-sm">
+                <a href="#features" class="hover:opacity-70 transition-opacity">Features</a>
+                <a href="#pricing" class="hover:opacity-70 transition-opacity">Pricing</a>
+                <a href="contact.html" class="hover:opacity-70 transition-opacity">Contact</a>
+                <a href="signup.html" class="hover:opacity-70 transition-opacity">Login</a>
+                <a href="checkout.html?plan=professional" class="btn">Get Started</a>
             </div>
-            <div class="feature-item">
-                <h3><ion-icon name="cube-outline"></ion-icon> Smart Inventory Management</h3>
-                <p>Maintain optimal stock levels with automated alerts and seamless integration with warehouse systems.</p>
-            </div>
-            <div class="feature-item">
-                <h3><ion-icon name="settings-outline"></ion-icon> Route Optimization</h3>
-                <p>Reduce transportation costs and delivery times with intelligent route planning and optimization algorithms.</p>
-            </div>
-            <div class="feature-item">
-                <h3><ion-icon name="people-outline"></ion-icon> Driver Collaboration</h3>
-                <p>Enhance communication and coordination with drivers through mobile access to schedules and delivery information.</p>
-            </div>
-            <div class="feature-item">
-                <h3><ion-icon name="bar-chart-outline"></ion-icon> Performance Analytics</h3>
-                <p>Gain insights into your logistics operations with comprehensive reports and customizable dashboards.</p>
-            </div>
-            <div class="feature-item">
-                <h3><ion-icon name="shield-checkmark-outline"></ion-icon> Secure and Reliable</h3>
-                <p>Ensure the safety and integrity of your data with our robust and secure platform.</p>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="min-h-screen flex items-center justify-center p-6">
+        <div class="max-w-7xl mx-auto text-center">
+            <h1 class="heading text-reveal mb-6">
+                <span>Fleet Management</span>
+                <span>Made Simple</span>
+            </h1>
+            <p class="max-w-2xl mx-auto mb-12 opacity-70 fade-in" style="--delay: 0.3s">
+                Streamline your fleet operations with real-time tracking, maintenance scheduling, and comprehensive analytics.
+            </p>
+            <div class="fade-in" style="--delay: 0.5s">
+                <a href="checkout.html?plan=professional" class="btn">Start Your Free Trial</a>
             </div>
         </div>
     </section>
 
-    <section id="services" class="services-section">
-        <h2 class="section-heading">Our Services</h2>
-        <div class="services-grid">
-            <div class="feature-card">
-                <h3>📦 Real-Time Inventory Tracking</h3>
-                <p>Monitor warehouse stock levels with live updates and automated alerts. Integrates with RFID and barcode systems for accurate inventory management.</p>
+    <!-- Features Section -->
+    <section id="features" class="py-24 px-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-medium mb-4">Comprehensive Fleet & Warehouse Management</h2>
+                <p class="max-w-2xl mx-auto opacity-70">Experience the future of logistics with our all-in-one solution for fleet and warehouse management.</p>
             </div>
-            <div class="feature-card">
-                <h3>🚚 Live Fleet Management</h3>
-                <p>Track delivery trucks in real-time with GPS technology. Includes driver performance monitoring and route optimization features.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+                <!-- Vehicle Tracking -->
+                <div class="feature-card fade-in" style="--delay: 0.2s">
+                    <svg class="w-12 h-12 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
+                    </svg>
+                    <h3 class="text-xl font-medium mb-3">Real-Time GPS Tracking</h3>
+                    <p class="opacity-70">Track your entire fleet in real-time with precise GPS monitoring. Get instant location updates, route optimization, and geofencing alerts.</p>
+                </div>
+
+                <!-- Warehouse Management -->
+                <div class="feature-card fade-in" style="--delay: 0.3s">
+                    <svg class="w-12 h-12 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                    </svg>
+                    <h3 class="text-xl font-medium mb-3">Smart Warehouse Control</h3>
+                    <p class="opacity-70">Manage inventory across multiple warehouses. Track stock levels, automate reordering, and optimize storage space utilization.</p>
+                </div>
+
+                <!-- Analytics Dashboard -->
+                <div class="feature-card fade-in" style="--delay: 0.4s">
+                    <svg class="w-12 h-12 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                    <h3 class="text-xl font-medium mb-3">Advanced Analytics</h3>
+                    <p class="opacity-70">Make data-driven decisions with comprehensive analytics. Monitor KPIs, track expenses, and generate detailed reports.</p>
+                </div>
+
+                <!-- Maintenance Management -->
+                <div class="feature-card fade-in" style="--delay: 0.5s">
+                    <svg class="w-12 h-12 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                    </svg>
+                    <h3 class="text-xl font-medium mb-3">Maintenance Automation</h3>
+                    <p class="opacity-70">Stay ahead of vehicle maintenance with automated scheduling, service reminders, and maintenance history tracking.</p>
+                </div>
+
+                <!-- Driver Management -->
+                <div class="feature-card fade-in" style="--delay: 0.6s">
+                    <svg class="w-12 h-12 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                    <h3 class="text-xl font-medium mb-3">Driver Management</h3>
+                    <p class="opacity-70">Monitor driver performance, track work hours, manage documents, and ensure compliance with regulations.</p>
+                </div>
+
+                <!-- Inventory Control -->
+                <div class="feature-card fade-in" style="--delay: 0.7s">
+                    <svg class="w-12 h-12 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                    </svg>
+                    <h3 class="text-xl font-medium mb-3">Smart Inventory</h3>
+                    <p class="opacity-70">Real-time inventory tracking, automated stock alerts, barcode scanning, and seamless order management.</p>
+                </div>
             </div>
-            <div class="feature-card">
-                <h3>🏭 Production Analytics</h3>
-                <p>Comprehensive dashboard for tracking manufacturing output, material consumption, and production line efficiency.</p>
-            </div>
-            <div class="feature-card">
-                <h3>👷 Driver Coordination</h3>
-                <p>Manage driver schedules, track certifications, and maintain complete driver profiles with performance history.</p>
+
+            <!-- Feature Highlights -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 mt-20">
+                <div class="space-y-8">
+                    <h3 class="text-2xl font-medium mb-6">Everything You Need in One Place</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <svg class="w-6 h-6 mr-3 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>Seamless integration between fleet and warehouse management</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-6 h-6 mr-3 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>Mobile app for drivers and warehouse staff</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-6 h-6 mr-3 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>Automated reporting and analytics</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-6 h-6 mr-3 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>24/7 customer support and training</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="space-y-8">
+                    <h3 class="text-2xl font-medium mb-6">Why Choose FleetSync</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <svg class="w-6 h-6 mr-3 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>Reduce operational costs by up to 30%</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-6 h-6 mr-3 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>Improve fleet utilization by 25%</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-6 h-6 mr-3 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>Enhanced inventory accuracy up to 99.9%</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-6 h-6 mr-3 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>Quick implementation within 48 hours</span>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     </section>
 
-    <section id="pricing" class="pricing-section">
-        <h2 class="section-heading">Pricing Plans</h2>
-        <div class="pricing-grid">
-            <div class="price-card">
-                <h3>Basic Plan</h3>
-                <div class="price-tag">₹9,999<span class="per-month">/month</span></div>
-                <p class="free-trial">Includes 14-day free trial</p>
-                <ul>
-                    <li>2 Truck Tracking</li>
-                    <li>1 Warehouse</li>
-                    <li>Basic Analytics</li>
-                </ul>
-                <a href="checkout.html?plan=Basic Plan&price=9999" class="cta-button">Get Started</a>
+    <!-- Pricing Section -->
+    <section id="pricing" class="py-24 px-6 bg-gray-50">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-medium mb-4">Simple, Transparent Pricing</h2>
+                <p class="max-w-2xl mx-auto opacity-70">Choose the perfect plan for your fleet management needs</p>
             </div>
-            <div class="price-card">
-                <h3>Pro Plan</h3>
-                <div class="price-tag">₹14,999<span class="per-month">/month</span></div>
-                <p class="free-trial">Includes 14-day free trial</p>
-                <ul>
-                    <li>3 Truck Tracking</li>
-                    <li>1 Warehouse</li>
-                    <li>Route Optimization</li>
-                </ul>
-                <a href="checkout.html?plan=Pro Plan&price=14999" class="cta-button">Choose Plan</a>
-            </div>
-            <div class="price-card">
-                <h3>Premium Plan</h3>
-                <div class="price-tag">₹26,999<span class="per-month">/month</span></div>
-                <p class="free-trial">Includes 14-day free trial</p>
-                <ul>
-                    <li>4 Truck Tracking</li>
-                    <li>2 Warehouses</li>
-                    <li>Driver Management</li>
-                </ul>
-                <a href="checkout.html?plan=Premium Plan&price=26999" class="cta-button">Choose Plan</a>
-            </div>
-            <div class="price-card">
-                <h3>Enterprise</h3>
-                <div class="price-tag">Custom<span class="per-month">/month</span></div>
-                <p class="no-trial">Contact us for custom pricing</p>
-                <ul>
-                    <li>Unlimited Tracking</li>
-                    <li>Multiple Warehouses</li>
-                    <li>Priority Support</li>
-                </ul>
-                <a href="contact.html" class="cta-button">Contact Us</a>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Starter Plan -->
+                <div class="bg-white p-8 rounded-lg shadow-lg fade-in" style="--delay: 0.2s">
+                    <h3 class="text-xl font-medium mb-4">Starter</h3>
+                    <div class="text-4xl font-bold mb-6">₹10,999<span class="text-lg font-normal opacity-70">/mo</span></div>
+                    <ul class="space-y-4 mb-8">
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 mr-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Up to 4 vehicles
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 mr-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            1 Warehouse tracking
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 mr-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Basic inventory management
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 mr-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Email support
+                        </li>
+                    </ul>
+                    <a href="checkout.html?plan=starter" class="btn w-full text-center">Get Started</a>
+                </div>
+
+                <!-- Professional Plan -->
+                <div class="bg-white p-8 rounded-lg shadow-lg transform scale-105 border-2 border-black fade-in" style="--delay: 0.4s">
+                    <div class="absolute top-0 right-0 -mt-4 mr-4 bg-black text-white px-4 py-1 text-sm">Popular</div>
+                    <h3 class="text-xl font-medium mb-4">Professional</h3>
+                    <div class="text-4xl font-bold mb-6">₹24,999<span class="text-lg font-normal opacity-70">/mo</span></div>
+                    <ul class="space-y-4 mb-8">
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 mr-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Up to 10 vehicles
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 mr-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            2 Warehouses tracking
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 mr-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Advanced inventory analytics
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 mr-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            24/7 priority support
+                        </li>
+                    </ul>
+                    <a href="checkout.html?plan=professional" class="btn w-full text-center">Get Started</a>
+                </div>
+
+                <!-- Enterprise Plan -->
+                <div class="bg-white p-8 rounded-lg shadow-lg fade-in" style="--delay: 0.6s">
+                    <h3 class="text-xl font-medium mb-4">Enterprise</h3>
+                    <div class="text-4xl font-bold mb-6">Custom<span class="text-lg block mt-1">Contact Sales</span></div>
+                    <ul class="space-y-4 mb-8">
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 mr-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Unlimited vehicles
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 mr-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Unlimited warehouses
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 mr-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"></svg>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Custom inventory solutions
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 mr-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Dedicated support team
+                        </li>
+                    </ul>
+                    <a href="contact.html" class="btn w-full text-center">Contact Sales</a>
+                </div>
             </div>
         </div>
     </section>
 
-    <section id="about" class="about-section">
-        <h2 class="section-heading">About Us</h2>
-        <div class="about-card">
-            <p>We are a team of 5 B-Tech Engineering students passionate about revolutionizing manufacturing logistics. Our platform combines industrial engineering principles with modern web technologies to create efficient supply chain solutions.</p>
+    <!-- Testimonials Section -->
+    <section class="py-24 px-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-medium mb-4">What Our Clients Say</h2>
+                <p class="max-w-2xl mx-auto opacity-70">Read about the experiences of companies using FleetSync</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="testimonial-card fade-in" style="--delay: 0.2s">
+                    <div class="flex items-center mb-4">
+                        <img src="https://i.pravatar.cc/60?img=1" alt="Client" class="w-12 h-12 rounded-full mr-4">
+                        <div>
+                            <h4 class="font-medium">Sarah Johnson</h4>
+                            <p class="text-sm opacity-70">Fleet Manager, LogiTech Solutions</p>
+                        </div>
+                    </div>
+                    <p class="opacity-70">"FleetSync has revolutionized how we manage our fleet. The real-time tracking and analytics have helped us optimize routes and reduce fuel costs by 30%."</p>
+                </div>
+
+                <div class="testimonial-card fade-in" style="--delay: 0.4s">
+                    <div class="flex items-center mb-4">
+                        <img src="https://i.pravatar.cc/60?img=2" alt="Client" class="w-12 h-12 rounded-full mr-4">
+                        <div>
+                            <h4 class="font-medium">Michael Chen</h4>
+                            <p class="text-sm opacity-70">Operations Director, FastFreight Inc</p>
+                        </div>
+                    </div>
+                    <p class="opacity-70">"The maintenance alerts and scheduling features have helped us prevent breakdowns and keep our fleet running smoothly. Excellent support team too!"</p>
+                </div>
+            </div>
         </div>
     </section>
 
-    <footer>
-        <div class="footer-links">
-            <a href="#features">Features</a>
-            <a href="#services">Services</a>
-            <a href="#pricing">Pricing</a>
-            <a href="#about">About Us</a>
-            <a href="login.html">Login</a>
-            <a href="contact.html">Contact Us</a>
-            <a href="#">Privacy Policy</a>
-            <a href="#">Terms of Service</a>
+    <!-- CTA Section -->
+    <section class="py-24 px-6 bg-gray-50">
+        <div class="max-w-7xl mx-auto text-center">
+            <h2 class="text-3xl font-medium mb-6">Ready to Optimize Your Fleet?</h2>
+            <p class="max-w-2xl mx-auto mb-8 opacity-70">Join thousands of companies that trust FleetSync for their fleet management needs</p>
+            <div class="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-4">
+                <a href="signup.html" class="btn">Start Free Trial</a>
+                <a href="contact.html" class="btn">Schedule Demo</a>
+            </div>
         </div>
-        <div class="social-icons">
-            <a href="#" target="_blank"><ion-icon name="logo-facebook"></ion-icon></a>
-            <a href="#" target="_blank"><ion-icon name="logo-twitter"></ion-icon></a>
-            <a href="#" target="_blank"><ion-icon name="logo-linkedin"></ion-icon></a>
-            <a href="#" target="_blank"><ion-icon name="logo-instagram"></ion-icon></a>
-        </div>
-        <div class="footer-bottom">
-            &copy; 2025 FleetSync - Industrial Logistics Management. All rights reserved.
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 px-6">
+        <div class="max-w-7xl mx-auto text-center">
+            <p class="opacity-70 text-sm">© 2025 FleetSync. All rights reserved.</p>
         </div>
     </footer>
 
-    <script>
-        // Intersection Observer for animations
-        const observer = new IntersectionObserver(entries => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                }
-            });
-        }, { threshold: 0.1 });
-
-        document.querySelectorAll('.feature-item').forEach(item => observer.observe(item));
-        document.querySelectorAll('.feature-card').forEach(card => observer.observe(card));
-        document.querySelectorAll('.about-card').forEach(card => observer.observe(card));
-
-        // Smooth scrolling for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
-                
-                // Close mobile menu if open
-                if (document.querySelector('.mobile-menu').classList.contains('active')) {
-                    document.querySelector('.mobile-menu').classList.remove('active');
-                }
-            });
-        });
-        
-        // Mobile menu toggle
-        document.querySelector('.mobile-menu-toggle').addEventListener('click', function() {
-            document.querySelector('.mobile-menu').classList.add('active');
-        });
-        
-        // Mobile menu close
-        document.querySelector('.mobile-menu-close').addEventListener('click', function() {
-            document.querySelector('.mobile-menu').classList.remove('active');
-        });
-</script>
+    <!-- Scripts -->
+    <script src="js/mobile-styles.js"></script>
 </body>
 </html>

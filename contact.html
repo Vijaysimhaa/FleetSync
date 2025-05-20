@@ -3,41 +3,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FleetSync - Contact Us</title>
-    <link href="https://fonts.googleapis.com/css2?family=Lobster&family=Comfortaa:wght@300;400;600&display=swap" rel="stylesheet">
+    <title>Contact Us - FleetSync</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root{--purple:#8A2BE2;--dark:#0A0A0A;--light:#FFFFFF}*{margin:0;padding:0;box-sizing:border-box;font-family:'Comfortaa',cursive}body{background:var(--dark);color:var(--light);line-height:1.6;padding:2rem 5%;display:flex;flex-direction:column;align-items:center;min-height:100vh}.logo-link{text-decoration:none;margin-bottom:2rem;display:inline-block}.logo-text{font-family:'Lobster',cursive;font-size:2.5rem;color:var(--light);text-shadow:0 0 20px var(--purple);animation:logoFloat 3s ease-in-out infinite}@keyframes logoFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}.contact-container{background:rgba(255,255,255,.05);padding:2rem;border-radius:15px;border:1px solid rgba(138,43,226,.3);width:90%;max-width:600px;box-shadow:0 10px 30px rgba(0,0,0,.3);opacity:0;transform:translateY(30px);transition:opacity 0.5s ease-in-out, transform 0.5s ease-in-out;animation:fadeInUp 0.5s forwards 0.3s, borderPulse 2s linear infinite}@keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}@keyframes borderPulse{0%{box-shadow:0 0 10px var(--purple), inset 0 0 10px var(--purple)}50%{box-shadow:0 0 20px var(--purple), inset 0 0 15px var(--purple)}100%{box-shadow:0 0 10px var(--purple), inset 0 0 10px var(--purple)}}.contact-heading{text-align:center;font-size:2rem;margin-bottom:1.5rem;color:var(--light)}.contact-form h3{color:var(--light);margin-bottom:1rem}.form-group{margin-bottom:1.2rem}.form-group label{display:block;color:rgba(255,255,255,.8);margin-bottom:.5rem}.form-group input[type="text"],.form-group input[type="email"],.form-group textarea{width:100%;padding:.8rem;border:1px solid rgba(255,255,255,.1);border-radius:8px;background:rgba(0,0,0,.3);color:var(--light);font-size:1rem}.form-group input[type="text"]:focus,.form-group input[type="email"]:focus,.form-group textarea:focus{outline:none;border-color:var(--purple);box-shadow:0 0 5px rgba(138,43,226,.5)}.form-group textarea{min-height:100px;resize:vertical}.cta-button{display:inline-block;padding:1rem 2.5rem;background:var(--purple);color:var(--light);border-radius:30px;text-decoration:none;font-weight:600;margin-top:1.5rem;transition:all.3s ease;border:none;cursor:pointer;width:100%;text-align:center}.cta-button:hover{transform:translateY(-3px);box-shadow:0 0 20px var(--purple)}.back-link{color:rgba(255,255,255,.7);text-decoration:none;margin-top:1rem;display:block;text-align:center;transition:color.3s ease}.back-link:hover{color:var(--purple)}
+        :root {
+            --text-color: #141414;
+            --bg-color: #ffffff;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.2;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            transition: border-color 0.3s ease;
+            background: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--text-color);
+        }
+
+        .btn {
+            position: relative;
+            display: inline-block;
+            padding: 1rem 2rem;
+            color: var(--text-color);
+            text-decoration: none;
+            border: 1px solid currentColor;
+            overflow: hidden;
+            transition: color 0.3s ease;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--text-color);
+            transition: transform 0.3s ease;
+            z-index: -1;
+        }
+
+        .btn:hover {
+            color: var(--bg-color);
+        }
+
+        .btn:hover::before {
+            transform: translateX(100%);
+        }
+
+        .fade-in {
+            opacity: 0;
+            animation: fadeIn 0.8s ease forwards;
+            animation-delay: var(--delay, 0s);
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        .contact-card {
+            padding: 2rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            background: var(--bg-color);
+            transition: transform 0.3s ease;
+        }
+
+        .contact-card:hover {
+            transform: translateY(-5px);
+        }
     </style>
 </head>
 <body>
-    <a href="index.html" class="logo-link">
-        <span class="logo-text">FleetSync</span>
-    </a>
-    <div class="contact-container">
-        <h2 class="contact-heading">Contact Us</h2>
-        <div class="contact-form">
-            <h3>Send us a message</h3>
-            <form>
-                <div class="form-group">
-                    <label for="name">Your Name</label>
-                    <input type="text" id="name" name="name" required>
-                </div>
-                <div class="form-group">
-                    <label for="email">Your Email</label>
-                    <input type="email" id="email" name="email" required>
-                </div>
-                <div class="form-group">
-                    <label for="subject">Subject</label>
-                    <input type="text" id="subject" name="subject" required>
-                </div>
-                <div class="form-group">
-                    <label for="message">Message</label>
-                    <textarea id="message" name="message" rows="5" required></textarea>
-                </div>
-                <button type="submit" class="cta-button">Send Message</button>
-            </form>
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 w-full p-6 z-50 bg-white border-b">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <a href="index.html" class="text-2xl font-bold">
+                FleetSync
+            </a>
+            <div class="space-x-8">
+                <a href="index.html" class="opacity-70 hover:opacity-100">Home</a>
+                <a href="#" class="opacity-100">Contact</a>
+            </div>
         </div>
-        <a href="index.html" class="back-link">Back to Home</a>
-    </div>
+    </nav>
+
+    <!-- Contact Section -->
+    <section class="min-h-screen pt-24 px-6">
+        <div class="max-w-7xl mx-auto py-16">
+            <div class="text-center mb-16 fade-in">
+                <h1 class="text-5xl font-medium mb-4">Get in Touch</h1>
+                <p class="opacity-70 text-lg max-w-2xl mx-auto">Have questions about FleetSync? We're here to help. Reach out to us and we'll get back to you as soon as possible.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+                <!-- Email Contact -->
+                <div class="contact-card fade-in" style="--delay: 0.2s">
+                    <div class="text-2xl mb-4">📧</div>
+                    <h3 class="text-xl font-medium mb-2">Email Us</h3>
+                    <p class="opacity-70 mb-4">Send us an email anytime, we'll respond within 24 hours</p>
+                    <a href="mailto:support@fleetsync.com" class="underline hover:opacity-80">support@fleetsync.com</a>
+                </div>
+
+                <!-- Phone Contact -->
+                <div class="contact-card fade-in" style="--delay: 0.4s">
+                    <div class="text-2xl mb-4">📱</div>
+                    <h3 class="text-xl font-medium mb-2">Call Us</h3>
+                    <p class="opacity-70 mb-4">Available Monday to Friday, 9:00 AM to 6:00 PM IST</p>
+                    <a href="tel:+919876543210" class="underline hover:opacity-80">+91 98765 43210</a>
+                </div>
+
+                <!-- Office Location -->
+                <div class="contact-card fade-in" style="--delay: 0.6s">
+                    <div class="text-2xl mb-4">📍</div>
+                    <h3 class="text-xl font-medium mb-2">Visit Us</h3>
+                    <p class="opacity-70 mb-4">Come visit our office in Bangalore</p>
+                    <address class="not-italic opacity-70">
+                        123 Tech Park<br>
+                        Electronic City Phase 1<br>
+                        Bangalore, 560100
+                    </address>
+                </div>
+            </div>
+
+            <!-- Contact Form -->
+            <div class="max-w-2xl mx-auto fade-in" style="--delay: 0.8s">
+                <form class="space-y-6" id="contactForm">
+                    <div>
+                        <label class="block mb-2 text-sm">Your Name</label>
+                        <input type="text" class="input-field" required>
+                    </div>
+                    <div>
+                        <label class="block mb-2 text-sm">Email Address</label>
+                        <input type="email" class="input-field" required>
+                    </div>
+                    <div>
+                        <label class="block mb-2 text-sm">Subject</label>
+                        <input type="text" class="input-field" required>
+                    </div>
+                    <div>
+                        <label class="block mb-2 text-sm">Message</label>
+                        <textarea class="input-field" rows="4" required></textarea>
+                    </div>
+                    <button type="submit" class="btn w-full">Send Message</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 px-6 border-t">
+        <div class="max-w-7xl mx-auto text-center">
+            <p class="opacity-70 text-sm">© 2025 FleetSync. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Thank you for your message! We will get back to you soon.');
+            this.reset();
+        });
+    </script>
 </body>
 </html>

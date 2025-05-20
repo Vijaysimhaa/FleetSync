@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FleetSync Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        body { font-family: 'Space Grotesk', sans-serif; background: #fff; color: #141414; }
+        .dashboard-card { box-shadow: 0 2px 8px rgba(0,0,0,0.04); border-radius: 1rem; border: 1px solid #eee; }
+        .dashboard-nav-link.active { color: #6366F1; font-weight: 600; border-bottom: 2px solid #6366F1; }
+    </style>
+</head>
+<body x-data="{
+    planType: 'Professional', // 'Basic', 'Professional', 'Enterprise'
+    page: 'dashboard',
+    showAddDelivery: false,
+    showAddWarehouse: false,
+    showAddDriver: false,
+    showTerms: false,
+    showCancel: false,
+    planWarehouseLimit() {
+        if (this.planType === 'Basic') return 1;
+        if (this.planType === 'Professional') return 2;
+        if (this.planType === 'Enterprise') return 10;
+        return 2;
+    },
+    planFeatures() {
+        if (this.planType === 'Basic') return ['1 Warehouse', 'Up to 1000 Deliveries/mo', 'Basic Analytics'];
+        if (this.planType === 'Professional') return ['2 Warehouses', 'Up to 20,000 Deliveries/mo', 'Advanced Analytics', 'Reports'];
+        if (this.planType === 'Enterprise') return ['10 Warehouses', 'Unlimited Deliveries', 'Premium Analytics', 'Priority Support', 'Custom Integrations'];
+        return [];
+    },
+    deliveries: [
+        { id: '#TN-2025-001', customer: 'Chennai Electronics', driver: 'Raj Kumar', status: 'In Transit', eta: '30 mins' },
+        { id: '#TN-2025-002', customer: 'Express Logistics', driver: 'Priya Singh', status: 'Delivered', eta: 'Delivered' },
+        { id: '#TN-2025-003', customer: 'FastFreight Inc', driver: 'Arun Kumar', status: 'Delayed', eta: '1 hr' }
+    ],
+    warehouses: [
+        { name: 'Warehouse A', stock: '42,500 / 50,000 units', status: 'Optimal', statusClass: 'bg-green-100 text-green-700' },
+        { name: 'Warehouse B', stock: '46,000 / 50,000 units', status: 'Near Capacity', statusClass: 'bg-yellow-100 text-yellow-700' },
+        { name: 'Warehouse C', stock: '32,500 / 50,000 units', status: 'Good', statusClass: 'bg-blue-100 text-blue-700' }
+    ],
+    drivers: [
+        { id: 'DRV-001', name: 'Raj Kumar', phone: '+91 98765 43210', status: 'On Duty', statusClass: 'bg-green-100 text-green-700' },
+        { id: 'DRV-002', name: 'Priya Singh', phone: '+91 98765 43211', status: 'Off Duty', statusClass: 'bg-yellow-100 text-yellow-700' },
+        { id: 'DRV-003', name: 'Arun Kumar', phone: '+91 98765 43212', status: 'On Leave', statusClass: 'bg-blue-100 text-blue-700' }
+    ],
+    newDelivery: { id: '', customer: '', driver: '', status: '', eta: '' },
+    newWarehouse: { name: '', stock: '', status: '', statusClass: '' },
+    newDriver: { id: '', name: '', phone: '', status: '', statusClass: '' },
+    plan: {
+        name: 'Professional',
+        renewal: 'May 20, 2026',
+        usage: '12,000 / 20,000 deliveries',
+        status: 'Active',
+        statusClass: 'bg-green-100 text-green-700'
+    },
+    settings: {
+        currency: 'INR',
+        timeFormat: '24',
+        dateFormat: 'YYYY-MM-DD',
+        timezone: 'UTC',
+        emailNotifications: true,
+        smsNotifications: false,
+        inAppNotifications: true,
+        dataRetention: '90',
+        autoBackup: true
+    }
+}" class="min-h-screen bg-white">
+    <!-- Plan Selector for Demo -->
+    <div class="fixed top-4 right-4 z-50">
+        <select x-model="planType" class="border rounded px-3 py-1">
+            <option value="Basic">Basic Plan</option>
+            <option value="Professional">Professional Plan</option>
+            <option value="Enterprise">Enterprise Plan</option>
+        </select>
+    </div>
+    <!-- Top Navigation -->
+    <nav class="fixed top-0 left-0 w-full bg-white shadow-sm z-50">
+        <div class="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
+            <a href="../index.html" class="text-2xl font-bold tracking-tight text-logo"><span>FleetSync</span></a>
+            <div class="flex items-center space-x-8 text-base">
+                <button class="dashboard-nav-link" :class="{ 'active': page === 'dashboard' }" @click="page = 'dashboard'">Dashboard</button>
+                <button class="dashboard-nav-link" :class="{ 'active': page === 'deliveries' }" @click="page = 'deliveries'">Deliveries</button>
+                <button class="dashboard-nav-link" :class="{ 'active': page === 'warehouses' }" @click="page = 'warehouses'">Warehouses</button>
+                <button class="dashboard-nav-link" :class="{ 'active': page === 'drivers' }" @click="page = 'drivers'">Drivers</button>
+                <button class="dashboard-nav-link" :class="{ 'active': page === 'reports' }" @click="page = 'reports'">Reports</button>
+                <button class="dashboard-nav-link" :class="{ 'active': page === 'profile' }" @click="page = 'profile'">Profile</button>
+                <a href="../login.html" class="ml-4 text-gray-500 hover:text-black">Logout</a>
+            </div>
+        </div>
+    </nav>
+    <main class="pt-28 pb-12 px-4 min-h-screen bg-white">
+        <!-- Plan Features Banner -->
+        <div class="max-w-5xl mx-auto mb-6">
+            <div class="rounded-lg bg-indigo-50 border border-indigo-200 p-4 flex flex-col md:flex-row md:items-center md:justify-between">
+                <div>
+                    <span class="font-semibold text-indigo-700" x-text="planType + ' Plan'"></span>
+                    <span class="ml-2 text-gray-500">Features:</span>
+                    <template x-for="feature in planFeatures()" :key="feature">
+                        <span class="inline-block bg-indigo-100 text-indigo-700 rounded px-2 py-1 text-xs ml-2 mb-1" x-text="feature"></span>
+                    </template>
+                </div>
+            </div>
+        </div>
+        <!-- Dashboard Overview -->
+        <section x-show="page === 'dashboard'" class="max-w-7xl mx-auto">
+            <h1 class="text-3xl font-bold mb-8">Dashboard Overview</h1>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+                <div class="dashboard-card p-6 text-center">
+                    <div class="text-4xl font-bold mb-2">24</div>
+                    <div class="text-gray-500">Active Vehicles</div>
+                </div>
+                <div class="dashboard-card p-6 text-center">
+                    <div class="text-4xl font-bold mb-2">1,284</div>
+                    <div class="text-gray-500">Total Deliveries</div>
+                </div>
+                <div class="dashboard-card p-6 text-center">
+                    <div class="text-4xl font-bold mb-2">76%</div>
+                    <div class="text-gray-500">Warehouse Usage</div>
+                </div>
+                <div class="dashboard-card p-6 text-center">
+                    <div class="text-4xl font-bold mb-2">7</div>
+                    <div class="text-gray-500">Pending Alerts</div>
+                </div>
+                <div class="dashboard-card p-6 text-center">
+                    <div class="text-4xl font-bold mb-2">₹2,45,000</div>
+                    <div class="text-gray-500">Monthly Revenue</div>
+                </div>
+                <div class="dashboard-card p-6 text-center">
+                    <div class="text-4xl font-bold mb-2">98%</div>
+                    <div class="text-gray-500">On-Time Delivery Rate</div>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+                <div class="dashboard-card p-6 lg:col-span-2">
+                    <h2 class="text-xl font-semibold mb-4">Live Fleet Map</h2>
+                    <div id="map" class="w-full h-72 rounded-lg"></div>
+                </div>
+                <div class="dashboard-card p-6">
+                    <h2 class="text-xl font-semibold mb-4">Delivery Performance</h2>
+                    <canvas id="deliveryChart" height="180"></canvas>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="dashboard-card p-6">
+                    <h2 class="text-xl font-semibold mb-4">Recent Activity</h2>
+                    <ul class="space-y-3">
+                        <li class="flex items-center text-gray-700"><span class="w-2 h-2 bg-green-500 rounded-full mr-3"></span>Delivery Completed - Vehicle TN-01-AB-1234</li>
+                        <li class="flex items-center text-gray-700"><span class="w-2 h-2 bg-yellow-400 rounded-full mr-3"></span>Maintenance Due - Vehicle TN-01-CD-5678</li>
+                        <li class="flex items-center text-gray-700"><span class="w-2 h-2 bg-blue-400 rounded-full mr-3"></span>Stock Updated - Warehouse A</li>
+                        <li class="flex items-center text-gray-700"><span class="w-2 h-2 bg-red-400 rounded-full mr-3"></span>Alert: Route Deviation - Vehicle TN-02-EF-9012</li>
+                    </ul>
+                </div>
+                <div class="dashboard-card p-6">
+                    <h2 class="text-xl font-semibold mb-4">Quick Actions</h2>
+                    <div class="flex flex-wrap gap-4">
+                        <button class="btn bg-primary text-white px-4 py-2 rounded-md" @click="page = 'deliveries'">New Delivery</button>
+                        <button class="btn bg-primary text-white px-4 py-2 rounded-md" @click="page = 'drivers'">Add Driver</button>
+                        <button class="btn bg-primary text-white px-4 py-2 rounded-md" @click="page = 'warehouses'">Add Warehouse</button>
+                        <button class="btn bg-primary text-white px-4 py-2 rounded-md" @click="page = 'reports'">View Reports</button>
+                    </div>
+                </div>
+            </div>
+            <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Map
+                if(document.getElementById('map')) {
+                    const map = L.map('map').setView([13.0827, 80.2707], 12);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap contributors'
+                    }).addTo(map);
+                    const vehicles = [
+                        { id: 'TN-01-AB-1234', lat: 13.0827, lng: 80.2707, status: 'active' },
+                        { id: 'TN-01-CD-5678', lat: 13.0622, lng: 80.2356, status: 'stopped' },
+                        { id: 'TN-02-EF-9012', lat: 13.1067, lng: 80.2912, status: 'active' }
+                    ];
+                    vehicles.forEach(vehicle => {
+                        const marker = L.marker([vehicle.lat, vehicle.lng], {
+                            icon: L.divIcon({
+                                className: 'vehicle-marker',
+                                html: '<div style="width: 16px; height: 16px; background:#6366F1; border-radius:50%; border:2px solid #fff;"></div>'
+                            })
+                        }).addTo(map);
+                        marker.bindPopup(`<div class='p-2'><h4 class='font-medium'>${vehicle.id}</h4><p class='text-sm'>Status: ${vehicle.status}</p></div>`);
+                    });
+                }
+                // Chart
+                if(document.getElementById('deliveryChart')) {
+                    new Chart(document.getElementById('deliveryChart').getContext('2d'), {
+                        type: 'line',
+                        data: {
+                            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                            datasets: [{
+                                label: 'On-Time Deliveries',
+                                data: [65, 59, 80, 81, 56, 55, 40],
+                                borderColor: '#6366F1',
+                                backgroundColor: 'rgba(99,102,241,0.1)',
+                                tension: 0.4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: { legend: { display: false } },
+                            scales: { y: { beginAtZero: true } }
+                        }
+                    });
+                }
+            });
+            </script>
+        </section>
+        <!-- Deliveries Section -->
+        <section x-show="page === 'deliveries'" class="max-w-5xl mx-auto">
+            <h1 class="text-2xl font-bold mb-8">Deliveries</h1>
+            <div class="flex justify-end mb-4">
+                <button class="bg-black hover:bg-gray-800 text-white px-6 py-2 rounded-md shadow transition font-semibold" @click="showAddDelivery = true">
+                    + Add Delivery
+                </button>
+            </div>
+            <div class="dashboard-card p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-semibold">Active Deliveries</h2>
+                </div>
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="border-b">
+                            <th class="py-2">Order ID</th>
+                            <th>Customer</th>
+                            <th>Driver</th>
+                            <th>Status</th>
+                            <th>ETA</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="(delivery, i) in deliveries" :key="delivery.id">
+                            <tr class="border-b hover:bg-gray-50">
+                                <td class="py-2 font-medium" x-text="delivery.id"></td>
+                                <td x-text="delivery.customer"></td>
+                                <td x-text="delivery.driver"></td>
+                                <td>
+                                    <span class="px-2 py-1 rounded-full text-xs"
+                                        :class="delivery.status === 'Delivered' ? 'bg-green-100 text-green-700' : delivery.status === 'Delayed' ? 'bg-yellow-100 text-yellow-700' : 'bg-primary/10 text-primary'"
+                                        x-text="delivery.status"></span>
+                                </td>
+                                <td x-text="delivery.eta"></td>
+                                <td>
+                                    <button class="ml-2 text-red-600 hover:text-red-800 font-semibold" @click="deliveries.splice(i, 1)">Remove</button>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+            <!-- Add Delivery Modal -->
+            <div x-show="showAddDelivery" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+                <div class="bg-white rounded-lg shadow-lg max-w-md w-full p-8 relative">
+                    <button @click="showAddDelivery = false" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700">
+                        <svg xmlns='http://www.w3.org/2000/svg' class='h-6 w-6' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 18L18 6M6 6l12 12'/></svg>
+                    </button>
+                    <h2 class="text-xl font-bold mb-6">Add New Delivery</h2>
+                    <form class="space-y-4" @submit.prevent="deliveries.push({...newDelivery}); newDelivery={id:'',customer:'',driver:'',status:'',eta:''}; showAddDelivery=false;">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Order ID</label>
+                            <input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md block w-full p-2.5" x-model="newDelivery.id" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Customer</label>
+                            <input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md block w-full p-2.5" x-model="newDelivery.customer" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Driver</label>
+                            <input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md block w-full p-2.5" x-model="newDelivery.driver" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                            <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md block w-full p-2.5" x-model="newDelivery.status" required>
+                                <option value="">Select status</option>
+                                <option>In Transit</option>
+                                <option>Delivered</option>
+                                <option>Delayed</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">ETA</label>
+                            <input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md block w-full p-2.5" x-model="newDelivery.eta" required>
+                        </div>
+                        <div class="flex justify-end mt-6">
+                            <button type="submit" class="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-md text-sm font-medium">Add Delivery</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+        <!-- Warehouses Section -->
+        <section x-show="page === 'warehouses'" class="max-w-5xl mx-auto">
+            <h1 class="text-2xl font-bold mb-8">Warehouses</h1>
+            <div class="flex justify-end mb-4">
+                <button 
+                    class="bg-black hover:bg-gray-800 text-white px-6 py-2 rounded-md shadow transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                    @click="if(warehouses.length < planWarehouseLimit()) showAddWarehouse = true"
+                    :disabled="warehouses.length >= planWarehouseLimit()"
+                    :title="warehouses.length >= planWarehouseLimit() ? 'Plan limit reached' : ''"
+                >
+                    + Add Warehouse
+                </button>
+            </div>
+            <div class="dashboard-card p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-semibold">Warehouse Management</h2>
+                </div>
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="border-b">
+                            <th class="py-2">Warehouse</th>
+                            <th>Stock</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="(warehouse, i) in warehouses" :key="warehouse.name">
+                            <tr class="border-b hover:bg-gray-50">
+                                <td class="py-2 font-medium" x-text="warehouse.name"></td>
+                                <td x-text="warehouse.stock"></td>
+                                <td><span class="px-2 py-1 rounded-full text-xs" :class="warehouse.statusClass" x-text="warehouse.status"></span></td>
+                                <td>
+                                    <button class="ml-2 text-red-600 hover:text-red-800 font-semibold" @click="warehouses.splice(i, 1)">Remove</button>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+            <!-- Add Warehouse Modal -->
+            <div x-show="showAddWarehouse" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+                <div class="bg-white rounded-lg shadow-lg max-w-md w-full p-8 relative">
+                    <button @click="showAddWarehouse = false" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700">
+                        <svg xmlns='http://www.w3.org/2000/svg' class='h-6 w-6' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 18L18 6M6 6l12 12'/></svg>
+                    </button>
+                    <h2 class="text-xl font-bold mb-6">Add New Warehouse</h2>
+                    <form class="space-y-4" @submit.prevent="warehouses.push({...newWarehouse}); newWarehouse={name:'',stock:'',status:'',statusClass:''}; showAddWarehouse=false;">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Warehouse Name</label>
+                            <input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md block w-full p-2.5" x-model="newWarehouse.name" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Stock</label>
+                            <input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md block w-full p-2.5" x-model="newWarehouse.stock" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                            <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md block w-full p-2.5" x-model="newWarehouse.status" required>
+                                <option value="">Select status</option>
+                                <option>Optimal</option>
+                                <option>Near Capacity</option>
+                                <option>Good</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Status Color</label>
+                            <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md block w-full p-2.5" x-model="newWarehouse.statusClass" required>
+                                <option value="bg-green-100 text-green-700">Optimal</option>
+                                <option value="bg-yellow-100 text-yellow-700">Near Capacity</option>
+                                <option value="bg-blue-100 text-blue-700">Good</option>
+                            </select>
+                        </div>
+                        <div class="flex justify-end mt-6">
+                            <button type="submit" class="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-md text-sm font-medium">Add Warehouse</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+        <!-- Drivers Section -->
+        <section x-show="page === 'drivers'" class="max-w-5xl mx-auto">
+            <h1 class="text-2xl font-bold mb-8">Drivers</h1>
+            <div class="flex justify-end mb-4">
+                <button class="bg-black hover:bg-gray-800 text-white px-6 py-2 rounded-md shadow transition font-semibold" @click="showAddDriver = true">
+                    + Add Driver
+                </button>
+            </div>
+            <div class="dashboard-card p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-semibold">Driver Management</h2>
+                </div>
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="border-b">
+                            <th class="py-2">Driver ID</th>
+                            <th>Name</th>
+                            <th>Phone</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="(driver, i) in drivers" :key="driver.id">
+                            <tr class="border-b hover:bg-gray-50">
+                                <td class="py-2 font-medium" x-text="driver.id"></td>
+                                <td x-text="driver.name"></td>
+                                <td x-text="driver.phone"></td>
+                                <td><span class="px-2 py-1 rounded-full text-xs" :class="driver.statusClass" x-text="driver.status"></span></td>
+                                <td>
+                                    <button class="ml-2 text-red-600 hover:text-red-800 font-semibold" @click="drivers.splice(i, 1)">Remove</button>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+            <!-- Add Driver Modal -->
+            <div x-show="showAddDriver" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+                <div class="bg-white rounded-lg shadow-lg max-w-md w-full p-8 relative">
+                    <button @click="showAddDriver = false" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700">
+                        <svg xmlns='http://www.w3.org/2000/svg' class='h-6 w-6' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 18L18 6M6 6l12 12'/></svg>
+                    </button>
+                    <h2 class="text-xl font-bold mb-6">Add New Driver</h2>
+                    <form class="space-y-4" @submit.prevent="drivers.push({...newDriver}); newDriver={id:'',name:'',phone:'',status:'',statusClass:''}; showAddDriver=false;">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Driver ID</label>
+                            <input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md block w-full p-2.5" x-model="newDriver.id" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                            <input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md block w-full p-2.5" x-model="newDriver.name" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                            <input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md block w-full p-2.5" x-model="newDriver.phone" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                            <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md block w-full p-2.5" x-model="newDriver.status" required>
+                                <option value="">Select status</option>
+                                <option>On Duty</option>
+                                <option>Off Duty</option>
+                                <option>On Leave</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Status Color</label>
+                            <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md block w-full p-2.5" x-model="newDriver.statusClass" required>
+                                <option value="bg-green-100 text-green-700">On Duty</option>
+                                <option value="bg-yellow-100 text-yellow-700">Off Duty</option>
+                                <option value="bg-blue-100 text-blue-700">On Leave</option>
+                            </select>
+                        </div>
+                        <div class="flex justify-end mt-6">
+                            <button type="submit" class="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-md text-sm font-medium">Add Driver</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+        <!-- Reports Section -->
+        <section x-show="page === 'reports'" class="max-w-5xl mx-auto">
+            <h1 class="text-2xl font-bold mb-8">Reports</h1>
+            <div class="dashboard-card p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-semibold">Analytics & Reports</h2>
+                    <button class="btn bg-primary text-white px-4 py-2 rounded-md" @click="">Export</button>
+                </div>
+                <ul class="space-y-3">
+                    <li class="flex items-center text-gray-700"><span class="w-2 h-2 bg-primary rounded-full mr-3"></span>Monthly Performance Report - May 2025</li>
+                    <li class="flex items-center text-gray-700"><span class="w-2 h-2 bg-primary rounded-full mr-3"></span>Warehouse Stock Report - May 2025</li>
+                    <li class="flex items-center text-gray-700"><span class="w-2 h-2 bg-primary rounded-full mr-3"></span>Driver Performance Report - May 2025</li>
+                    <li class="flex items-center text-gray-700"><span class="w-2 h-2 bg-primary rounded-full mr-3"></span>Maintenance Report - May 2025</li>
+                </ul>
+                <div class="mt-8">
+                    <canvas id="reportChart" height="180"></canvas>
+                </div>
+                <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    if(document.getElementById('reportChart')) {
+                        new Chart(document.getElementById('reportChart').getContext('2d'), {
+                            type: 'bar',
+                            data: {
+                                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+                                datasets: [{
+                                    label: 'Deliveries',
+                                    data: [120, 150, 170, 140, 180],
+                                    backgroundColor: '#6366F1'
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                plugins: { legend: { display: false } },
+                                scales: { y: { beginAtZero: true } }
+                            }
+                        });
+                    }
+                });
+                </script>
+            </div>
+        </section>
+        <!-- Profile Section -->
+        <section x-show="page === 'profile'" class="max-w-2xl mx-auto">
+            <h1 class="text-2xl font-bold mb-8">Profile</h1>
+            <div class="dashboard-card p-6 space-y-6">
+                <form class="space-y-4">
+                    <div>
+                        <label for="fullName" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                        <input type="text" id="fullName" class="bg-white border border-gray-300 text-gray-900 text-sm rounded-md block w-full p-2.5" value="Admin">
+                    </div>
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input type="email" id="email" class="bg-white border border-gray-300 text-gray-900 text-sm rounded-md block w-full p-2.5" value="admin@fleetsync.com">
+                    </div>
+                    <div>
+                        <label for="role" class="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                        <input type="text" id="role" class="bg-white border border-gray-300 text-gray-900 text-sm rounded-md block w-full p-2.5" value="Administrator" readonly>
+                    </div>
+                    <div class="flex justify-end">
+                        <button class="bg-primary hover:bg-primary/90 text-white px-6 py-2.5 rounded-md text-sm font-medium whitespace-nowrap">Save Profile</button>
+                    </div>
+                </form>
+                <!-- Plan Information -->
+                <div class="rounded-lg border border-gray-200 bg-white p-6">
+                    <h3 class="text-lg font-medium mb-4 text-gray-900">Plan Information</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <p class="text-sm text-gray-500 mb-1">Current Plan</p>
+                            <p class="text-lg font-semibold text-gray-900" x-text="plan.name"></p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500 mb-1">Renewal Date</p>
+                            <p class="text-lg font-semibold text-gray-900" x-text="plan.renewal"></p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500 mb-1">Usage</p>
+                            <p class="text-lg font-semibold text-gray-900" x-text="plan.usage"></p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500 mb-1">Status</p>
+                            <span class="inline-block px-3 py-1 rounded-full text-xs font-medium" :class="plan.statusClass" x-text="plan.status"></span>
+                        </div>
+                    </div>
+                    <div class="flex justify-end mt-6">
+                        <button @click="showCancel = true" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-md text-sm font-medium">Cancel Subscription</button>
+                    </div>
+                </div>
+                <div x-show="showCancel" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+                    <div class="bg-white rounded-lg shadow-lg max-w-md w-full p-8 relative">
+                        <button @click="showCancel = false" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                        <h2 class="text-xl font-bold mb-4 text-gray-900">Cancel Subscription</h2>
+                        <p class="text-gray-700 mb-6">Are you sure you want to cancel your subscription? This action cannot be undone.</p>
+                        <div class="flex justify-end gap-3">
+                            <button @click="showCancel = false" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-2 rounded-md text-sm font-medium">Keep Subscription</button>
+                            <button @click="showCancel = false" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-md text-sm font-medium">Confirm Cancel</button>
+                        </div>
+                    </div>
+                </div>
+                <!-- System Preferences -->
+                <div class="rounded-lg border border-gray-200 bg-white p-6">
+                    <h3 class="text-lg font-medium mb-4 text-gray-900">System Preferences</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Default Currency</label>
+                            <select class="bg-white border border-gray-300 text-gray-900 text-sm rounded-md block w-full p-2.5 pr-8" x-model="settings.currency">
+                                <option value="INR">INR - Indian Rupees</option>
+                                <option value="USD">USD - US Dollar</option>
+                                <option value="EUR">EUR - Euro</option>
+                                <option value="GBP">GBP - British Pound</option>
+                                <option value="JPY">JPY - Japanese Yen</option>
+                                <option value="AUD">AUD - Australian Dollar</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Time Format</label>
+                            <select class="bg-white border border-gray-300 text-gray-900 text-sm rounded-md block w-full p-2.5 pr-8" x-model="settings.timeFormat">
+                                <option value="12">12-hour (AM/PM)</option>
+                                <option value="24">24-hour</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Date Format</label>
+                            <select class="bg-white border border-gray-300 text-gray-900 text-sm rounded-md block w-full p-2.5 pr-8" x-model="settings.dateFormat">
+                                <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                                <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                                <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Default Timezone</label>
+                            <select class="bg-white border border-gray-300 text-gray-900 text-sm rounded-md block w-full p-2.5 pr-8" x-model="settings.timezone">
+                                <option value="UTC">UTC</option>
+                                <option value="EST">Eastern Time (ET)</option>
+                                <option value="CST">Central Time (CT)</option>
+                                <option value="MST">Mountain Time (MT)</option>
+                                <option value="PST">Pacific Time (PT)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <!-- Notification Settings -->
+                <div class="rounded-lg border border-gray-200 bg-white p-6">
+                    <h3 class="text-lg font-medium mb-4 text-gray-900">Notification Settings</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <label class="text-sm font-medium text-gray-700">Email Notifications</label>
+                            <input type="checkbox" class="form-checkbox h-5 w-5 text-primary" x-model="settings.emailNotifications">
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <label class="text-sm font-medium text-gray-700">SMS Notifications</label>
+                            <input type="checkbox" class="form-checkbox h-5 w-5 text-primary" x-model="settings.smsNotifications">
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <label class="text-sm font-medium text-gray-700">In-App Notifications</label>
+                            <input type="checkbox" class="form-checkbox h-5 w-5 text-primary" x-model="settings.inAppNotifications">
+                        </div>
+                    </div>
+                </div>
+                <!-- Data Management -->
+                <div class="rounded-lg border border-gray-200 bg-white p-6">
+                    <h3 class="text-lg font-medium mb-4 text-gray-900">Data Management</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Data Retention Period</label>
+                            <select class="bg-white border border-gray-300 text-gray-900 text-sm rounded-md block w-full p-2.5 pr-8" x-model="settings.dataRetention">
+                                <option value="30">30 days</option>
+                                <option value="60">60 days</option>
+                                <option value="90">90 days</option>
+                                <option value="180">180 days</option>
+                                <option value="365">1 year</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Automatic Backup</label>
+                            <input type="checkbox" class="form-checkbox h-5 w-5 text-primary ml-2" x-model="settings.autoBackup">
+                        </div>
+                    </div>
+                </div>
+                <!-- Terms and Conditions Section -->
+                <button @click="showTerms = true" class="w-full rounded-lg border border-gray-200 bg-white p-6 text-left hover:bg-gray-50 transition flex flex-col">
+                    <span class="text-lg font-medium mb-2 text-gray-900">Terms and Conditions</span>
+                    <span class="text-gray-500 text-sm">Please review our terms and conditions for using FleetSync. Click to view the full terms.</span>
+                </button>
+                <div x-show="showTerms" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+                    <div class="bg-white rounded-lg shadow-lg max-w-2xl w-full p-8 relative">
+                        <button @click="showTerms = false" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                        <h2 class="text-xl font-bold mb-4 text-gray-900">Terms and Conditions</h2>
+                        <div class="text-gray-700 text-sm max-h-96 overflow-y-auto">
+                            <p><strong>1. Acceptance of Terms:</strong> By using FleetSync, you agree to abide by all terms and conditions set forth herein.</p>
+                            <p class="mt-2"><strong>2. User Responsibilities:</strong> You are responsible for maintaining the confidentiality of your account and for all activities that occur under your account.</p>
+                            <p class="mt-2"><strong>3. Data Usage:</strong> FleetSync may collect and use data as described in our Privacy Policy. You retain ownership of your data, but grant FleetSync a license to use it for service provision.</p>
+                            <p class="mt-2"><strong>4. Service Availability:</strong> We strive for 99.9% uptime, but do not guarantee uninterrupted service. Scheduled maintenance and unforeseen outages may occur.</p>
+                            <p class="mt-2"><strong>5. Limitation of Liability:</strong> FleetSync is not liable for any indirect, incidental, or consequential damages arising from use of the service.</p>
+                            <p class="mt-2"><strong>6. Modifications:</strong> Terms may be updated from time to time. Continued use of the service constitutes acceptance of the new terms.</p>
+                            <p class="mt-2"><strong>7. Contact:</strong> For questions, contact support@fleetsync.com.</p>
+                        </div>
+                        <div class="flex justify-end mt-6">
+                            <button @click="showTerms = false" class="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-md text-sm font-medium">Close</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-end">
+                    <button class="bg-primary hover:bg-primary/90 text-white px-6 py-2.5 rounded-md text-sm font-medium whitespace-nowrap">Save Changes</button>
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

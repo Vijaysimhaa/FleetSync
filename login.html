@@ -3,51 +3,245 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FleetSync - Login</title>
-    <link href="https://fonts.googleapis.com/css2?family=Lobster&family=Comfortaa:wght@300;400;600&display=swap" rel="stylesheet">
+    <title>Login - FleetSync</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root{--purple:#8A2BE2;--dark:#0A0A0A;--light:#FFFFFF}*{margin:0;padding:0;box-sizing:border-box;font-family:'Comfortaa',cursive}body{background:var(--dark);color:var(--light);line-height:1.6;padding:2rem 5%;display:flex;flex-direction:column;align-items:center;min-height:100vh}.logo-link{text-decoration:none;margin-bottom:2rem;display:inline-block}.logo-text{font-family:'Lobster',cursive;font-size:2.5rem;color:var(--light);text-shadow:0 0 20px var(--purple);animation:logoFloat 3s ease-in-out infinite}@keyframes logoFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}.login-container{background:rgba(255,255,255,.05);padding:2rem;border-radius:15px;border:1px solid rgba(138,43,226,.3);width:90%;max-width:400px;box-shadow:0 10px 30px rgba(0,0,0,.3);opacity:0;transform:translateY(20px);transition:opacity 0.3s ease-in-out, transform 0.3s ease-in-out;animation:fadeInUp 0.3s forwards 0.2s, borderPulse 2s linear infinite}@keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}@keyframes borderPulse{0%{box-shadow:0 0 10px var(--purple), inset 0 0 10px var(--purple)}50%{box-shadow:0 0 20px var(--purple), inset 0 0 15px var(--purple)}100%{box-shadow:0 0 10px var(--purple), inset 0 0 10px var(--purple)}}.login-heading{text-align:center;font-size:2rem;margin-bottom:1.5rem;color:var(--light)}.login-form .form-group{margin-bottom:1.2rem}.login-form label{display:block;color:rgba(255,255,255,.8);margin-bottom:.5rem}.login-form input[type="text"],.login-form input[type="password"]{width:100%;padding:.8rem;border:1px solid rgba(255,255,255,.1);border-radius:8px;background:rgba(0,0,0,.3);color:var(--light);font-size:1rem}.login-form input[type="text"]:focus,.login-form input[type="password"]:focus{outline:none;border-color:var(--purple);box-shadow:0 0 5px rgba(138,43,226,.5)}.login-form button{display:inline-block;padding:1rem 2.5rem;background:var(--purple);color:var(--light);border-radius:30px;text-decoration:none;font-weight:600;margin-top:1.5rem;transition:all.3s ease;border:none;cursor:pointer;width:100%;text-align:center}.login-form button:hover{transform:translateY(-3px);box-shadow:0 0 20px var(--purple)}.signup-link{color:rgba(255,255,255,.7);text-decoration:none;margin-top:1rem;display:block;text-align:center;transition:color.3s ease}.signup-link:hover{color:var(--purple)}.error-message{color:#FF4500;margin-top:1rem;text-align:center}
+        :root {
+            --text-color: #141414;
+            --bg-color: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.2;
+        }
+
+        .text-reveal {
+            overflow: hidden;
+        }
+
+        .text-reveal span {
+            display: block;
+            animation: reveal 1s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+
+        @keyframes reveal {
+            from {
+                transform: translateY(100%);
+            }
+            to {
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            opacity: 0;
+            animation: fadeIn 0.8s ease forwards;
+            animation-delay: var(--delay, 0s);
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        .input-field {
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid currentColor;
+            padding: 1rem 0;
+            width: 100%;
+            transition: border-color 0.3s ease;
+            outline: none;
+        }
+
+        .input-field:focus {
+            border-color: var(--text-color);
+        }
+
+        .grain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.05;
+            background-image: url('data:image/png;base64,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');
+        }
+
+        .btn {
+            position: relative;
+            display: inline-block;
+            padding: 1rem 2rem;
+            color: var(--text-color);
+            text-decoration: none;
+            border: 1px solid currentColor;
+            overflow: hidden;
+            transition: color 0.3s ease;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--text-color);
+            transition: transform 0.3s ease;
+            z-index: -1;
+        }
+
+        .btn:hover {
+            color: var(--bg-color);
+        }
+
+        .btn:hover::before {
+            transform: translateX(100%);
+        }
     </style>
+    <!-- Firebase App (the core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script>
+        // TODO: Replace with your Firebase project config
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            appId: "YOUR_APP_ID"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        function googleSignIn() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider)
+                .then(() => {
+                    window.location.href = 'dashboard/dashboard.html';
+                })
+                .catch(error => {
+                    alert('Google sign-in failed: ' + error.message);
+                });
+        }
+    </script>
 </head>
 <body>
-    <a href="index.html" class="logo-link">
-        <span class="logo-text">FleetSync</span>
-    </a>
-    <div class="login-container">
-        <h2 class="login-heading">Login</h2>
-        <form class="login-form" id="login-form">
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" required>
+    <!-- Grain Effect -->
+    <div class="grain"></div>
+
+    <!-- Back to Home -->
+    <a href="index.html" class="fixed top-8 left-8 text-sm tracking-wider hover:opacity-70 transition-opacity">← Back</a>
+
+    <!-- Login Form -->
+    <div class="min-h-screen flex items-center justify-center p-6">
+        <div class="w-full max-w-md">
+            <div class="mb-16 text-reveal">
+                <span class="text-4xl font-medium">Login</span>
             </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" required>
+
+            <form class="space-y-8 fade-in" style="--delay: 0.3s">
+                <div>
+                    <input type="text" class="input-field" placeholder="Username" required>
+                </div>
+                
+                <div>
+                    <input type="password" class="input-field" placeholder="Password" required>
+                </div>
+
+                <div class="flex items-center justify-between text-sm">
+                    <label class="flex items-center">
+                        <input type="checkbox" class="mr-2">
+                        Remember me
+                    </label>
+                    <a href="#" class="hover:opacity-70 transition-opacity">Forgot password?</a>
+                </div>
+
+                <button type="submit" class="btn w-full">
+                    Login
+                </button>
+            </form>
+
+            <div class="mt-6 flex flex-col gap-3">
+                <button type="button" onclick="googleSignIn()" class="w-full flex items-center justify-center gap-2 border border-gray-300 rounded px-4 py-2 bg-white hover:bg-gray-50 transition">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="h-5 w-5">
+                    <span>Sign in with Google</span>
+                </button>
             </div>
-            <button type="submit">Login</button>
-        </form>
-        <a href="signup.html" class="signup-link">Don't have an account? Sign up</a>
-        <p class="error-message" id="login-error" style="display:none;">Invalid username or password.</p>
+
+            <p class="mt-8 text-center fade-in" style="--delay: 0.5s">
+                Don't have an account? 
+                <a href="signup.html" class="underline hover:opacity-70 transition-opacity">Sign up</a>
+            </p>
+
+            <div class="mt-6 text-center text-sm text-gray-500">
+                By logging in, you agree to our
+                <button type="button" class="text-primary underline hover:text-primary/80" onclick="document.getElementById('termsModal').style.display='flex'">Terms and Conditions</button>
+                and
+                <button type="button" class="text-primary underline hover:text-primary/80" onclick="document.getElementById('privacyModal').style.display='flex'">Privacy Policy</button>.
+            </div>
+        </div>
     </div>
+
+    <!-- Terms Modal -->
+    <div id="termsModal" style="display:none" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+        <div class="bg-white rounded-lg shadow-lg max-w-2xl w-full p-8 relative">
+            <button onclick="document.getElementById('termsModal').style.display='none'" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+            <h2 class="text-xl font-bold mb-4 text-gray-900">Terms and Conditions</h2>
+            <div class="text-gray-700 text-sm max-h-96 overflow-y-auto">
+                <p><strong>1. Acceptance of Terms:</strong> By using FleetSync, you agree to abide by all terms and conditions set forth herein.</p>
+                <p class="mt-2"><strong>2. User Responsibilities:</strong> You are responsible for maintaining the confidentiality of your account and for all activities that occur under your account.</p>
+                <p class="mt-2"><strong>3. Data Usage:</strong> FleetSync may collect and use data as described in our Privacy Policy. You retain ownership of your data, but grant FleetSync a license to use it for service provision.</p>
+                <p class="mt-2"><strong>4. Service Availability:</strong> We strive for 99.9% uptime, but do not guarantee uninterrupted service. Scheduled maintenance and unforeseen outages may occur.</p>
+                <p class="mt-2"><strong>5. Limitation of Liability:</strong> FleetSync is not liable for any indirect, incidental, or consequential damages arising from use of the service.</p>
+                <p class="mt-2"><strong>6. Modifications:</strong> Terms may be updated from time to time. Continued use of the service constitutes acceptance of the new terms.</p>
+                <p class="mt-2"><strong>7. Contact:</strong> For questions, contact support@fleetsync.com.</p>
+            </div>
+            <div class="flex justify-end mt-6">
+                <button onclick="document.getElementById('termsModal').style.display='none'" class="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-md text-sm font-medium">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Privacy Modal -->
+    <div id="privacyModal" style="display:none" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+        <div class="bg-white rounded-lg shadow-lg max-w-2xl w-full p-8 relative">
+            <button onclick="document.getElementById('privacyModal').style.display='none'" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+            <h2 class="text-xl font-bold mb-4 text-gray-900">Privacy Policy</h2>
+            <div class="text-gray-700 text-sm max-h-96 overflow-y-auto">
+                <p><strong>1. Data Collection:</strong> We collect only the data necessary to provide and improve our services.</p>
+                <p class="mt-2"><strong>2. Data Usage:</strong> Your data is used solely for service provision, analytics, and support. We do not sell your data.</p>
+                <p class="mt-2"><strong>3. Data Security:</strong> We implement industry-standard security measures to protect your data.</p>
+                <p class="mt-2"><strong>4. Data Sharing:</strong> We do not share your data with third parties except as required by law or for service provision.</p>
+                <p class="mt-2"><strong>5. User Rights:</strong> You may request access, correction, or deletion of your data at any time.</p>
+                <p class="mt-2"><strong>6. Contact:</strong> For privacy questions, contact privacy@fleetsync.com.</p>
+            </div>
+            <div class="flex justify-end mt-6">
+                <button onclick="document.getElementById('privacyModal').style.display='none'" class="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-md text-sm font-medium">Close</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        const loginForm = document.getElementById('login-form');
-        const loginError = document.getElementById('login-error');
-
-        loginForm.addEventListener('submit', (event) => {
-            event.preventDefault();
-
-            const username = loginForm.username.value.trim();
-            const password = loginForm.password.value.trim();
-
-            // **VERY INSECURE** Hardcoded credentials for demonstration purposes only.
-            if (username === 'user' && password === 'password') {
-                // Store user session (insecure, for demonstration only).
-                localStorage.setItem('user', username);
-                // Redirect to the dashboard.
-                window.location.href = 'dashboard.html';
-            } else {
-                loginError.style.display = 'block';
-            }
+        // Form handling
+        const form = document.querySelector('form');
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            window.location.href = 'dashboard/dashboard.html';
         });
     </script>
 </body>

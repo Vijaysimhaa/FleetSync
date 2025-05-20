@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const sidebar = document.querySelector('aside');
   const sidebarOverlay = document.getElementById('sidebar-overlay') || createSidebarOverlay();
   const mobileMenuButton = document.getElementById('mobile-menu-button') || updateMobileMenuButton();
-  const headerMenuButton = document.getElementById('header-menu-button') || updateHeaderMenuButton();
+  const headerMenuButton = document.querySelector('.md\\:hidden button') || updateHeaderMenuButton();
 
   function createSidebarOverlay() {
     // Create overlay if it doesn't exist
@@ -63,31 +63,27 @@ document.addEventListener('DOMContentLoaded', function() {
   function toggleSidebar() {
     if (!sidebar) return;
     
-    // Toggle sidebar visibility and positioning
     sidebar.classList.toggle('hidden');
+    sidebar.classList.toggle('md:flex');
     
-    // If sidebar is now visible, add mobile styling
     if (!sidebar.classList.contains('hidden')) {
       sidebar.classList.add('fixed', 'inset-0', 'z-50', 'h-full', 'w-3/4');
-      document.body.style.overflow = 'hidden'; // Prevent scrolling when sidebar is open
+      document.body.style.overflow = 'hidden';
       
-      // Show overlay
       if (sidebarOverlay) {
         sidebarOverlay.classList.remove('hidden');
       }
     } else {
-      // Remove mobile styling when hiding
       sidebar.classList.remove('fixed', 'inset-0', 'z-50', 'h-full', 'w-3/4');
-      document.body.style.overflow = ''; // Restore scrolling
+      document.body.style.overflow = '';
       
-      // Hide overlay
       if (sidebarOverlay) {
         sidebarOverlay.classList.add('hidden');
       }
     }
   }
 
-  // Add event listeners for mobile menu buttons
+  // Add event listeners
   if (mobileMenuButton) {
     mobileMenuButton.addEventListener('click', toggleSidebar);
   }
@@ -98,7 +94,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Close sidebar when clicking overlay
   if (sidebarOverlay) {
-    sidebarOverlay.addEventListener('click', toggleSidebar);
+    sidebarOverlay.addEventListener('click', () => {
+      if (!sidebar.classList.contains('hidden')) {
+        toggleSidebar();
+      }
+    });
   }
 
   // Add mobile-specific CSS
@@ -248,4 +248,31 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     }
   }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Mobile menu button functionality
+    const mobileMenuButton = document.querySelector('button[x-text="☰"]') || document.querySelector('button[aria-label="Menu"]');
+    if (mobileMenuButton) {
+        mobileMenuButton.addEventListener('click', function() {
+            const sidebar = document.querySelector('aside');
+            if (sidebar) {
+                sidebar.classList.toggle('hidden');
+                sidebar.classList.toggle('md:flex');
+            }
+        });
+    }
+
+    // Close sidebar when clicking outside
+    document.addEventListener('click', function(event) {
+        const sidebar = document.querySelector('aside');
+        const mobileMenuButton = document.querySelector('button[x-text="☰"]') || document.querySelector('button[aria-label="Menu"]');
+        
+        if (sidebar && mobileMenuButton) {
+            if (!sidebar.contains(event.target) && !mobileMenuButton.contains(event.target)) {
+                sidebar.classList.add('hidden');
+                sidebar.classList.add('md:flex');
+            }
+        }
+    });
 });
