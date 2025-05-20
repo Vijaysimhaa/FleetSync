@@ -10,6 +10,50 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Firebase App (the core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script>
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCdpQz_HS52qkYF3tRMnNLnvbK5u2Ssug8",
+            authDomain: "fleetsync-1127.firebaseapp.com",
+            projectId: "fleetsync-1127",
+            storageBucket: "fleetsync-1127.firebasestorage.app",
+            messagingSenderId: "329236279873",
+            appId: "1:329236279873:web:1d01929377f6a370574cc0",
+            measurementId: "G-073H96LD75"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        // Check if user is authenticated
+        auth.onAuthStateChanged(function(user) {
+            if (!user) {
+                // No user is signed in, redirect to login
+                window.location.href = '../login.html';
+            } else {
+                // Update user info in the dashboard
+                const userInfo = JSON.parse(localStorage.getItem('user'));
+                if (userInfo) {
+                    document.getElementById('userFullName').textContent = userInfo.displayName || 'User';
+                    if (userInfo.photoURL) {
+                        document.getElementById('userAvatar').innerHTML = `<img src="${userInfo.photoURL}" alt="Profile" class="w-10 h-10 rounded-full">`;
+                    }
+                }
+            }
+        });
+
+        // Handle logout
+        function handleLogout() {
+            auth.signOut().then(() => {
+                localStorage.removeItem('user');
+                window.location.href = '../login.html';
+            }).catch((error) => {
+                console.error('Logout failed:', error);
+            });
+        }
+    </script>
     <style>
         body { font-family: 'Space Grotesk', sans-serif; background: #fff; color: #141414; }
         .dashboard-card { box-shadow: 0 2px 8px rgba(0,0,0,0.04); border-radius: 1rem; border: 1px solid #eee; }
@@ -92,7 +136,7 @@
                 <button class="dashboard-nav-link" :class="{ 'active': page === 'drivers' }" @click="page = 'drivers'">Drivers</button>
                 <button class="dashboard-nav-link" :class="{ 'active': page === 'reports' }" @click="page = 'reports'">Reports</button>
                 <button class="dashboard-nav-link" :class="{ 'active': page === 'profile' }" @click="page = 'profile'">Profile</button>
-                <a href="../login.html" class="ml-4 text-gray-500 hover:text-black">Logout</a>
+                <a href="javascript:void(0)" onclick="handleLogout()" class="ml-4 text-gray-500 hover:text-black">Logout</a>
             </div>
         </div>
     </nav>
