@@ -4,10 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FleetSync - Fleet Management System</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Google Analytics -->
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl+'&gtm_auth=&gtm_preview=env-1&gtm_cookies_win=x';f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-[YOUR-CONTAINER-ID]');</script>
+    <!-- End Google Tag Manager -->
+    
+    <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-073H96LD75"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
@@ -48,7 +54,10 @@
             });
         });
     </script>
-
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
         :root {
             --text-color: #141414;
@@ -292,6 +301,11 @@
     </style>
 </head>
 <body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-[YOUR-CONTAINER-ID]&gtm_auth=&gtm_preview=env-1&gtm_cookies_win=x"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
     <!-- Loading Animation -->
     <div class="loader-wrapper">
         <div class="loader-text">FleetSync</div>
@@ -301,7 +315,7 @@
     <div class="grain"></div>
 
     <!-- Navigation -->
-    <nav class="fixed top-0 left-0 w-full p-6 z-50 bg-white shadow-sm backdrop-blur-sm">
+    <nav class="fixed top-0 left-0 w-full py-4 px-6 z-50 bg-white/95 backdrop-blur-sm shadow-sm">
         <div class="max-w-7xl mx-auto flex items-center justify-between">
             <a href="index.html" class="text-logo">
                 <span>FleetSync</span>
@@ -315,24 +329,31 @@
                 <a href="checkout.html?plan=professional" class="btn">Get Started</a>
             </div>
             <!-- Hamburger for Mobile -->
-            <button id="mobileMenuBtn" class="md:hidden focus:outline-none" aria-label="Open menu">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button id="mobileMenuBtn" class="md:hidden p-2 hover:bg-gray-50 rounded-lg transition-colors" aria-label="Open menu">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
             </button>
         </div>
         <!-- Mobile Dropdown Menu -->
-        <div id="mobileMenu" class="md:hidden fixed top-0 left-0 w-full h-full bg-white bg-opacity-95 z-50 flex flex-col items-center justify-center space-y-8 text-xl font-medium hidden">
-            <button id="closeMobileMenu" class="absolute top-6 right-6">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
-            <a href="#features" class="block" onclick="closeMenu()">Features</a>
-            <a href="#pricing" class="block" onclick="closeMenu()">Pricing</a>
-            <a href="contact.html" class="block" onclick="closeMenu()">Contact</a>
-            <a href="signup.html" class="block" onclick="closeMenu()">Login</a>
-            <a href="checkout.html?plan=professional" class="btn w-48 text-center" onclick="closeMenu()">Get Started</a>
+        <div id="mobileMenu" class="md:hidden fixed top-0 left-0 w-full h-full bg-white transform transition-transform duration-300 ease-in-out z-[60] flex flex-col items-center justify-center space-y-8 text-xl font-medium translate-x-full">
+            <div class="absolute top-0 left-0 w-full p-6 flex justify-between items-center border-b border-gray-100">
+                <a href="index.html" class="text-logo">
+                    <span>FleetSync</span>
+                </a>
+                <button id="closeMobileMenu" class="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="flex flex-col items-center space-y-6">
+                <a href="#features" class="block px-4 py-2 hover:bg-gray-50 rounded-lg transition-colors w-48 text-center" onclick="closeMenu()">Features</a>
+                <a href="#pricing" class="block px-4 py-2 hover:bg-gray-50 rounded-lg transition-colors w-48 text-center" onclick="closeMenu()">Pricing</a>
+                <a href="contact.html" class="block px-4 py-2 hover:bg-gray-50 rounded-lg transition-colors w-48 text-center" onclick="closeMenu()">Contact</a>
+                <a href="signup.html" class="block px-4 py-2 hover:bg-gray-50 rounded-lg transition-colors w-48 text-center" onclick="closeMenu()">Login</a>
+                <a href="checkout.html?plan=professional" class="btn w-48 text-center" onclick="closeMenu()">Get Started</a>
+            </div>
         </div>
     </nav>
     <script>
@@ -340,16 +361,35 @@
         const mobileMenuBtn = document.getElementById('mobileMenuBtn');
         const mobileMenu = document.getElementById('mobileMenu');
         const closeMobileMenu = document.getElementById('closeMobileMenu');
+        
         function closeMenu() {
-            mobileMenu.classList.add('hidden');
+            mobileMenu.classList.add('translate-x-full');
+            // Re-enable scrolling
+            document.body.style.overflow = '';
         }
+        
         mobileMenuBtn.addEventListener('click', () => {
-            mobileMenu.classList.remove('hidden');
+            mobileMenu.classList.remove('translate-x-full');
+            // Prevent background scrolling when menu is open
+            document.body.style.overflow = 'hidden';
         });
+        
         closeMobileMenu.addEventListener('click', closeMenu);
-        // Optional: close menu on link click
+        
+        // Close menu on link click
         mobileMenu.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', closeMenu);
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('#mobileMenu') || e.target.closest('#mobileMenuBtn')) return;
+            closeMenu();
+        });
+
+        // Close menu on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeMenu();
         });
     </script>
 
@@ -662,7 +702,205 @@
         </div>
     </footer>
 
+    <!-- Cookie Preferences Modal -->
+    <div id="cookiePreferencesModal" style="display:none" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+        <div class="bg-white rounded-lg shadow-lg max-w-3xl w-full p-8 relative max-h-[90vh] overflow-y-auto">
+            <button onclick="document.getElementById('cookiePreferencesModal').style.display='none'" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+            <h2 class="text-xl font-bold mb-4 text-gray-900">Privacy Preferences Center</h2>
+            <p class="text-gray-600 mb-6">We care about your privacy. Select which cookies you allow us to use. Learn more about how we use cookies in our Privacy Policy.</p>
+            
+            <div class="space-y-4">
+                <!-- Essential Cookies -->
+                <div class="cookie-category">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex-1">
+                            <div class="flex items-center">
+                                <h3 class="font-medium">Essential Cookies</h3>
+                                <span class="cookie-info-icon" title="These cookies are necessary for the website to function and cannot be disabled">?</span>
+                            </div>
+                            <p class="text-sm text-gray-600">Required for core site functionality</p>
+                        </div>
+                        <label class="cookie-toggle">
+                            <input type="checkbox" checked disabled>
+                            <span class="cookie-toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="cookie-details text-sm text-gray-500 pl-4">
+                        <p>These cookies are strictly necessary for the website to function properly. They enable basic functions like page navigation, access to secure areas, and form submissions.</p>
+                        <ul class="list-disc pl-4 mt-2">
+                            <li>Session management</li>
+                            <li>Security features</li>
+                            <li>Basic functionality</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Analytics Cookies -->
+                <div class="cookie-category">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex-1">
+                            <div class="flex items-center">
+                                <h3 class="font-medium">Analytics Cookies</h3>
+                                <span class="cookie-info-icon" title="These cookies help us understand how visitors interact with our website">?</span>
+                            </div>
+                            <p class="text-sm text-gray-600">Help us improve our website</p>
+                        </div>
+                        <label class="cookie-toggle">
+                            <input type="checkbox" id="analyticsCookies">
+                            <span class="cookie-toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="cookie-details text-sm text-gray-500 pl-4">
+                        <p>These cookies collect anonymous information about how visitors use our website. This helps us improve the user experience and identify potential issues.</p>
+                        <ul class="list-disc pl-4 mt-2">
+                            <li>Page visit statistics</li>
+                            <li>Time spent on pages</li>
+                            <li>Navigation patterns</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Marketing Cookies -->
+                <div class="cookie-category">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex-1">
+                            <div class="flex items-center">
+                                <h3 class="font-medium">Marketing Cookies</h3>
+                                <span class="cookie-info-icon" title="These cookies are used to deliver personalized advertisements">?</span>
+                            </div>
+                            <p class="text-sm text-gray-600">Personalized advertising</p>
+                        </div>
+                        <label class="cookie-toggle">
+                            <input type="checkbox" id="marketingCookies">
+                            <span class="cookie-toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="cookie-details text-sm text-gray-500 pl-4">
+                        <p>These cookies are used to make advertising messages more relevant to you and your interests. They also help measure the effectiveness of advertising campaigns.</p>
+                        <ul class="list-disc pl-4 mt-2">
+                            <li>Personalized ads</li>
+                            <li>Ad performance tracking</li>
+                            <li>Remarketing</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 pt-4 border-t border-gray-200">
+                <div class="flex flex-col sm:flex-row gap-3 justify-end">
+                    <button onclick="acceptEssentialCookies()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md">Essential Only</button>
+                    <button onclick="acceptAllCookies()" class="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-md">Accept All</button>
+                    <button onclick="saveCookiePreferences()" class="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-md">Save Preferences</button>
+                </div>
+                <p class="text-xs text-gray-500 mt-4">You can change your preferences at any time by clicking the "Cookie Preferences" link in the footer.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cookie Consent Banner -->
+    <div id="cookieConsent" class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg p-4 transform translate-y-full transition-all duration-300 z-[9999]">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="text-sm text-gray-600">
+                <p class="mb-2">We value your privacy</p>
+                <p>We use cookies to enhance your browsing experience, serve personalized ads or content, and analyze our traffic. By clicking "Accept All", you consent to our use of cookies. You can manage your preferences by clicking "Manage Preferences".</p>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-3">
+                <button onclick="document.getElementById('cookiePreferencesModal').style.display='flex'" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md whitespace-nowrap">Manage Preferences</button>
+                <button onclick="acceptEssentialCookies()" class="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 hover:border-gray-400 rounded-md whitespace-nowrap">Essential Only</button>
+                <button onclick="acceptAllCookies()" class="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-md whitespace-nowrap">Accept All</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="js/mobile-styles.js"></script>
+    <script>
+        // Cookie consent functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Clear any existing cookie preferences first to ensure banner shows
+            if (!localStorage.getItem('cookieConsent')) {
+                const cookieConsent = document.getElementById('cookieConsent');
+                if (cookieConsent) {
+                    // Force a reflow to ensure the transition works
+                    void cookieConsent.offsetWidth;
+                    cookieConsent.style.transform = 'translateY(0)';
+                }
+            }
+            
+            // Setup cookie category details expand/collapse
+            document.querySelectorAll('.cookie-category').forEach(category => {
+                const heading = category.querySelector('.flex.items-center.justify-between');
+                const details = category.querySelector('.cookie-details');
+                
+                heading.addEventListener('click', () => {
+                    details.classList.toggle('expanded');
+                });
+            });
+
+            // Show cookie banner if no preference is saved
+            if (!localStorage.getItem('cookieConsent')) {
+                setTimeout(() => {
+                    const cookieConsent = document.getElementById('cookieConsent');
+                    cookieConsent.style.transform = 'translateY(0)';
+                }, 1000);
+            } else {
+                // Apply saved preferences
+                const preferences = JSON.parse(localStorage.getItem('cookieConsent'));
+                if (preferences.analytics === false) {
+                    window['ga-disable-G-073H96LD75'] = true;
+                }
+                if (document.getElementById('analyticsCookies')) {
+                    document.getElementById('analyticsCookies').checked = preferences.analytics;
+                }
+                if (document.getElementById('marketingCookies')) {
+                    document.getElementById('marketingCookies').checked = preferences.marketing;
+                }
+            }
+        });
+
+        function acceptAllCookies() {
+            const preferences = {
+                essential: true,
+                analytics: true,
+                marketing: true
+            };
+            localStorage.setItem('cookieConsent', JSON.stringify(preferences));
+            hideCookieBanner();
+            window['ga-disable-G-073H96LD75'] = false;
+        }
+
+        function acceptEssentialCookies() {
+            const preferences = {
+                essential: true,
+                analytics: false,
+                marketing: false
+            };
+            localStorage.setItem('cookieConsent', JSON.stringify(preferences));
+            window['ga-disable-G-073H96LD75'] = true;
+            hideCookieBanner();
+        }
+
+        function saveCookiePreferences() {
+            const preferences = {
+                essential: true,
+                analytics: document.getElementById('analyticsCookies').checked,
+                marketing: document.getElementById('marketingCookies').checked
+            };
+            localStorage.setItem('cookieConsent', JSON.stringify(preferences));
+            
+            // Apply analytics preference
+            window['ga-disable-G-073H96LD75'] = !preferences.analytics;
+            
+            document.getElementById('cookiePreferencesModal').style.display = 'none';
+            hideCookieBanner();
+        }
+
+        function hideCookieBanner() {
+            const cookieConsent = document.getElementById('cookieConsent');
+            cookieConsent.style.transform = 'translateY(100%)';
+        }
+    </script>
 </body>
 </html>
