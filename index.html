@@ -6,6 +6,49 @@
     <title>FleetSync - Fleet Management System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-073H96LD75"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-073H96LD75', {
+            page_path: window.location.pathname,
+            'site_speed_sample_rate': 100
+        });
+        
+        // Track user interactions
+        document.addEventListener('DOMContentLoaded', function() {
+            // Track CTA button clicks
+            document.querySelectorAll('.btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    gtag('event', 'click', {
+                        'event_category': 'CTA',
+                        'event_label': this.textContent.trim()
+                    });
+                });
+            });
+
+            // Track feature card views
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        gtag('event', 'view', {
+                            'event_category': 'Feature',
+                            'event_label': entry.target.querySelector('h3').textContent
+                        });
+                        observer.unobserve(entry.target);
+                    }
+                });
+            });
+
+            document.querySelectorAll('.feature-card').forEach(card => {
+                observer.observe(card);
+            });
+        });
+    </script>
+
     <style>
         :root {
             --text-color: #141414;
