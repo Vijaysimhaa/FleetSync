@@ -238,6 +238,19 @@
             }
         };
 
+        function updatePlanDetails() {
+            const planKey = document.getElementById('planSelect').value;
+            const details = plansDetails[planKey];
+            document.getElementById('planDetails').innerHTML = `
+                <h2 class="text-xl font-bold mb-2">${details.name} Plan</h2>
+                <div class="text-2xl font-semibold text-indigo-700 mb-4">${details.priceText}</div>
+                <ul class="mb-4 list-disc pl-6 text-gray-700">
+                    ${details.features.map(f => `<li>${f}</li>`).join('')}
+                </ul>
+            `;
+            updateOrderSummary(planKey);
+        }
+
         function applyCoupon() {
             const couponCode = document.getElementById('couponCode').value.trim();
             const couponMessage = document.getElementById('couponMessage');
@@ -294,13 +307,23 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Set default plan to Professional
+            // Check for plan parameter in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const planFromUrl = urlParams.get('plan');
+            
+            // Set default plan to Professional or use plan from URL
             document.getElementById('planSelect').innerHTML = `
                 <option value="Starter">Starter Plan</option>
                 <option value="Professional">Professional Plan</option>
                 <option value="Enterprise">Enterprise Plan</option>
             `;
-            document.getElementById('planSelect').value = 'Professional';
+            
+            if (planFromUrl && plansDetails[planFromUrl.charAt(0).toUpperCase() + planFromUrl.slice(1)]) {
+                document.getElementById('planSelect').value = planFromUrl.charAt(0).toUpperCase() + planFromUrl.slice(1);
+            } else {
+                document.getElementById('planSelect').value = 'Professional';
+            }
+            
             updatePlanDetails();
         });
     </script>
