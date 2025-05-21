@@ -149,24 +149,17 @@
     <!-- Firebase App (the core Firebase SDK) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="dist/main.bundle.js"></script>
     <script>
-      const firebaseConfig = {
-        apiKey: "AIzaSyCdpQz_HS52qkYF3tRMnNLnvbK5u2Ssug8",
-        authDomain: "fleetsync-1127.firebaseapp.com",
-        projectId: "fleetsync-1127",
-        storageBucket: "fleetsync-1127.firebasestorage.app",
-        messagingSenderId: "329236279873",
-        appId: "1:329236279873:web:1d01929377f6a370574cc0",
-        measurementId: "G-073H96LD75"
-      };
+      // Initialize Firebase using imported config
       firebase.initializeApp(firebaseConfig);
       const auth = firebase.auth();
 
       // Check if user is already signed in
       auth.onAuthStateChanged(function(user) {
           if (user) {
-              // User is signed in, redirect to checkout
-              window.location.href = 'checkout.html';
+              // User is signed in, redirect to dashboard
+              window.location.replace('dashboard/dashboard.html');
           }
       });
 
@@ -182,7 +175,7 @@
                 displayName: user.displayName,
                 photoURL: user.photoURL
             }));
-            window.location.href = 'checkout.html';
+            window.location.replace('dashboard/dashboard.html');
           })
           .catch(error => {
             console.error('Google sign-up failed:', error);
@@ -211,45 +204,50 @@
       });
 
       // Form handling with Firebase Authentication
-      const form = document.querySelector('form');
-      form.addEventListener('submit', (e) => {
-          e.preventDefault();
-          
-          if (password.value !== confirmPassword.value) {
-              alert('Passwords do not match');
-              return;
-          }
+      document.addEventListener('DOMContentLoaded', function() {
+          const form = document.querySelector('form');
+          form.addEventListener('submit', (e) => {
+              e.preventDefault();
+              
+              const password = document.getElementById('password');
+              const confirmPassword = document.getElementById('confirmPassword');
+              
+              if (password.value !== confirmPassword.value) {
+                  alert('Passwords do not match');
+                  return;
+              }
 
-          if (password.value.length < 8) {
-              alert('Password must be at least 8 characters');
-              return;
-          }
+              if (password.value.length < 8) {
+                  alert('Password must be at least 8 characters');
+                  return;
+              }
 
-          const email = form.querySelector('input[type="email"]').value;
-          const fullName = form.querySelector('input[placeholder="Full Name"]').value;
+              const email = document.querySelector('input[type="email"]').value;
+              const fullName = document.querySelector('input[placeholder="Full Name"]').value;
 
-          // Create user with email and password
-          auth.createUserWithEmailAndPassword(email, password.value)
-              .then((userCredential) => {
-                  // Update the user's profile with their full name
-                  return userCredential.user.updateProfile({
-                      displayName: fullName
+              // Create user with email and password
+              auth.createUserWithEmailAndPassword(email, password.value)
+                  .then((userCredential) => {
+                      // Update the user's profile with their full name
+                      return userCredential.user.updateProfile({
+                          displayName: fullName
+                      });
+                  })
+                  .then(() => {
+                      const user = auth.currentUser;
+                      localStorage.setItem('user', JSON.stringify({
+                          uid: user.uid,
+                          email: user.email,
+                          displayName: user.displayName,
+                          photoURL: user.photoURL
+                      }));
+                      window.location.replace('dashboard/dashboard.html');
+                  })
+                  .catch((error) => {
+                      console.error('Sign up failed:', error);
+                      alert('Sign up failed: ' + error.message);
                   });
-              })
-              .then(() => {
-                  const user = auth.currentUser;
-                  localStorage.setItem('user', JSON.stringify({
-                      uid: user.uid,
-                      email: user.email,
-                      displayName: user.displayName,
-                      photoURL: user.photoURL
-                  }));
-                  window.location.href = 'checkout.html';
-              })
-              .catch((error) => {
-                  console.error('Sign up failed:', error);
-                  alert('Sign up failed: ' + error.message);
-              });
+          });
       });
     </script>
 </head>

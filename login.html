@@ -124,40 +124,39 @@
     <!-- Firebase App (the core Firebase SDK) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="dist/main.bundle.js"></script>
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyCdpQz_HS52qkYF3tRMnNLnvbK5u2Ssug8",
-            authDomain: "fleetsync-1127.firebaseapp.com",
-            projectId: "fleetsync-1127",
-            storageBucket: "fleetsync-1127.firebasestorage.app",
-            messagingSenderId: "329236279873",
-            appId: "1:329236279873:web:1d01929377f6a370574cc0",
-            measurementId: "G-073H96LD75"
-        };
+        // Initialize Firebase using imported config
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
 
-        // Check if user is already signed in
-        auth.onAuthStateChanged(function(user) {
-            if (user) {
-                // User is signed in, redirect to dashboard
-                window.location.href = 'dashboard/dashboard.html';
-            }
-        });
+        // Set persistence to LOCAL
+        auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+            .then(() => {
+                // Check if user is already signed in
+                auth.onAuthStateChanged(function(user) {
+                    if (user) {
+                        // User is signed in, redirect to dashboard
+                        window.location.replace('dashboard/dashboard.html');
+                    }
+                });
+            })
+            .catch((error) => {
+                console.error('Error setting auth persistence:', error);
+            });
 
         function googleSignIn() {
             const provider = new firebase.auth.GoogleAuthProvider();
             auth.signInWithPopup(provider)
                 .then((result) => {
                     const user = result.user;
-                    // Store user info in localStorage if needed
                     localStorage.setItem('user', JSON.stringify({
                         uid: user.uid,
                         email: user.email,
                         displayName: user.displayName,
                         photoURL: user.photoURL
                     }));
-                    window.location.href = 'dashboard/dashboard.html';
+                    window.location.replace('dashboard/dashboard.html');
                 })
                 .catch(error => {
                     console.error('Google sign-in failed:', error);
@@ -165,28 +164,29 @@
                 });
         }
 
-        // Handle email/password login
-        const form = document.querySelector('form');
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const email = form.querySelector('input[type="text"]').value;
-            const password = form.querySelector('input[type="password"]').value;
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('form');
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
 
-            auth.signInWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    const user = userCredential.user;
-                    localStorage.setItem('user', JSON.stringify({
-                        uid: user.uid,
-                        email: user.email,
-                        displayName: user.displayName,
-                        photoURL: user.photoURL
-                    }));
-                    window.location.href = 'dashboard/dashboard.html';
-                })
-                .catch((error) => {
-                    console.error('Login failed:', error);
-                    alert('Login failed: ' + error.message);
-                });
+                auth.signInWithEmailAndPassword(email, password)
+                    .then((userCredential) => {
+                        const user = userCredential.user;
+                        localStorage.setItem('user', JSON.stringify({
+                            uid: user.uid,
+                            email: user.email,
+                            displayName: user.displayName || email,
+                            photoURL: user.photoURL
+                        }));
+                        window.location.replace('dashboard/dashboard.html');
+                    })
+                    .catch((error) => {
+                        console.error('Login failed:', error);
+                        alert('Login failed: ' + error.message);
+                    });
+            });
         });
     </script>
 </head>
@@ -206,11 +206,11 @@
 
             <form class="space-y-8 fade-in" style="--delay: 0.3s">
                 <div>
-                    <input type="text" class="input-field" placeholder="Username" required>
+                    <input type="email" id="email" class="input-field" placeholder="Email" required>
                 </div>
                 
                 <div>
-                    <input type="password" class="input-field" placeholder="Password" required>
+                    <input type="password" id="password" class="input-field" placeholder="Password" required>
                 </div>
 
                 <div class="flex items-center justify-between text-sm">

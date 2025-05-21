@@ -3,15 +3,15 @@ import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAnalytics } from "firebase/analytics";
 
-// Your web app's Firebase configuration
+// Firebase configuration loaded from environment variables
 const firebaseConfig = {
-    apiKey: "AIzaSyCdpQz_HS52qkYF3tRMnNLnvbK5u2Ssug8",
-    authDomain: "fleetsync-1127.firebaseapp.com",
-    projectId: "fleetsync-1127",
-    storageBucket: "fleetsync-1127.firebasestorage.app",
-    messagingSenderId: "329236279873",
-    appId: "1:329236279873:web:1d01929377f6a370574cc0",
-    measurementId: "G-073H96LD75"
+  apiKey: process.env.FIREBASE_API_KEY,
+  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.FIREBASE_PROJECT_ID,
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.FIREBASE_APP_ID,
+  measurementId: process.env.FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase
@@ -22,3 +22,4 @@ const db = getFirestore(app);
 const analytics = getAnalytics(app);
 
 export { app, db, analytics };
+export default firebaseConfig;

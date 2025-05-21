@@ -769,6 +769,32 @@ loadDashboardData();
 
 // All charts are now initialized in the loadDashboardData function
 
+firebase.auth().onAuthStateChanged(function(user) {
+    if (!user) {
+        // No user is signed in, redirect to login
+        window.location.replace('login.html');
+        return;
+    }
+    
+    // User is signed in, update UI
+    const userInfo = JSON.parse(localStorage.getItem('user'));
+    if (userInfo) {
+        const nameElement = document.querySelector('.profile-link p.text-sm');
+        if (nameElement) {
+            nameElement.textContent = userInfo.displayName || 'User';
+        }
+    }
+});
+
+function signOut() {
+    firebase.auth().signOut().then(() => {
+        localStorage.removeItem('user');
+        window.location.replace('login.html');
+    }).catch((error) => {
+        console.error('Sign out failed:', error);
+    });
+}
+
 });
 </script>
 <script src="js/mobile-styles.js"></script>

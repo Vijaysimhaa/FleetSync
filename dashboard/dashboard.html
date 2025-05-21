@@ -37,22 +37,47 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
 
-        // Check if user is authenticated
-        auth.onAuthStateChanged(function(user) {
-            if (!user) {
-                // No user is signed in, redirect to login
-                window.location.href = '../login.html';
-            } else {
-                // Update user info in the dashboard
-                const userInfo = JSON.parse(localStorage.getItem('user'));
-                if (userInfo) {
-                    document.getElementById('userFullName').textContent = userInfo.displayName || 'User';
-                    if (userInfo.photoURL) {
-                        document.getElementById('userAvatar').innerHTML = `<img src="${userInfo.photoURL}" alt="Profile" class="w-10 h-10 rounded-full">`;
+        // Wait for the initial auth state to be ready
+        let authInitialized = false;
+        
+        // Set persistence to LOCAL and check auth state
+        auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+            .then(() => {
+                // Check if user is authenticated
+                auth.onAuthStateChanged(function(user) {
+                    if (!authInitialized) {
+                        authInitialized = true;
+                        if (!user) {
+                            // No user is signed in, redirect to login
+                            window.location.href = '../login.html';
+                        } else {
+                            // Update user info in the dashboard
+                            const userInfo = JSON.parse(localStorage.getItem('user'));
+                            if (userInfo) {
+                                // Update user info display
+                                const nameElement = document.querySelector('.profile-link p.text-sm');
+                                if (nameElement) {
+                                    nameElement.textContent = userInfo.displayName || 'User';
+                                }
+                            }
+                            // Initialize the dashboard content since user is authenticated
+                            initializeDashboard();
+                        }
                     }
-                }
+                });
+            })
+            .catch((error) => {
+                console.error('Error setting auth persistence:', error);
+                window.location.href = '../login.html';
+            });
+
+        // Function to initialize dashboard content
+        function initializeDashboard() {
+            if (document.getElementById('map')) {
+                // Initialize map and other dashboard components
+                // ...existing initialization code...
             }
-        });
+        }
 
         // Handle logout
         function handleLogout() {
@@ -63,11 +88,414 @@
                 console.error('Logout failed:', error);
             });
         }
+
+        function generateSyntheticData(dateRange = 30) {
+            const now = new Date();
+            const deliveryPatterns = {
+                'Morning Rush': { startHour: 8, endHour: 11, weight: 0.3 },
+                'Lunch Time': { startHour: 12, endHour: 14, weight: 0.25 },
+                'Evening Peak': { startHour: 16, endHour: 19, weight: 0.35 },
+                'Night Time': { startHour: 20, endHour: 23, weight: 0.1 }
+            };
+
+            function generateTimeBasedData(date) {
+                const hour = date.getHours();
+                let baseVolume = 10;
+                
+                for (const [pattern, info] of Object.entries(deliveryPatterns)) {
+                    if (hour >= info.startHour && hour <= info.endHour) {
+                        baseVolume *= (1 + info.weight);
+                    }
+                }
+                
+                // Add day-of-week variations
+                const dayFactor = date.getDay() === 0 || date.getDay() === 6 ? 0.7 : 1.2;
+                return Math.round(baseVolume * dayFactor * (0.9 + Math.random() * 0.2));
+            }
+
+            // Generate delivery data with realistic patterns
+            const deliveries = Array.from({ length: dateRange }, (_, i) => {
+                const date = new Date(now);
+                date.setDate(date.getDate() - i);
+                
+                return {
+                    date: date.toISOString().split('T')[0],
+                    volume: generateTimeBasedData(date),
+                    efficiency: 85 + Math.random() * 10,
+                    onTime: Math.random() > 0.15 // 85% on-time rate
+                };
+            });
+
+            // Generate vehicle utilization data
+            const vehicles = Array.from({ length: 10 }, (_, i) => ({
+                id: `VEH-${String(i + 1).padStart(4, '0')}`,
+                type: ['Truck', 'Van', 'Bike'][i % 3],
+                status: ['Active', 'Maintenance', 'Idle'][Math.floor(Math.random() * 3)],
+                utilization: Math.round(65 + Math.random() * 25),
+                mileage: Math.round(1000 + Math.random() * 5000),
+                fuelEfficiency: Math.round(80 + Math.random() * 15),
+                maintenanceScore: Math.round(70 + Math.random() * 25)
+            }));
+
+            // Generate warehouse analytics
+            const warehouses = ['Warehouse A', 'Warehouse B', 'Warehouse C'].map(name => ({
+                name,
+                capacity: 50000,
+                currentStock: Math.round(30000 + Math.random() * 15000),
+                turnoverRate: Math.round(70 + Math.random() * 20),
+                pickingEfficiency: Math.round(75 + Math.random() * 20),
+                stockoutRisk: Math.random() < 0.1 ? 'High' : Math.random() < 0.3 ? 'Medium' : 'Low'
+            }));
+
+            const syntheticData = {
+                deliveries,
+                vehicles,
+                warehouses,
+                analytics: {
+                    averageDeliveryTime: Math.round(25 + Math.random() * 10),
+                    customerSatisfaction: Math.round(85 + Math.random() * 10),
+                    fuelEfficiency: Math.round(75 + Math.random() * 15),
+                    maintenanceCompliance: Math.round(90 + Math.random() * 8)
+                }
+            };
+
+            // Update the preview and charts
+            document.querySelector('#syntheticDataPreview pre').textContent = JSON.stringify(syntheticData, null, 2);
+            updateAnalyticsCharts(syntheticData);
+            return syntheticData;
+        }
+
+        function updateAnalyticsCharts(data) {
+            // Update Delivery Trends Chart
+            const deliveryTrends = echarts.init(document.getElementById('deliveryTrendsChart'));
+            const deliveryOption = {
+                title: { text: 'Delivery Trends', left: 'center' },
+                tooltip: { trigger: 'axis' },
+                xAxis: {
+                    type: 'category',
+                    data: data.deliveries.map(d => d.date).reverse()
+                },
+                yAxis: {
+                    type: 'value',
+                    name: 'Deliveries'
+                },
+                series: [{
+                    name: 'Daily Deliveries',
+                    type: 'line',
+                    smooth: true,
+                    data: data.deliveries.map(d => d.volume).reverse(),
+                    areaStyle: { opacity: 0.2 }
+                }]
+            };
+            deliveryTrends.setOption(deliveryOption);
+
+            // Update Vehicle Performance Chart
+            const vehiclePerf = echarts.init(document.getElementById('vehiclePerfChart'));
+            const vehicleOption = {
+                title: { text: 'Vehicle Performance', left: 'center' },
+                tooltip: { trigger: 'item' },
+                radar: {
+                    indicator: [
+                        { name: 'Utilization', max: 100 },
+                        { name: 'Fuel Efficiency', max: 100 },
+                        { name: 'Maintenance', max: 100 }
+                    ]
+                },
+                series: [{
+                    type: 'radar',
+                    data: data.vehicles.slice(0, 5).map(v => ({
+                        value: [v.utilization, v.fuelEfficiency, v.maintenanceScore],
+                        name: v.id
+                    }))
+                }]
+            };
+            vehiclePerf.setOption(vehicleOption);
+
+            // Warehouse Status Chart
+            const warehouseStatus = echarts.init(document.getElementById('warehouseStatusChart'));
+            const warehouseOption = {
+                title: { text: 'Warehouse Utilization', left: 'center' },
+                tooltip: { trigger: 'axis' },
+                xAxis: { type: 'category', data: data.warehouses.map(w => w.name) },
+                yAxis: { type: 'value', max: 100 },
+                series: [{
+                    type: 'bar',
+                    data: data.warehouses.map(w => (w.currentStock / w.capacity) * 100)
+                }]
+            };
+            warehouseStatus.setOption(warehouseOption);
+        }
+    </script>
+    <script>
+        // Funnel Analysis Functions
+        function initFunnelAnalysis() {
+            const funnelChart = echarts.init(document.getElementById('funnelChart'));
+            const funnelOption = {
+                title: {
+                    text: 'Delivery Process Funnel',
+                    left: 'center'
+                },
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{b}: {c} ({d}%)'
+                },
+                series: [{
+                    name: 'Funnel',
+                    type: 'funnel',
+                    left: '10%',
+                    width: '80%',
+                    minSize: '0%',
+                    maxSize: '100%',
+                    sort: 'descending',
+                    gap: 2,
+                    label: {
+                        show: true,
+                        position: 'inside'
+                    },
+                    emphasis: {
+                        label: {
+                            fontSize: 20
+                        }
+                    },
+                    data: [
+                        { value: 1250, name: 'Order Creation' },
+                        { value: 1060, name: 'Driver Assignment' },
+                        { value: 968, name: 'Pickup Complete' },
+                        { value: 856, name: 'Delivery Complete' }
+                    ]
+                }]
+            };
+            funnelChart.setOption(funnelOption);
+            
+            // Update funnel on type change
+            document.getElementById('funnelType').addEventListener('change', updateFunnelData);
+            document.getElementById('dateRange').addEventListener('change', updateFunnelData);
+        }
+
+        function updateFunnelData() {
+            const type = document.getElementById('funnelType').value;
+            const range = document.getElementById('dateRange').value;
+            // Fetch and update data based on type and range
+            const data = getFunnelData(type, range);
+            updateFunnelChart(data);
+            updateFunnelMetrics(data);
+        }
+
+        function getFunnelData(type, range) {
+            // Generate realistic funnel data based on type and date range
+            const baseData = {
+                'delivery': [
+                    { value: 1000, name: 'Order Creation' },
+                    { value: 850, name: 'Driver Assignment' },
+                    { value: 720, name: 'Pickup Complete' },
+                    { value: 650, name: 'Delivery Complete' }
+                ],
+                'signup': [
+                    { value: 500, name: 'Visit' },
+                    { value: 400, name: 'Sign Up Start' },
+                    { value: 300, name: 'Form Complete' },
+                    { value: 250, name: 'Email Verified' }
+                ],
+                'checkout': [
+                    { value: 800, name: 'Cart View' },
+                    { value: 600, name: 'Checkout Start' },
+                    { value: 450, name: 'Payment Info' },
+                    { value: 380, name: 'Purchase Complete' }
+                ]
+            };
+
+            // Apply date range multiplier
+            const rangeMultiplier = {
+                'today': 0.2,
+                'week': 1,
+                'month': 4,
+                'quarter': 12
+            };
+
+            const data = baseData[type].map(item => ({
+                ...item,
+                value: Math.round(item.value * rangeMultiplier[range])
+            }));
+
+            return data;
+        }
+
+        function updateFunnelChart(data) {
+            const funnelChart = echarts.init(document.getElementById('funnelChart'));
+            const funnelOption = {
+                title: {
+                    text: 'Funnel Analysis',
+                    left: 'center'
+                },
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{b}: {c} ({d}%)'
+                },
+                series: [{
+                    name: 'Funnel',
+                    type: 'funnel',
+                    left: '10%',
+                    width: '80%',
+                    minSize: '0%',
+                    maxSize: '100%',
+                    sort: 'descending',
+                    gap: 2,
+                    label: {
+                        show: true,
+                        position: 'inside',
+                        formatter: '{b}: {c}'
+                    },
+                    emphasis: {
+                        label: {
+                            fontSize: 20
+                        }
+                    },
+                    data: data
+                }]
+            };
+            funnelChart.setOption(funnelOption);
+        }
+
+        function updateFunnelMetrics(data) {
+            const totalEntries = data[0].value;
+            const totalConversions = data[data.length - 1].value;
+            const conversionRate = ((totalConversions / totalEntries) * 100).toFixed(1);
+            const dropoffRate = (100 - conversionRate).toFixed(1);
+            
+            document.querySelector('#funnelDetails').innerHTML = data.map((stage, index) => {
+                const nextStage = data[index + 1];
+                const dropoff = index < data.length - 1 ? stage.value - nextStage.value : 0;
+                const dropoffPercent = index < data.length - 1 ? 
+                    ((dropoff / stage.value) * 100).toFixed(1) : 0;
+                    
+                return `
+                    <div class="mb-4">
+                        <h4 class="font-medium">${stage.name}</h4>
+                        <div class="flex justify-between text-sm mt-1">
+                            <span>Total: ${stage.value}</span>
+                            ${index < data.length - 1 ? 
+                                `<span class="text-red-500">Dropoff: ${dropoff} (${dropoffPercent}%)</span>` 
+                                : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Cohort Analysis Functions
+        function initCohortAnalysis() {
+            const cohortChart = echarts.init(document.getElementById('cohortHeatmap'));
+            const cohortData = generateCohortData();
+            
+            const cohortOption = {
+                title: {
+                    text: 'Customer Retention by Cohort',
+                    left: 'center'
+                },
+                tooltip: {
+                    position: 'top'
+                },
+                animation: true,
+                grid: {
+                    height: '70%',
+                    top: '10%'
+                },
+                xAxis: {
+                    type: 'category',
+                    data: ['Month 0', 'Month 1', 'Month 2', 'Month 3'],
+                    splitArea: {
+                        show: true
+                    }
+                },
+                yAxis: {
+                    type: 'category',
+                    data: ['May 2025', 'Apr 2025', 'Mar 2025', 'Feb 2025', 'Jan 2025'],
+                    splitArea: {
+                        show: true
+                    }
+                },
+                visualMap: {
+                    min: 0,
+                    max: 100,
+                    calculable: true,
+                    orient: 'horizontal',
+                    left: 'center',
+                    bottom: '0%',
+                    inRange: {
+                        color: ['#FFF5F5', '#FE4365']
+                    }
+                },
+                series: [{
+                    name: 'Retention Rate',
+                    type: 'heatmap',
+                    data: cohortData,
+                    label: {
+                        show: true,
+                        formatter: function(params) {
+                            return params.data[2] + '%';
+                        }
+                    },
+                    emphasis: {
+                        itemStyle: {
+                            shadowBlur: 10,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    }
+                }]
+            };
+            
+            cohortChart.setOption(cohortOption);
+            
+            // Update cohort on metric/size change
+            document.getElementById('cohortMetric').addEventListener('change', updateCohortData);
+            document.getElementById('cohortSize').addEventListener('change', updateCohortData);
+        }
+
+        function generateCohortData() {
+            const months = ['May 2025', 'Apr 2025', 'Mar 2025', 'Feb 2025', 'Jan 2025'];
+            const data = [];
+            
+            months.forEach((month, i) => {
+                for (let j = 0; j < 4; j++) {
+                    // Generate retention rate that declines over time
+                    const baseRate = 100 - (j * 15);
+                    const variance = Math.random() * 10 - 5;
+                    data.push([j, i, Math.round(Math.max(baseRate + variance, 0))]);
+                }
+            });
+            
+            return data;
+        }
+
+        // Export functions
+        function exportFunnelData() {
+            // Implementation for exporting funnel data
+            console.log('Exporting funnel data...');
+        }
+
+        function exportCohortData() {
+            // Implementation for exporting cohort data
+            console.log('Exporting cohort data...');
+        }
+
+        // Initialize both analyses when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initFunnelAnalysis();
+            initCohortAnalysis();
+        });
     </script>
     <style>
         body { font-family: 'Space Grotesk', sans-serif; background: #fff; color: #141414; }
-        .dashboard-card { box-shadow: 0 2px 8px rgba(0,0,0,0.04); border-radius: 1rem; border: 1px solid #eee; }
+        .dashboard-card { 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04); 
+            border-radius: 1rem; 
+            border: 1px solid #eee; 
+            position: relative;
+            z-index: 10;
+        }
         .dashboard-nav-link.active { color: #6366F1; font-weight: 600; border-bottom: 2px solid #6366F1; }
+        main { position: relative; z-index: 10; }
+        nav { position: relative; z-index: 50; }
     </style>
 </head>
 <body x-data="{
@@ -128,11 +556,7 @@
         autoBackup: true
     },
     generateSyntheticData() {
-        const syntheticData = {
-            deliveries: generateDeliveryData(),
-            customers: generateCustomerData(),
-            vehicles: generateVehicleData()
-        };
+        const syntheticData = generateSyntheticData();
         document.querySelector('#syntheticDataPreview pre').textContent = 
             JSON.stringify(syntheticData, null, 2);
     }
@@ -255,25 +679,96 @@
                 <!-- Funnel Analysis -->
                 <div x-show="currentAnalytics === 'funnel'" class="space-y-6">
                     <div class="bg-gray-50 p-4 rounded-lg">
-                        <h3 class="text-lg font-medium mb-4">Delivery Funnel Analysis</h3>
-                        <div id="funnelChart" class="h-80"></div>
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-medium">Funnel Analysis</h3>
+                            <div class="flex gap-2">
+                                <select id="funnelType" class="bg-white border border-gray-300 text-sm rounded-md p-2">
+                                    <option value="delivery">Delivery Process</option>
+                                    <option value="signup">User Signup</option>
+                                    <option value="checkout">Checkout Process</option>
+                                </select>
+                                <select id="dateRange" class="bg-white border border-gray-300 text-sm rounded-md p-2">
+                                    <option value="today">Today</option>
+                                    <option value="week">Last 7 days</option>
+                                    <option value="month">Last 30 days</option>
+                                    <option value="quarter">Last 90 days</option>
+                                </select>
+                                <button onclick="exportFunnelData()" class="bg-primary text-white px-4 py-2 rounded-md">Export Data</button>
+                            </div>
+                        </div>
+
+                        <!-- Funnel Visualization -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="bg-white p-4 rounded-lg shadow">
+                                <div id="funnelChart" class="h-96"></div>
+                            </div>
+                            
+                            <!-- Funnel Stage Details -->
+                            <div class="bg-white p-4 rounded-lg shadow">
+                                <div id="funnelDetails" class="space-y-4">
+                                    <!-- Stage details will be populated dynamically -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Funnel Insights -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                            <div class="bg-white p-4 rounded-lg shadow">
+                                <h4 class="text-sm font-medium text-gray-500">Overall Conversion</h4>
+                                <p class="text-2xl font-bold">62%</p>
+                                <span class="text-green-500 text-sm">↑ 3% vs previous period</span>
+                            </div>
+                            <div class="bg-white p-4 rounded-lg shadow">
+                                <h4 class="text-sm font-medium text-gray-500">Biggest Drop-off</h4>
+                                <p class="text-2xl font-bold">Driver Assignment</p>
+                                <span class="text-red-500 text-sm">-13% conversion rate</span>
+                            </div>
+                            <div class="bg-white p-4 rounded-lg shadow">
+                                <h4 class="text-sm font-medium text-gray-500">Opportunity Size</h4>
+                                <p class="text-2xl font-bold">2,450 users</p>
+                                <span class="text-blue-500 text-sm">potential recovery</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="grid grid-cols-4 gap-4 text-center">
-                        <div class="bg-white p-4 rounded-lg shadow">
-                            <div class="text-2xl font-bold text-primary">85%</div>
-                            <div class="text-sm text-gray-600">Order Creation</div>
+                </div>
+
+                <!-- Funnel Analysis Section -->
+                <div class="bg-white p-6 rounded-lg shadow-lg mb-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold">Funnel Analysis</h2>
+                        <div class="flex space-x-4">
+                            <select id="funnelType" class="rounded border p-2">
+                                <option value="delivery">Delivery Funnel</option>
+                                <option value="registration">Registration Funnel</option>
+                                <option value="purchase">Purchase Funnel</option>
+                            </select>
+                            <select id="dateRange" class="rounded border p-2">
+                                <option value="7d">Last 7 Days</option>
+                                <option value="30d">Last 30 Days</option>
+                                <option value="90d">Last 90 Days</option>
+                            </select>
+                            <button onclick="exportFunnelData()" class="bg-blue-500 text-white px-4 py-2 rounded">
+                                Export Data
+                            </button>
                         </div>
-                        <div class="bg-white p-4 rounded-lg shadow">
-                            <div class="text-2xl font-bold text-primary">72%</div>
-                            <div class="text-sm text-gray-600">Driver Assignment</div>
+                    </div>
+                    <div id="funnelChart" style="height: 400px;"></div>
+                    <div class="grid grid-cols-4 gap-4 mt-4">
+                        <div class="p-4 bg-gray-50 rounded">
+                            <h3 class="font-semibold">Conversion Rate</h3>
+                            <p class="text-2xl text-blue-600">62.4%</p>
                         </div>
-                        <div class="bg-white p-4 rounded-lg shadow">
-                            <div class="text-2xl font-bold text-primary">68%</div>
-                            <div class="text-sm text-gray-600">Pickup Complete</div>
+                        <div class="p-4 bg-gray-50 rounded">
+                            <h3 class="font-semibold">Drop-off Rate</h3>
+                            <p class="text-2xl text-red-600">37.6%</p>
                         </div>
-                        <div class="bg-white p-4 rounded-lg shadow">
-                            <div class="text-2xl font-bold text-primary">62%</div>
-                            <div class="text-sm text-gray-600">Delivery Complete</div>
+                        <div class="p-4 bg-gray-50 rounded">
+                            <h3 class="font-semibold">Average Time</h3>
+                            <p class="text-2xl text-green-600">45m</p>
+                        </div>
+                        <div class="p-4 bg-gray-50 rounded">
+                            <h3 class="font-semibold">Total Value</h3>
+                            <p class="text-2xl text-purple-600">$12.5k</p>
                         </div>
                     </div>
                 </div>
@@ -281,56 +776,115 @@
                 <!-- Cohort Analysis -->
                 <div x-show="currentAnalytics === 'cohort'" class="space-y-6">
                     <div class="bg-gray-50 p-4 rounded-lg">
-                        <h3 class="text-lg font-medium mb-4">Customer Retention Cohort</h3>
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead>
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cohort</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Month 0</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Month 1</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Month 2</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Month 3</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-200" id="cohortTable">
-                                    <!-- Cohort data will be injected here -->
-                                </tbody>
-                            </table>
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-medium">Cohort Analysis</h3>
+                            <div class="flex gap-2">
+                                <select id="cohortMetric" class="bg-white border border-gray-300 text-sm rounded-md p-2">
+                                    <option value="retention">User Retention</option>
+                                    <option value="revenue">Revenue per User</option>
+                                    <option value="frequency">Order Frequency</option>
+                                    <option value="lifetime">Customer Lifetime</option>
+                                </select>
+                                <select id="cohortSize" class="bg-white border border-gray-300 text-sm rounded-md p-2">
+                                    <option value="daily">Daily Cohorts</option>
+                                    <option value="weekly">Weekly Cohorts</option>
+                                    <option value="monthly">Monthly Cohorts</option>
+                                </select>
+                                <button onclick="exportCohortData()" class="bg-primary text-white px-4 py-2 rounded-md">Export Data</button>
+                            </div>
                         </div>
-                        <div id="cohortChart" class="h-80 mt-4"></div>
+
+                        <!-- Cohort Visualization -->
+                        <div class="grid grid-cols-1 gap-6">
+                            <div class="bg-white p-4 rounded-lg shadow">
+                                <div id="cohortHeatmap" class="h-96"></div>
+                            </div>
+                            
+                            <!-- Cohort Details Table -->
+                            <div class="bg-white p-4 rounded-lg shadow overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cohort</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Size</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Month 0</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Month 1</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Month 2</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Month 3</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="cohortTableBody" class="bg-white divide-y divide-gray-200">
+                                        <!-- Dynamically populated by JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Cohort Insights -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                            <div class="bg-white p-4 rounded-lg shadow">
+                                <h4 class="text-sm font-medium text-gray-500">Best Performing Cohort</h4>
+                                <p class="text-2xl font-bold">March 2025</p>
+                                <span class="text-green-500 text-sm">85% retention</span>
+                            </div>
+                            <div class="bg-white p-4 rounded-lg shadow">
+                                <h4 class="text-sm font-medium text-gray-500">Average Retention</h4>
+                                <p class="text-2xl font-bold">68%</p>
+                                <span class="text-green-500 text-sm">↑ 5% vs previous period</span>
+                            </div>
+                            <div class="bg-white p-4 rounded-lg shadow">
+                                <h4 class="text-sm font-medium text-gray-500">Lifetime Value</h4>
+                                <p class="text-2xl font-bold">$245</p>
+                                <span class="text-green-500 text-sm">↑ $12 vs previous period</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Synthetic Data -->
+                <!-- Cohort Analysis Section -->
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold">Cohort Analysis</h2>
+                        <div class="flex space-x-4">
+                            <select id="cohortMetric" class="rounded border p-2">
+                                <option value="retention">Retention Rate</option>
+                                <option value="revenue">Revenue</option>
+                                <option value="frequency">Purchase Frequency</option>
+                            </select>
+                            <select id="cohortSize" class="rounded border p-2">
+                                <option value="monthly">Monthly</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="daily">Daily</option>
+                            </select>
+                            <button onclick="exportCohortData()" class="bg-blue-500 text-white px-4 py-2 rounded">
+                                Export Data
+                            </button>
+                        </div>
+                    </div>
+                    <div id="cohortHeatmap" style="height: 400px;"></div>
+                    <div class="mt-4">
+                        <h3 class="font-semibold mb-2">Key Insights</h3>
+                        <ul class="list-disc pl-5">
+                            <li>Best performing cohort: March 2025 (76% retention)</li>
+                            <li>Average retention after 3 months: 45%</li>
+                            <li>Strongest drop-off: Month 1 to Month 2</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Synthetic Data Section -->
                 <div x-show="currentAnalytics === 'synthetic'" class="space-y-6">
                     <div class="bg-gray-50 p-4 rounded-lg">
-                        <h3 class="text-lg font-medium mb-4">Synthetic Data Generation</h3>
-                        <div class="grid grid-cols-2 gap-4 mb-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Date Range</label>
-                                <select class="bg-white border border-gray-300 text-gray-900 text-sm rounded-md block w-full p-2.5">
-                                    <option>Last 7 days</option>
-                                    <option>Last 30 days</option>
-                                    <option>Last 90 days</option>
-                                    <option>Custom Range</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Data Type</label>
-                                <select class="bg-white border border-gray-300 text-gray-900 text-sm rounded-md block w-full p-2.5">
-                                    <option>Delivery Data</option>
-                                    <option>Customer Data</option>
-                                    <option>Vehicle Data</option>
-                                    <option>All Data Types</option>
-                                </select>
-                            </div>
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-medium">Synthetic Data Preview</h3>
+                            <button class="btn bg-primary text-white px-4 py-2 rounded-md" @click="generateSyntheticData()">Generate New Data</button>
                         </div>
-                        <div id="syntheticDataPreview" class="border rounded-lg p-4 bg-white">
-                            <pre class="text-sm text-gray-600 overflow-x-auto"></pre>
+                        <div class="bg-white p-4 rounded-lg shadow">
+                            <pre id="syntheticDataPreview" class="overflow-auto max-h-96"></pre>
                         </div>
                     </div>
                 </div>
+
             </div>
 
             <script>
@@ -496,36 +1050,6 @@
                     `;
                     table.appendChild(row);
                 });
-            }
-
-            function generateDeliveryData() {
-                // Generate synthetic delivery data
-                return Array.from({ length: 10 }, (_, i) => ({
-                    id: `DEL-${String(i + 1).padStart(4, '0')}`,
-                    customer: `Customer ${i + 1}`,
-                    status: ['Pending', 'In Transit', 'Delivered'][Math.floor(Math.random() * 3)],
-                    timestamp: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString()
-                }));
-            }
-
-            function generateCustomerData() {
-                // Generate synthetic customer data
-                return Array.from({ length: 5 }, (_, i) => ({
-                    id: `CUST-${String(i + 1).padStart(4, '0')}`,
-                    name: `Customer ${i + 1}`,
-                    deliveries: Math.floor(Math.random() * 50),
-                    joinDate: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString()
-                }));
-            }
-
-            function generateVehicleData() {
-                // Generate synthetic vehicle data
-                return Array.from({ length: 3 }, (_, i) => ({
-                    id: `VEH-${String(i + 1).padStart(4, '0')}`,
-                    type: ['Truck', 'Van', 'Bike'][i % 3],
-                    status: ['Active', 'Maintenance', 'Idle'][Math.floor(Math.random() * 3)],
-                    lastService: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString()
-                }));
             }
             </script>
         </section>
