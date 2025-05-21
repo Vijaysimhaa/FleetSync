@@ -58,25 +58,11 @@ function generateSyntheticData(days = 30) {
         'Night Time': { startHour: 20, endHour: 23, weight: 0.1 }
     };
 
-    function generateTimeBasedData(date) {
-        const hour = date.getHours();
-        let baseVolume = 100;
-        
-        for (const [pattern, info] of Object.entries(deliveryPatterns)) {
-            if (hour >= info.startHour && hour <= info.endHour) {
-                baseVolume *= (1 + info.weight);
-            }
-        }
-        
-        const dayFactor = date.getDay() === 0 || date.getDay() === 6 ? 0.7 : 1.2;
-        return Math.round(baseVolume * dayFactor * (0.9 + Math.random() * 0.2));
-    }
-
     // Generate delivery data with realistic patterns
     const deliveries = Array.from({ length: days }, (_, i) => {
         const date = new Date(now);
         date.setDate(date.getDate() - i);
-        const volume = generateTimeBasedData(date);
+        const volume = generateTimeBasedData(date, deliveryPatterns);
         const revenue = Math.round(volume * (2500 + Math.random() * 1000));
         
         return {
@@ -88,11 +74,15 @@ function generateSyntheticData(days = 30) {
         };
     });
 
+    const vehicles = generateVehicleData();
+    const warehouses = generateWarehouseData();
+    const analytics = generateAnalyticsData();
+
     const syntheticData = {
         deliveries,
-        vehicles: generateVehicleData(),
-        warehouses: generateWarehouseData(),
-        analytics: generateAnalyticsData()
+        vehicles,
+        warehouses,
+        analytics
     };
 
     // Update visualizations
@@ -101,28 +91,21 @@ function generateSyntheticData(days = 30) {
         preview.textContent = JSON.stringify(syntheticData, null, 2);
     }
 
-    // Update charts with new data
-    const deliveryTrends = echarts.getInstanceByDom(document.getElementById('deliveryTrendsChart'));
-    if (deliveryTrends) {
-        deliveryTrends.setOption({
-            xAxis: { data: deliveries.map(d => d.date).reverse() },
-            series: [{ data: deliveries.map(d => d.volume).reverse() }]
-        });
-    }
-
-    const vehiclePerf = echarts.getInstanceByDom(document.getElementById('vehiclePerfChart'));
-    if (vehiclePerf) {
-        vehiclePerf.setOption({
-            series: [{
-                data: syntheticData.vehicles.slice(0, 5).map(v => ({
-                    value: [v.utilization, v.fuelEfficiency, v.maintenanceScore],
-                    name: v.id
-                }))
-            }]
-        });
-    }
-
     return syntheticData;
+}
+
+function generateTimeBasedData(date, patterns) {
+    const hour = date.getHours();
+    let baseVolume = 100;
+    
+    for (const [pattern, info] of Object.entries(patterns)) {
+        if (hour >= info.startHour && hour <= info.endHour) {
+            baseVolume *= (1 + info.weight);
+        }
+    }
+    
+    const dayFactor = date.getDay() === 0 || date.getDay() === 6 ? 0.7 : 1.2;
+    return Math.round(baseVolume * dayFactor * (0.9 + Math.random() * 0.2));
 }
 
 function generateVehicleData() {
@@ -133,7 +116,8 @@ function generateVehicleData() {
         utilization: Math.round(65 + Math.random() * 25),
         mileage: Math.round(1000 + Math.random() * 5000),
         fuelEfficiency: Math.round(80 + Math.random() * 15),
-        maintenanceScore: Math.round(70 + Math.random() * 25)
+        maintenanceScore: Math.round(70 + Math.random() * 25),
+        revenue: formatIndianCurrency(Math.round(50000 + Math.random() * 100000))
     }));
 }
 
@@ -144,7 +128,8 @@ function generateWarehouseData() {
         currentStock: Math.round(30000 + Math.random() * 15000),
         turnoverRate: Math.round(70 + Math.random() * 20),
         pickingEfficiency: Math.round(75 + Math.random() * 20),
-        stockoutRisk: Math.random() < 0.1 ? 'High' : Math.random() < 0.3 ? 'Medium' : 'Low'
+        stockoutRisk: Math.random() < 0.1 ? 'High' : Math.random() < 0.3 ? 'Medium' : 'Low',
+        revenue: formatIndianCurrency(Math.round(500000 + Math.random() * 1000000))
     }));
 }
 
@@ -153,7 +138,8 @@ function generateAnalyticsData() {
         averageDeliveryTime: Math.round(25 + Math.random() * 10),
         customerSatisfaction: Math.round(85 + Math.random() * 10),
         fuelEfficiency: Math.round(75 + Math.random() * 15),
-        maintenanceCompliance: Math.round(90 + Math.random() * 8)
+        maintenanceCompliance: Math.round(90 + Math.random() * 8),
+        totalRevenue: formatIndianCurrency(Math.round(5000000 + Math.random() * 2000000))
     };
 }
 

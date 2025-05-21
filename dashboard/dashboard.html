@@ -634,25 +634,73 @@ document.addEventListener('alpine:init', () => {
             this.charts.funnel = echarts.init(document.getElementById('funnelChart'));
             this.charts.cohort = echarts.init(document.getElementById('cohortChart'));
             this.updateCharts();
-            
-            // Handle window resize
-            window.addEventListener('resize', () => {
-                Object.values(this.charts).forEach(chart => chart.resize());
-            });
         },
         
-        switchTab(tab) {
-            this.currentTab = tab;
-            this.$nextTick(() => {
-                if (this.charts[tab]) {
-                    this.charts[tab].resize();
-                }
-            });
-        },
-        
-        generateNewData() {
+        updateCharts() {
             const data = generateSyntheticData();
-            // Charts will be updated by the generateSyntheticData function
+            // Update funnel chart
+            if (this.charts.funnel) {
+                this.charts.funnel.setOption({
+                    title: { text: 'Delivery Process Funnel', left: 'center' },
+                    tooltip: { trigger: 'item', formatter: '{b}: {c}' },
+                    series: [{
+                        type: 'funnel',
+                        left: '10%',
+                        width: '80%',
+                        minSize: '0%',
+                        maxSize: '100%',
+                        sort: 'descending',
+                        gap: 2,
+                        label: { show: true, position: 'inside' },
+                        data: [
+                            { value: data.deliveries.length, name: 'Order Creation' },
+                            { value: Math.round(data.deliveries.length * 0.85), name: 'Driver Assignment' },
+                            { value: Math.round(data.deliveries.length * 0.72), name: 'Pickup Complete' },
+                            { value: Math.round(data.deliveries.length * 0.65), name: 'Delivery Complete' }
+                        ]
+                    }]
+                });
+            }
+            
+            // Update cohort chart
+            if (this.charts.cohort) {
+                const cohortData = generateCohortData();
+                this.charts.cohort.setOption({
+                    title: { text: 'Customer Retention by Cohort', left: 'center' },
+                    tooltip: { position: 'top' },
+                    grid: { height: '70%', top: '15%' },
+                    xAxis: {
+                        type: 'category',
+                        data: ['Month 0', 'Month 1', 'Month 2', 'Month 3']
+                    },
+                    yAxis: {
+                        type: 'category',
+                        data: ['May', 'Apr', 'Mar', 'Feb', 'Jan']
+                    },
+                    visualMap: {
+                        min: 0,
+                        max: 100,
+                        calculable: true,
+                        orient: 'horizontal',
+                        left: 'center',
+                        bottom: '0%'
+                    },
+                    series: [{
+                        type: 'heatmap',
+                        data: cohortData,
+                        label: { show: true }
+                    }]
+                });
+            }
+        },
+        
+        generateData() {
+            const data = generateSyntheticData();
+            if (document.getElementById('syntheticDataPreview')) {
+                document.getElementById('syntheticDataPreview').textContent = 
+                    JSON.stringify(data, null, 2);
+            }
+            this.updateCharts();
         }
     }));
 });
@@ -868,7 +916,7 @@ document.addEventListener('alpine:init', () => {
                         <div id="cohortChart" style="height: 400px;"></div>
                     </div>
                     <div x-show="currentTab === 'synthetic'" id="syntheticPanel" style="display: none;">
-                        <button @click="generateNewData()" class="bg-primary text-white px-4 py-2 rounded mb-4">
+                        <button @click="generateData" class="bg-primary text-white px-4 py-2 rounded mb-4">
                             Generate New Data
                         </button>
                         <pre id="syntheticDataPreview" class="bg-gray-50 p-4 rounded overflow-auto max-h-96"></pre>
