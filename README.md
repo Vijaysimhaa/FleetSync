@@ -49,7 +49,7 @@ We are a team of **5 B-Tech Engineering students** passionate about revolutioniz
 ## 📬 Contact & Support
 
 **Customer Support**
-📧 [avaldharvijaysimhaa@gmail.com](mailto:avaldharvijaysimhaa@gmail.com)
+📧 [avaldharvijaysimhaa@gmail.com](mailto:help.fleetsync@gmail.com)
 🕒 Mon–Sat (10 AM–6 PM IST)
 
 **Technical Issues**
