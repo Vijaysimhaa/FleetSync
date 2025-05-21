@@ -631,14 +631,27 @@ document.addEventListener('alpine:init', () => {
         charts: {},
         
         initCharts() {
-            this.charts.funnel = echarts.init(document.getElementById('funnelChart'));
-            this.charts.cohort = echarts.init(document.getElementById('cohortChart'));
-            this.updateCharts();
+            setTimeout(() => {
+                this.charts.funnel = echarts.init(document.getElementById('funnelChart'));
+                this.charts.cohort = echarts.init(document.getElementById('cohortChart'));
+                this.updateCharts();
+                
+                // Watch for tab changes to trigger chart resize
+                this.$watch('currentTab', (tab) => {
+                    setTimeout(() => {
+                        if (tab === 'funnel' && this.charts.funnel) {
+                            this.charts.funnel.resize();
+                        } else if (tab === 'cohort' && this.charts.cohort) {
+                            this.charts.cohort.resize();
+                        }
+                    }, 50);
+                });
+            }, 100);
         },
         
         updateCharts() {
             const data = generateSyntheticData();
-            // Update funnel chart
+            
             if (this.charts.funnel) {
                 this.charts.funnel.setOption({
                     title: { text: 'Delivery Process Funnel', left: 'center' },
@@ -662,21 +675,14 @@ document.addEventListener('alpine:init', () => {
                 });
             }
             
-            // Update cohort chart
             if (this.charts.cohort) {
                 const cohortData = generateCohortData();
                 this.charts.cohort.setOption({
                     title: { text: 'Customer Retention by Cohort', left: 'center' },
                     tooltip: { position: 'top' },
                     grid: { height: '70%', top: '15%' },
-                    xAxis: {
-                        type: 'category',
-                        data: ['Month 0', 'Month 1', 'Month 2', 'Month 3']
-                    },
-                    yAxis: {
-                        type: 'category',
-                        data: ['May', 'Apr', 'Mar', 'Feb', 'Jan']
-                    },
+                    xAxis: { type: 'category', data: ['Month 0', 'Month 1', 'Month 2', 'Month 3'] },
+                    yAxis: { type: 'category', data: ['May', 'Apr', 'Mar', 'Feb', 'Jan'] },
                     visualMap: {
                         min: 0,
                         max: 100,
@@ -696,9 +702,9 @@ document.addEventListener('alpine:init', () => {
         
         generateData() {
             const data = generateSyntheticData();
-            if (document.getElementById('syntheticDataPreview')) {
-                document.getElementById('syntheticDataPreview').textContent = 
-                    JSON.stringify(data, null, 2);
+            const preview = document.getElementById('syntheticDataPreview');
+            if (preview) {
+                preview.querySelector('pre').textContent = JSON.stringify(data, null, 2);
             }
             this.updateCharts();
         }
@@ -884,42 +890,34 @@ document.addEventListener('alpine:init', () => {
             <div class="dashboard-card p-6" 
                 x-data="analytics"
                 x-init="initCharts">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-lg font-semibold">Analytics & Reports</h2>
-                </div>
-
-                <!-- Tab Navigation -->
-                <nav class="border-b border-gray-200 -mb-px flex space-x-8">
-                    <button @click="switchTab('funnel')" 
-                        :class="{ 'border-primary text-primary border-b-2': currentTab === 'funnel' }"
-                        class="py-4 px-1 text-center font-medium">
-                        Funnel Analysis
-                    </button>
-                    <button @click="switchTab('cohort')" 
-                        :class="{ 'border-primary text-primary border-b-2': currentTab === 'cohort' }"
-                        class="py-4 px-1 text-center font-medium">
-                        Cohort Analysis
-                    </button>
-                    <button @click="switchTab('synthetic')" 
-                        :class="{ 'border-primary text-primary border-b-2': currentTab === 'synthetic' }"
-                        class="py-4 px-1 text-center font-medium">
-                        Synthetic Data
-                    </button>
-                </nav>
-
-                <!-- Tab Content -->
-                <div class="mt-6">
-                    <div x-show="currentTab === 'funnel'" id="funnelPanel">
-                        <div id="funnelChart" style="height: 400px;"></div>
+                <div x-data="analytics" x-init="initCharts" class="bg-white p-4 rounded-lg shadow">
+                    <div class="border-b border-gray-200">
+                        <nav class="-mb-px flex" aria-label="Analytics">
+                            <button
+                                @click="currentTab = 'funnel'"
+                                :class="{'border-indigo-500 text-indigo-600': currentTab === 'funnel',
+                                        'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': currentTab !== 'funnel'}"
+                                class="w-1/2 py-4 px-1 text-center border-b-2 font-medium text-sm">
+                                Delivery Funnel
+                            </button>
+                            <button
+                                @click="currentTab = 'cohort'"
+                                :class="{'border-indigo-500 text-indigo-600': currentTab === 'cohort',
+                                        'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': currentTab !== 'cohort'}"
+                                class="w-1/2 py-4 px-1 text-center border-b-2 font-medium text-sm">
+                                Cohort Analysis
+                            </button>
+                        </nav>
                     </div>
-                    <div x-show="currentTab === 'cohort'" id="cohortPanel" style="display: none;">
-                        <div id="cohortChart" style="height: 400px;"></div>
-                    </div>
-                    <div x-show="currentTab === 'synthetic'" id="syntheticPanel" style="display: none;">
-                        <button @click="generateData" class="bg-primary text-white px-4 py-2 rounded mb-4">
-                            Generate New Data
-                        </button>
-                        <pre id="syntheticDataPreview" class="bg-gray-50 p-4 rounded overflow-auto max-h-96"></pre>
+
+                    <!-- Tab Panels -->
+                    <div class="mt-4">
+                        <div x-show="currentTab === 'funnel'" class="h-96">
+                            <div id="funnelChart" class="w-full h-full"></div>
+                        </div>
+                        <div x-show="currentTab === 'cohort'" class="h-96">
+                            <div id="cohortChart" class="w-full h-full"></div>
+                        </div>
                     </div>
                 </div>
             </div>

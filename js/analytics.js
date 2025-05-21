@@ -292,3 +292,127 @@ document.addEventListener('DOMContentLoaded', setupEventListeners);
 
 // Initialize synthetic data on page load
 generateSyntheticData();
+
+document.addEventListener('alpine:init', () => {
+    Alpine.data('analytics', () => ({
+        currentTab: 'funnel',
+        
+        initCharts() {
+            this.$watch('currentTab', (tab) => {
+                if (tab === 'funnel') {
+                    this.initFunnelChart();
+                } else if (tab === 'cohort') {
+                    this.initCohortChart();
+                }
+            });
+            
+            // Initialize the default tab's chart
+            this.initFunnelChart();
+        },
+
+        initFunnelChart() {
+            const data = [
+                { name: 'Website Visits', value: 5000 },
+                { name: 'Sign Ups', value: 2500 },
+                { name: 'Applications', value: 1200 },
+                { name: 'Interviews', value: 800 },
+                { name: 'Placements', value: 300 }
+            ];
+
+            const chart = echarts.init(document.getElementById('funnelChart'));
+            const option = {
+                title: {
+                    text: 'Delivery Funnel',
+                    left: 'center'
+                },
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{b}: {c}'
+                },
+                series: [{
+                    name: 'Funnel',
+                    type: 'funnel',
+                    left: '10%',
+                    top: 60,
+                    bottom: 60,
+                    width: '80%',
+                    min: 0,
+                    max: Math.max(...data.map(d => d.value)),
+                    minSize: '0%',
+                    maxSize: '100%',
+                    sort: 'descending',
+                    gap: 2,
+                    label: {
+                        show: true,
+                        position: 'inside'
+                    },
+                    labelLine: {
+                        length: 10,
+                        lineStyle: {
+                            width: 1,
+                            type: 'solid'
+                        }
+                    },
+                    itemStyle: {
+                        borderColor: '#fff',
+                        borderWidth: 1
+                    },
+                    emphasis: {
+                        label: {
+                            fontSize: 20
+                        }
+                    },
+                    data: data
+                }]
+            };
+            chart.setOption(option);
+            window.addEventListener('resize', () => chart.resize());
+        },
+
+        initCohortChart() {
+            const data = [
+                ['Cohort', 'Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                ['Jan 2025', 100, 90, 80, 70],
+                ['Feb 2025', 95, 85, 75, 65],
+                ['Mar 2025', 90, 80, 70, 60],
+                ['Apr 2025', 85, 75, 65, 55]
+            ];
+
+            const chart = echarts.init(document.getElementById('cohortChart'));
+            const option = {
+                title: {
+                    text: 'Cohort Analysis',
+                    left: 'center'
+                },
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    data: data[0].slice(1),
+                    top: 'bottom'
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '10%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    data: data.slice(1).map(row => row[0])
+                },
+                yAxis: {
+                    type: 'value',
+                    name: 'Retention %'
+                },
+                series: data[0].slice(1).map((week, index) => ({
+                    name: week,
+                    type: 'line',
+                    data: data.slice(1).map(row => row[index + 1])
+                }))
+            };
+            chart.setOption(option);
+            window.addEventListener('resize', () => chart.resize());
+        }
+    }));
+});
