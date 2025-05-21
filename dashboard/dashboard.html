@@ -23,6 +23,8 @@
     <!-- Firebase App (the core Firebase SDK) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <!-- Add ECharts library -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     <script>
         // Initialize Firebase
         const firebaseConfig = {
@@ -98,6 +100,15 @@
                 'Night Time': { startHour: 20, endHour: 23, weight: 0.1 }
             };
 
+            function formatIndianCurrency(amount) {
+                const formatter = new Intl.NumberFormat('en-IN', {
+                    style: 'currency',
+                    currency: 'INR',
+                    maximumFractionDigits: 0
+                });
+                return formatter.format(amount);
+            }
+
             function generateTimeBasedData(date) {
                 const hour = date.getHours();
                 let baseVolume = 10;
@@ -108,7 +119,6 @@
                     }
                 }
                 
-                // Add day-of-week variations
                 const dayFactor = date.getDay() === 0 || date.getDay() === 6 ? 0.7 : 1.2;
                 return Math.round(baseVolume * dayFactor * (0.9 + Math.random() * 0.2));
             }
@@ -117,12 +127,15 @@
             const deliveries = Array.from({ length: dateRange }, (_, i) => {
                 const date = new Date(now);
                 date.setDate(date.getDate() - i);
+                const volume = generateTimeBasedData(date);
+                const revenue = Math.round(volume * (2500 + Math.random() * 1000)); // Revenue in INR
                 
                 return {
                     date: date.toISOString().split('T')[0],
-                    volume: generateTimeBasedData(date),
-                    efficiency: 85 + Math.random() * 10,
-                    onTime: Math.random() > 0.15 // 85% on-time rate
+                    volume: volume,
+                    revenue: formatIndianCurrency(revenue),
+                    efficiency: Math.round(85 + Math.random() * 10),
+                    onTime: Math.random() > 0.15
                 };
             });
 
@@ -134,7 +147,8 @@
                 utilization: Math.round(65 + Math.random() * 25),
                 mileage: Math.round(1000 + Math.random() * 5000),
                 fuelEfficiency: Math.round(80 + Math.random() * 15),
-                maintenanceScore: Math.round(70 + Math.random() * 25)
+                maintenanceScore: Math.round(70 + Math.random() * 25),
+                revenue: formatIndianCurrency(Math.round(50000 + Math.random() * 100000))
             }));
 
             // Generate warehouse analytics
@@ -144,7 +158,8 @@
                 currentStock: Math.round(30000 + Math.random() * 15000),
                 turnoverRate: Math.round(70 + Math.random() * 20),
                 pickingEfficiency: Math.round(75 + Math.random() * 20),
-                stockoutRisk: Math.random() < 0.1 ? 'High' : Math.random() < 0.3 ? 'Medium' : 'Low'
+                stockoutRisk: Math.random() < 0.1 ? 'High' : Math.random() < 0.3 ? 'Medium' : 'Low',
+                revenue: formatIndianCurrency(Math.round(500000 + Math.random() * 1000000))
             }));
 
             const syntheticData = {
@@ -155,13 +170,19 @@
                     averageDeliveryTime: Math.round(25 + Math.random() * 10),
                     customerSatisfaction: Math.round(85 + Math.random() * 10),
                     fuelEfficiency: Math.round(75 + Math.random() * 15),
-                    maintenanceCompliance: Math.round(90 + Math.random() * 8)
+                    maintenanceCompliance: Math.round(90 + Math.random() * 8),
+                    totalRevenue: formatIndianCurrency(Math.round(5000000 + Math.random() * 2000000))
                 }
             };
 
-            // Update the preview and charts
+            // Update the preview
             document.querySelector('#syntheticDataPreview pre').textContent = JSON.stringify(syntheticData, null, 2);
+            
+            // Update all charts with new data
             updateAnalyticsCharts(syntheticData);
+            updateFunnelData();
+            initCohortAnalysis();
+            
             return syntheticData;
         }
 
@@ -361,18 +382,20 @@
             const totalConversions = data[data.length - 1].value;
             const conversionRate = ((totalConversions / totalEntries) * 100).toFixed(1);
             const dropoffRate = (100 - conversionRate).toFixed(1);
+            const averageValue = formatIndianCurrency(Math.round(totalConversions * 2500)); // Average value per conversion
             
             document.querySelector('#funnelDetails').innerHTML = data.map((stage, index) => {
                 const nextStage = data[index + 1];
                 const dropoff = index < data.length - 1 ? stage.value - nextStage.value : 0;
                 const dropoffPercent = index < data.length - 1 ? 
                     ((dropoff / stage.value) * 100).toFixed(1) : 0;
+                const stageValue = formatIndianCurrency(stage.value * 2500); // Value at each stage
                     
                 return `
                     <div class="mb-4">
                         <h4 class="font-medium">${stage.name}</h4>
                         <div class="flex justify-between text-sm mt-1">
-                            <span>Total: ${stage.value}</span>
+                            <span>Total: ${stage.value} (${stageValue})</span>
                             ${index < data.length - 1 ? 
                                 `<span class="text-red-500">Dropoff: ${dropoff} (${dropoffPercent}%)</span>` 
                                 : ''}
@@ -469,19 +492,60 @@
 
         // Export functions
         function exportFunnelData() {
-            // Implementation for exporting funnel data
-            console.log('Exporting funnel data...');
+            const type = document.getElementById('funnelType').value;
+            const range = document.getElementById('dateRange').value;
+            const data = getFunnelData(type, range);
+            
+            const csvContent = "data:text/csv;charset=utf-8,Stage,Value\n" + 
+                data.map(d => `${d.name},${d.value}`).join("\n");
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `funnel_analysis_${type}_${range}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
         function exportCohortData() {
-            // Implementation for exporting cohort data
-            console.log('Exporting cohort data...');
+            const cohortData = generateCohortData();
+            const months = ['May 2025', 'Apr 2025', 'Mar 2025', 'Feb 2025', 'Jan 2025'];
+            const periods = ['Month 0', 'Month 1', 'Month 2', 'Month 3'];
+            
+            let csvContent = "data:text/csv;charset=utf-8,Cohort," + periods.join(",") + "\n";
+            
+            months.forEach((month, i) => {
+                let row = [month];
+                for (let j = 0; j < 4; j++) {
+                    const dataPoint = cohortData.find(d => d[0] === j && d[1] === i);
+                    row.push(dataPoint ? dataPoint[2] : 0);
+                }
+                csvContent += row.join(",") + "\n";
+            });
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "cohort_analysis.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
-        // Initialize both analyses when the page loads
+        // Initialize charts when DOM is ready
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize both analyses
             initFunnelAnalysis();
             initCohortAnalysis();
+            
+            // Add window resize handlers
+            window.addEventListener('resize', function() {
+                const funnelChart = echarts.getInstanceByDom(document.getElementById('funnelChart'));
+                const cohortChart = echarts.getInstanceByDom(document.getElementById('cohortHeatmap'));
+                if (funnelChart) funnelChart.resize();
+                if (cohortChart) cohortChart.resize();
+            });
         });
     </script>
     <style>
