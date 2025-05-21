@@ -2,6 +2,139 @@
 let funnelChart = null;
 let cohortChart = null;
 
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize charts when tabs are shown
+    document.addEventListener('alpinejs:initialized', () => {
+        initializeFunnelChart();
+        initializeCohortChart();
+    });
+
+    // Handle tab switching
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.attributeName === 'style' && !mutation.target.style.display) {
+                // Element became visible
+                if (mutation.target.id === 'funnelContent' && funnelChart) {
+                    funnelChart.resize();
+                } else if (mutation.target.id === 'cohortContent' && cohortChart) {
+                    cohortChart.resize();
+                }
+            }
+        });
+    });
+
+    // Observe content sections
+    ['funnelContent', 'cohortContent'].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            observer.observe(element, { attributes: true });
+        }
+    });
+});
+
+function initializeFunnelChart() {
+    const element = document.getElementById('funnelChart');
+    if (!element) return;
+    
+    funnelChart = echarts.init(element);
+    updateFunnelData('delivery', 'month');
+}
+
+function initializeCohortChart() {
+    const element = document.getElementById('cohortHeatmap');
+    if (!element) return;
+    
+    cohortChart = echarts.init(element);
+    updateCohortView();
+}
+
+// Synthetic Data Generation
+function generateSyntheticData(days = 30) {
+    const syntheticData = {
+        deliveries: generateDeliveryData(days),
+        vehicles: generateVehicleData(),
+        warehouses: generateWarehouseData(),
+        analytics: generateAnalyticsData()
+    };
+
+    // Update visualizations
+    const preview = document.getElementById('syntheticDataPreview');
+    if (preview) {
+        preview.textContent = JSON.stringify(syntheticData, null, 2);
+    }
+
+    // Update charts if visible
+    if (!document.getElementById('funnelContent')?.style.display) {
+        updateFunnelData('delivery', 'month');
+    }
+    if (!document.getElementById('cohortContent')?.style.display) {
+        updateCohortView();
+    }
+    
+    return syntheticData;
+}
+
+function generateDeliveryData(days) {
+    return Array.from({ length: days }, (_, i) => {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        const volume = Math.round(100 + Math.random() * 50);
+        const revenue = Math.round(volume * 2500 * (0.9 + Math.random() * 0.2));
+        
+        return {
+            date: date.toISOString().split('T')[0],
+            volume,
+            revenue: formatIndianCurrency(revenue),
+            efficiency: Math.round(85 + Math.random() * 10),
+            onTime: Math.random() > 0.15
+        };
+    });
+}
+
+function generateVehicleData() {
+    const vehicleTypes = ['Truck', 'Van', 'Bike'];
+    return Array.from({ length: 10 }, (_, i) => ({
+        id: `VEH-${String(i + 1).padStart(4, '0')}`,
+        type: vehicleTypes[i % 3],
+        status: ['Active', 'Maintenance', 'Idle'][Math.floor(Math.random() * 3)],
+        utilization: Math.round(65 + Math.random() * 25),
+        mileage: Math.round(1000 + Math.random() * 5000),
+        fuelEfficiency: Math.round(80 + Math.random() * 15),
+        maintenanceScore: Math.round(70 + Math.random() * 25),
+        revenue: formatIndianCurrency(Math.round(50000 + Math.random() * 100000))
+    }));
+}
+
+function generateWarehouseData() {
+    return ['Warehouse A', 'Warehouse B', 'Warehouse C'].map(name => ({
+        name,
+        capacity: 50000,
+        currentStock: Math.round(30000 + Math.random() * 15000),
+        turnoverRate: Math.round(70 + Math.random() * 20),
+        pickingEfficiency: Math.round(75 + Math.random() * 20),
+        stockoutRisk: Math.random() < 0.1 ? 'High' : Math.random() < 0.3 ? 'Medium' : 'Low',
+        revenue: formatIndianCurrency(Math.round(500000 + Math.random() * 1000000))
+    }));
+}
+
+function generateAnalyticsData() {
+    return {
+        averageDeliveryTime: Math.round(25 + Math.random() * 10),
+        customerSatisfaction: Math.round(85 + Math.random() * 10),
+        fuelEfficiency: Math.round(75 + Math.random() * 15),
+        maintenanceCompliance: Math.round(90 + Math.random() * 8),
+        totalRevenue: formatIndianCurrency(Math.round(5000000 + Math.random() * 2000000))
+    };
+}
+
+function formatIndianCurrency(amount) {
+    return new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        maximumFractionDigits: 0
+    }).format(amount);
+}
+
 // Funnel Analysis Functions
 function initializeFunnelAnalysis() {
     const ctx = document.getElementById('funnelChart').getContext('2d');
@@ -110,25 +243,36 @@ function exportCohortData() {
     link.click();
 }
 
-// Event Listeners
-document.getElementById('funnelType').addEventListener('change', (e) => {
-    updateFunnelData(e.target.value, document.getElementById('dateRange').value);
-});
+// Add event listeners for UI controls
+function setupEventListeners() {
+    const funnelType = document.getElementById('funnelType');
+    const dateRange = document.getElementById('dateRange');
+    const cohortMetric = document.getElementById('cohortMetric');
+    const cohortSize = document.getElementById('cohortSize');
+    
+    if (funnelType) {
+        funnelType.addEventListener('change', () => 
+            updateFunnelData(funnelType.value, dateRange.value));
+    }
+    
+    if (dateRange) {
+        dateRange.addEventListener('change', () => 
+            updateFunnelData(funnelType.value, dateRange.value));
+    }
+    
+    if (cohortMetric) {
+        cohortMetric.addEventListener('change', () => 
+            updateCohortView());
+    }
+    
+    if (cohortSize) {
+        cohortSize.addEventListener('change', () => 
+            updateCohortView());
+    }
+}
 
-document.getElementById('dateRange').addEventListener('change', (e) => {
-    updateFunnelData(document.getElementById('funnelType').value, e.target.value);
-});
+// Call setup when DOM is ready
+document.addEventListener('DOMContentLoaded', setupEventListeners);
 
-document.getElementById('cohortMetric').addEventListener('change', (e) => {
-    updateCohortData(e.target.value, document.getElementById('cohortSize').value);
-});
-
-document.getElementById('cohortSize').addEventListener('change', (e) => {
-    updateCohortData(document.getElementById('cohortMetric').value, e.target.value);
-});
-
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', () => {
-    initializeFunnelAnalysis();
-    initializeCohortAnalysis();
-});
+// Initialize synthetic data on page load
+generateSyntheticData();
